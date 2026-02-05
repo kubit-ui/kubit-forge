@@ -51,7 +51,7 @@ const getDependencyReleaseLine = async (changesets, dependenciesUpdated) => {
   return `- Updated dependencies\n${updatedDependencies.join('\n')}`;
 };
 
-module.exports = {
+export default {
   getReleaseLine,
   getDependencyReleaseLine,
 };
