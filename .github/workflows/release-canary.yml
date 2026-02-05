@@ -95,7 +95,7 @@ jobs:
           CHANGESET_FILE=".changeset/canary-$CHANGESET_ID.md"
 
           echo "---" > $CHANGESET_FILE
-          echo "\"@kubit-ui-web/kubit-forge\": patch" >> $CHANGESET_FILE
+          echo "\"kubit-forge\": patch" >> $CHANGESET_FILE
           echo "---" >> $CHANGESET_FILE
           echo "" >> $CHANGESET_FILE
           echo "$SUMMARY (canary.$COMMIT_SHA)" >> $CHANGESET_FILE
@@ -192,7 +192,7 @@ jobs:
         run: |
           COMMIT_SHA="${{ steps.commit.outputs.sha }}"
           VERSION="${{ steps.version.outputs.version }}"
-          NPM_LINK="https://www.npmjs.com/package/@kubit-ui-web/kubit-forge/v/$VERSION"
+          NPM_LINK="https://www.npmjs.com/package/kubit-forge/v/$VERSION"
 
           echo "## 🚀 Canary Release Published" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -205,5 +205,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Install canary version:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`sh" >> $GITHUB_STEP_SUMMARY
-          echo "pnpm add -g @kubit-ui-web/kubit-forge@$VERSION" >> $GITHUB_STEP_SUMMARY
+          echo "pnpm add -g kubit-forge@$VERSION" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

@@ -113,7 +113,7 @@ jobs:
           CHANGESET_FILE=".changeset/auto-$CHANGESET_ID.md"
 
           echo "---" > $CHANGESET_FILE
-          echo "\"@kubit-ui-web/kubit-forge\": $BUMP_TYPE" >> $CHANGESET_FILE
+          echo "\"kubit-forge\": $BUMP_TYPE" >> $CHANGESET_FILE
           echo "---" >> $CHANGESET_FILE
           echo "" >> $CHANGESET_FILE
           echo "$SUMMARY" >> $CHANGESET_FILE
@@ -182,7 +182,7 @@ jobs:
             const fs = require('fs');
             const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
             const version = packageJson.version;
-            const npmLink = `https://www.npmjs.com/package/@kubit-ui-web/kubit-forge/v/${version}`;
+            const npmLink = `https://www.npmjs.com/package/kubit-forge/v/${version}`;
 
             let comment = '## 🚀 Package Published\n\n';
             comment += `**Version bump type:** \`${bumpType}\`\n\n`;
@@ -192,7 +192,7 @@ jobs:
             comment += '\n✅ Package has been successfully published to NPM!\n\n';
             comment += '**Install:**\n';
             comment += '```sh\n';
-            comment += `pnpm add -g @kubit-ui-web/kubit-forge@${version}\n`;
+            comment += `pnpm add -g kubit-forge@${version}\n`;
             comment += '```';
 
             github.rest.issues.createComment({
