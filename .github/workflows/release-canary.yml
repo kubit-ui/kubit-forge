@@ -79,7 +79,12 @@ jobs:
           echo "Commit: $COMMIT_MSG"
           echo "SHA: $COMMIT_SHA"
 
-          echo "message=$COMMIT_MSG" >> $GITHUB_OUTPUT
+          # Use EOF delimiter to safely handle special characters
+          {
+            echo "message<<EOF"
+            echo "$COMMIT_MSG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
           echo "sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
 
       - name: Create canary changeset

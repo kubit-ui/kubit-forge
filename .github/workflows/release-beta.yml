@@ -62,12 +62,24 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Get latest commit message
+      - name: Get commit info
         id: commit
         run: |
+          BRANCH_NAME="${{ github.ref_name }}"
           COMMIT_MSG=$(git log -1 --pretty=%B)
-          echo "message=$COMMIT_MSG" >> $GITHUB_OUTPUT
-          echo "Commit message: $COMMIT_MSG"
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+
+          echo "Branch: $BRANCH_NAME"
+          echo "Commit: $COMMIT_MSG"
+          echo "SHA: $COMMIT_SHA"
+
+          # Use EOF delimiter to safely handle special characters
+          {
+            echo "message<<EOF"
+            echo "$COMMIT_MSG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+          echo "sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
 
       - name: Create beta changeset
         run: |
