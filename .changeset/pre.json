@@ -2,9 +2,7 @@
   "mode": "exit",
   "tag": "canary",
   "initialVersions": {
-    "@kubit-ui-web/kubit-forge": "0.0.0"
+    "kubit-forge": "0.0.0"
   },
-  "changesets": [
-    "canary-1770281786"
-  ]
+  "changesets": []
 }
