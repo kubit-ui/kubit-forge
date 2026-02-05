@@ -1,0 +1,58 @@
+{
+  "provider": {
+    "name": "BernovaStyledProvider",
+    "path": "./src/styles/provider",
+    "declarationHelp": true
+  },
+  "themes": [
+    {
+      "name": "default",
+      "minified": false,
+      "theme": {
+        "name": "THEME_STYLES",
+        "path": "./src/styles/theme.ts"
+      },
+      "foundations": {
+        "name": "FOUNDATIONS",
+        "path": "./src/styles/foundations.ts"
+      },
+      "globalStyles": {
+        "name": "GLOBAL_STYLES",
+        "path": "./src/styles/globalStyles.ts"
+      },
+      "mediaQueries": {
+        "name": "MEDIA_QUERIES",
+        "path": "./src/styles/mediaQueries.ts"
+      },
+      "resetCss": true,
+      "stylesPath": "./src/styles/output",
+      "bvTools": {
+        "path": "./src/styles/tools",
+        "declarationHelp": true,
+        "cssVariables": true,
+        "cssClassNames": true,
+        "cssMediaQueries": true,
+        "cssGlobalStyles": true,
+        "availableComponents": true
+      },
+      "typesTools": {
+        "stylesTypes": {
+          "name": "stylesTypes",
+          "path": "./src/styles/types"
+        },
+        "componentsTypes": {
+          "name": "componentsTypes",
+          "path": "./src/styles/tools"
+        }
+      },
+      "fonts": {
+        "google": [
+          {
+            "name": "Inter",
+            "weights": ["300", "400", "500", "600", "700"]
+          }
+        ]
+      }
+    }
+  ]
+}

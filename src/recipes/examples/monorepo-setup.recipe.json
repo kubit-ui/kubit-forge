@@ -1,0 +1,145 @@
+{
+  "name": "monorepo-setup",
+  "version": "1.0.0",
+  "description": "Setup a monorepo with workspaces, Turborepo, and shared configurations",
+  "author": "Kubit Team",
+  "tags": ["monorepo", "turborepo", "workspace", "pnpm"],
+  "variables": {
+    "packageManager": "pnpm",
+    "useTurborepo": true,
+    "sharedPackages": ["eslint-config", "tsconfig", "prettier-config"],
+    "apps": ["web", "docs"],
+    "packages": ["ui", "utils", "types"]
+  },
+  "prerequisites": {
+    "commands": ["pnpm", "node"]
+  },
+  "steps": [
+    {
+      "type": "log",
+      "message": "🚀 Setting up monorepo structure...",
+      "level": "info"
+    },
+    {
+      "type": "create-file",
+      "name": "Create root package.json",
+      "path": "package.json",
+      "content": "{\n  \"name\": \"monorepo\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"workspaces\": [\n    \"apps/*\",\n    \"packages/*\"\n  ],\n  \"scripts\": {\n    \"dev\": \"turbo run dev\",\n    \"build\": \"turbo run build\",\n    \"test\": \"turbo run test\",\n    \"lint\": \"turbo run lint\",\n    \"format\": \"prettier --write \\\"**/*.{ts,tsx,js,jsx,json,md}\\\"\"\n  },\n  \"devDependencies\": {\n    \"turbo\": \"^2.0.0\",\n    \"prettier\": \"^3.0.0\"\n  }\n}"
+    },
+    {
+      "type": "conditional",
+      "name": "Setup Turborepo",
+      "condition": "$useTurborepo === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": "turbo.json",
+          "content": "{\n  \"$schema\": \"https://turbo.build/schema.json\",\n  \"globalDependencies\": [\"**/.env.*local\"],\n  \"pipeline\": {\n    \"build\": {\n      \"dependsOn\": [\"^build\"],\n      \"outputs\": [\"dist/**\", \".next/**\", \"!.next/cache/**\"]\n    },\n    \"dev\": {\n      \"cache\": false,\n      \"persistent\": true\n    },\n    \"test\": {\n      \"dependsOn\": [\"build\"],\n      \"outputs\": [\"coverage/**\"]\n    },\n    \"lint\": {\n      \"dependsOn\": [\"^build\"]\n    }\n  }\n}"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Setup pnpm workspace",
+      "condition": "$packageManager === 'pnpm'",
+      "then": [
+        {
+          "type": "create-file",
+          "path": "pnpm-workspace.yaml",
+          "content": "packages:\n  - 'apps/*'\n  - 'packages/*'\n"
+        },
+        {
+          "type": "create-file",
+          "path": ".npmrc",
+          "content": "shamefully-hoist=true\nstrict-peer-dependencies=false\nauto-install-peers=true\n"
+        }
+      ]
+    },
+    {
+      "type": "loop",
+      "name": "Create app directories",
+      "items": "$apps",
+      "variable": "appName",
+      "steps": [
+        {
+          "type": "log",
+          "message": "Creating app: ${appName}",
+          "level": "info"
+        },
+        {
+          "type": "create-file",
+          "path": "apps/${appName}/package.json",
+          "content": "{\n  \"name\": \"@monorepo/${appName}\",\n  \"version\": \"1.0.0\",\n  \"private\": true,\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"vite build\",\n    \"preview\": \"vite preview\"\n  },\n  \"dependencies\": {\n    \"react\": \"^18.2.0\",\n    \"react-dom\": \"^18.2.0\"\n  },\n  \"devDependencies\": {\n    \"@vitejs/plugin-react\": \"^4.0.0\",\n    \"vite\": \"^5.0.0\"\n  }\n}"
+        },
+        {
+          "type": "create-file",
+          "path": "apps/${appName}/tsconfig.json",
+          "content": "{\n  \"extends\": \"@monorepo/tsconfig/base.json\",\n  \"compilerOptions\": {\n    \"outDir\": \"dist\"\n  },\n  \"include\": [\"src\"]\n}"
+        }
+      ]
+    },
+    {
+      "type": "loop",
+      "name": "Create package directories",
+      "items": "$packages",
+      "variable": "pkgName",
+      "steps": [
+        {
+          "type": "log",
+          "message": "Creating package: ${pkgName}",
+          "level": "info"
+        },
+        {
+          "type": "create-file",
+          "path": "packages/${pkgName}/package.json",
+          "content": "{\n  \"name\": \"@monorepo/${pkgName}\",\n  \"version\": \"1.0.0\",\n  \"main\": \"./dist/index.js\",\n  \"types\": \"./dist/index.d.ts\",\n  \"scripts\": {\n    \"build\": \"tsup src/index.ts --format cjs,esm --dts\",\n    \"dev\": \"tsup src/index.ts --format cjs,esm --dts --watch\"\n  },\n  \"devDependencies\": {\n    \"tsup\": \"^8.0.0\",\n    \"typescript\": \"^5.0.0\"\n  }\n}"
+        },
+        {
+          "type": "create-file",
+          "path": "packages/${pkgName}/src/index.ts",
+          "content": "export const ${pkgName} = '${pkgName}';\n"
+        },
+        {
+          "type": "create-file",
+          "path": "packages/${pkgName}/tsconfig.json",
+          "content": "{\n  \"extends\": \"@monorepo/tsconfig/base.json\",\n  \"compilerOptions\": {\n    \"outDir\": \"dist\"\n  },\n  \"include\": [\"src\"]\n}"
+        }
+      ]
+    },
+    {
+      "type": "create-file",
+      "name": "Create shared TypeScript config",
+      "path": "packages/tsconfig/base.json",
+      "content": "{\n  \"$schema\": \"https://json.schemastore.org/tsconfig\",\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"ESNext\",\n    \"lib\": [\"ES2020\", \"DOM\", \"DOM.Iterable\"],\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"allowJs\": true,\n    \"strict\": true,\n    \"noEmit\": true,\n    \"esModuleInterop\": true,\n    \"skipLibCheck\": true,\n    \"forceConsistentCasingInFileNames\": true\n  }\n}"
+    },
+    {
+      "type": "create-file",
+      "name": "Create shared ESLint config",
+      "path": "packages/eslint-config/package.json",
+      "content": "{\n  \"name\": \"@monorepo/eslint-config\",\n  \"version\": \"1.0.0\",\n  \"main\": \"index.js\",\n  \"dependencies\": {\n    \"eslint\": \"^8.0.0\",\n    \"@typescript-eslint/eslint-plugin\": \"^6.0.0\",\n    \"@typescript-eslint/parser\": \"^6.0.0\"\n  }\n}"
+    },
+    {
+      "type": "create-file",
+      "path": "packages/eslint-config/index.js",
+      "content": "module.exports = {\n  extends: [\n    'eslint:recommended',\n    'plugin:@typescript-eslint/recommended'\n  ],\n  parser: '@typescript-eslint/parser',\n  plugins: ['@typescript-eslint'],\n  rules: {\n    '@typescript-eslint/no-unused-vars': 'error',\n    '@typescript-eslint/no-explicit-any': 'warn'\n  }\n};\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create root .gitignore",
+      "path": ".gitignore",
+      "content": "node_modules/\ndist/\n.turbo/\n.next/\n.env*.local\ncoverage/\n*.log\n.DS_Store\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create README",
+      "path": "README.md",
+      "content": "# Monorepo\n\n## Structure\n\n```\n.\n├── apps/\n│   ├── web/          # Main web application\n│   └── docs/         # Documentation site\n├── packages/\n│   ├── ui/           # Shared UI components\n│   ├── utils/        # Shared utilities\n│   ├── types/        # Shared TypeScript types\n│   ├── tsconfig/     # Shared TypeScript configs\n│   └── eslint-config/ # Shared ESLint config\n└── turbo.json        # Turborepo configuration\n```\n\n## Getting Started\n\n```bash\n# Install dependencies\npnpm install\n\n# Start development\npnpm dev\n\n# Build all packages\npnpm build\n\n# Run tests\npnpm test\n\n# Lint code\npnpm lint\n```\n\n## Adding a new package\n\n```bash\ncd packages\nmkdir my-package\ncd my-package\npnpm init\n```\n\n## Adding a new app\n\n```bash\ncd apps\nmkdir my-app\ncd my-app\npnpm init\n```\n"
+    },
+    {
+      "type": "log",
+      "message": "✓ Monorepo structure created successfully!",
+      "level": "success"
+    }
+  ],
+  "instructions": "Monorepo setup complete!\n\nStructure created:\n- ${apps.length} apps: ${apps.join(', ')}\n- ${packages.length} packages: ${packages.join(', ')}\n- Shared configurations (TypeScript, ESLint)\n- ${useTurborepo ? 'Turborepo' : 'Workspace'} configuration\n\nNext steps:\n1. cd into your monorepo directory\n2. Run: ${packageManager} install\n3. Run: ${packageManager} dev\n4. Start building your apps and packages!\n\nUseful commands:\n- ${packageManager} dev - Start all apps in development mode\n- ${packageManager} build - Build all packages and apps\n- ${packageManager} test - Run all tests\n- ${packageManager} lint - Lint all code"
+}

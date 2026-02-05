@@ -1,0 +1,59 @@
+{
+  "name": "loop-migration",
+  "version": "1.0.0",
+  "description": "Migrate multiple files using loop iteration",
+  "author": "Kubit Team",
+  "tags": ["migration", "loop", "automation"],
+  "variables": {
+    "filesToMigrate": [
+      "src/components/Button.jsx",
+      "src/components/Input.jsx",
+      "src/components/Card.jsx"
+    ],
+    "fromExtension": ".jsx",
+    "toExtension": ".tsx"
+  },
+  "steps": [
+    {
+      "type": "log",
+      "message": "Starting file migration...",
+      "level": "info"
+    },
+    {
+      "type": "loop",
+      "name": "Migrate files",
+      "items": "$filesToMigrate",
+      "variable": "currentFile",
+      "steps": [
+        {
+          "type": "log",
+          "message": "Migrating: ${currentFile}",
+          "level": "info"
+        },
+        {
+          "type": "modify-file",
+          "path": "${currentFile}",
+          "search": "import React from 'react';",
+          "replace": "import React from 'react';\nimport type { FC } from 'react';"
+        },
+        {
+          "type": "modify-file",
+          "path": "${currentFile}",
+          "search": "export default function",
+          "replace": "const Component: FC = () => {\n  return"
+        },
+        {
+          "type": "log",
+          "message": "✓ Migrated ${currentFile}",
+          "level": "success"
+        }
+      ]
+    },
+    {
+      "type": "log",
+      "message": "✓ All files migrated successfully!",
+      "level": "success"
+    }
+  ],
+  "instructions": "Migration completed!\n\nMigrated ${filesToMigrate.length} files from ${fromExtension} to ${toExtension}\n\nNext steps:\n1. Review the migrated files\n2. Run type checking: npm run typecheck\n3. Run tests: npm test\n4. Commit changes if everything looks good"
+}

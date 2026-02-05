@@ -1,0 +1,91 @@
+/**
+ * Bernova Foundations
+ * CSS Variables for the design system
+ */
+
+export const FOUNDATIONS = {
+  colors: {
+    primary: '#E60028',
+    secondary: '#00A650',
+    tertiary: '#0066CC',
+    neutral: {
+      50: '#FAFAFA',
+      100: '#F5F5F5',
+      200: '#EEEEEE',
+      300: '#E0E0E0',
+      400: '#BDBDBD',
+      500: '#9E9E9E',
+      600: '#757575',
+      700: '#616161',
+      800: '#424242',
+      900: '#212121',
+    },
+    success: '#00A650',
+    warning: '#FFC107',
+    error: '#E60028',
+    info: '#0066CC',
+    background: '#FFFFFF',
+    surface: '#F5F5F5',
+    text: {
+      primary: '#212121',
+      secondary: '#616161',
+      disabled: '#9E9E9E',
+      inverse: '#FFFFFF',
+    },
+  },
+  spacing: {
+    xs: '4px',
+    sm: '8px',
+    md: '16px',
+    lg: '24px',
+    xl: '32px',
+    xxl: '48px',
+    xxxl: '64px',
+  },
+  borderRadius: {
+    none: '0',
+    sm: '4px',
+    md: '8px',
+    lg: '12px',
+    xl: '16px',
+    full: '9999px',
+  },
+  fontSize: {
+    xs: '12px',
+    sm: '14px',
+    base: '16px',
+    lg: '18px',
+    xl: '20px',
+    '2xl': '24px',
+    '3xl': '30px',
+    '4xl': '36px',
+    '5xl': '48px',
+  },
+  fontWeight: {
+    light: '300',
+    normal: '400',
+    medium: '500',
+    semibold: '600',
+    bold: '700',
+  },
+  lineHeight: {
+    tight: '1.25',
+    normal: '1.5',
+    relaxed: '1.75',
+  },
+  shadows: {
+    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+  },
+  zIndex: {
+    dropdown: '1000',
+    sticky: '1020',
+    fixed: '1030',
+    modalBackdrop: '1040',
+    modal: '1050',
+    popover: '1060',
+    tooltip: '1070',
+  },
+};

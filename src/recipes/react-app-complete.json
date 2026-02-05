@@ -1,0 +1,78 @@
+{
+  "name": "react-app-complete",
+  "version": "1.0.0",
+  "description": "Complete React application setup with routing, state management, and testing",
+  "author": "Kubit Team",
+  "tags": ["react", "router", "redux", "testing", "eslint", "prettier"],
+  "category": "setup",
+  "requires": {
+    "kubitVersion": "^2.0.0",
+    "nodeVersion": ">=18",
+    "tools": ["git"]
+  },
+  "variables": {
+    "projectName": {
+      "type": "string",
+      "description": "Project name",
+      "required": true
+    },
+    "useRedux": {
+      "type": "boolean",
+      "description": "Include Redux for state management",
+      "default": true
+    },
+    "useRouter": {
+      "type": "boolean",
+      "description": "Include React Router",
+      "default": true
+    }
+  },
+  "steps": [
+    {
+      "id": "install-router",
+      "name": "Install React Router",
+      "type": "shell",
+      "script": "pnpm add react-router-dom",
+      "condition": "useRouter"
+    },
+    {
+      "id": "install-redux",
+      "name": "Install Redux Toolkit",
+      "type": "shell",
+      "script": "pnpm add @reduxjs/toolkit react-redux",
+      "condition": "useRedux"
+    },
+    {
+      "id": "create-store",
+      "name": "Create Redux store",
+      "type": "file",
+      "operation": "create",
+      "target": "src/store/index.ts",
+      "content": "import { configureStore } from '@reduxjs/toolkit';\n\nexport const store = configureStore({\n  reducer: {},\n});\n\nexport type RootState = ReturnType<typeof store.getState>;\nexport type AppDispatch = typeof store.dispatch;\n",
+      "condition": "useRedux"
+    },
+    {
+      "id": "create-router",
+      "name": "Create router configuration",
+      "type": "file",
+      "operation": "create",
+      "target": "src/router/index.tsx",
+      "content": "import { createBrowserRouter } from 'react-router-dom';\nimport { HomePage } from '../pages/HomePage';\n\nexport const router = createBrowserRouter([\n  {\n    path: '/',\n    element: <HomePage />,\n  },\n]);\n",
+      "condition": "useRouter"
+    },
+    {
+      "id": "install-testing",
+      "name": "Install testing libraries",
+      "type": "shell",
+      "script": "pnpm add -D @testing-library/react @testing-library/jest-dom @testing-library/user-event vitest jsdom"
+    },
+    {
+      "id": "create-test-setup",
+      "name": "Create test setup",
+      "type": "file",
+      "operation": "create",
+      "target": "src/test/setup.ts",
+      "content": "import '@testing-library/jest-dom';\n"
+    }
+  ]
+}

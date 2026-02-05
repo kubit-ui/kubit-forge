@@ -1,0 +1,14 @@
+import { test, expect } from '@playwright/test';
+
+test('homepage has title', async ({ page }) => {
+  await page.goto('/');
+  
+  await expect(page).toHaveTitle(/Vite \+ React/);
+});
+
+test('get started link', async ({ page }) => {
+  await page.goto('/');
+
+  const getStarted = page.getByRole('link', { name: /get started/i });
+  await expect(getStarted).toBeVisible();
+});

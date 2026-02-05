@@ -1,0 +1,127 @@
+{
+  "name": "conditional-setup",
+  "version": "1.0.0",
+  "description": "Smart project setup with conditional steps based on project type",
+  "author": "Kubit Team",
+  "tags": ["setup", "conditional", "smart"],
+  "variables": {
+    "projectType": "react",
+    "useTypeScript": true,
+    "addTesting": true,
+    "addStorybook": false
+  },
+  "prerequisites": {
+    "files": ["package.json"]
+  },
+  "steps": [
+    {
+      "type": "log",
+      "message": "Starting conditional project setup...",
+      "level": "info"
+    },
+    {
+      "type": "conditional",
+      "name": "Setup TypeScript",
+      "condition": "$useTypeScript === true",
+      "then": [
+        {
+          "type": "log",
+          "message": "Setting up TypeScript...",
+          "level": "info"
+        },
+        {
+          "type": "add-feature",
+          "feature": "typescript"
+        },
+        {
+          "type": "create-file",
+          "path": "tsconfig.json",
+          "content": "{\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"module\": \"ESNext\",\n    \"strict\": true\n  }\n}"
+        }
+      ],
+      "else": [
+        {
+          "type": "log",
+          "message": "Skipping TypeScript setup (JavaScript project)",
+          "level": "info"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Setup React",
+      "condition": "$projectType === 'react'",
+      "then": [
+        {
+          "type": "log",
+          "message": "Setting up React...",
+          "level": "info"
+        },
+        {
+          "type": "install-deps",
+          "dependencies": ["react", "react-dom"]
+        },
+        {
+          "type": "conditional",
+          "name": "Add React TypeScript types",
+          "condition": "$useTypeScript === true",
+          "then": [
+            {
+              "type": "install-deps",
+              "devDependencies": ["@types/react", "@types/react-dom"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Setup Testing",
+      "condition": "$addTesting === true",
+      "then": [
+        {
+          "type": "log",
+          "message": "Setting up testing framework...",
+          "level": "info"
+        },
+        {
+          "type": "add-feature",
+          "feature": "vitest"
+        },
+        {
+          "type": "conditional",
+          "name": "Add React Testing Library",
+          "condition": "$projectType === 'react'",
+          "then": [
+            {
+              "type": "install-deps",
+              "devDependencies": ["@testing-library/react", "@testing-library/jest-dom"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Setup Storybook",
+      "condition": "$addStorybook === true && $projectType === 'react'",
+      "then": [
+        {
+          "type": "log",
+          "message": "Setting up Storybook...",
+          "level": "info"
+        },
+        {
+          "type": "add-feature",
+          "feature": "storybook"
+        }
+      ]
+    },
+    {
+      "type": "log",
+      "message": "✓ Conditional setup completed!",
+      "level": "success"
+    }
+  ],
+  "instructions": "Your project has been set up based on your preferences!\n\nNext steps:\n1. Review the generated configuration files\n2. Run 'npm install' to install dependencies\n3. Start development with 'npm run dev'"
+}

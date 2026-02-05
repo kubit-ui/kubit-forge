@@ -1,0 +1,86 @@
+{
+  "name": "docker-setup",
+  "version": "1.0.0",
+  "description": "Setup Docker configuration with multi-stage builds, docker-compose, and development/production environments",
+  "author": "Kubit Team",
+  "tags": ["docker", "containerization", "devops", "deployment"],
+  "variables": {
+    "projectName": "my-app",
+    "nodeVersion": "20-alpine",
+    "port": 3000,
+    "usePostgres": false,
+    "useRedis": false,
+    "useNginx": true,
+    "packageManager": "pnpm"
+  },
+  "prerequisites": {
+    "files": ["package.json"]
+  },
+  "steps": [
+    {
+      "type": "log",
+      "message": "🐳 Setting up Docker configuration...",
+      "level": "info"
+    },
+    {
+      "type": "create-file",
+      "name": "Create Dockerfile",
+      "path": "Dockerfile",
+      "content": "# syntax=docker/dockerfile:1\n\n# Base stage\nFROM node:${nodeVersion} AS base\nWORKDIR /app\n\n# Install pnpm\nRUN corepack enable && corepack prepare ${packageManager}@latest --activate\n\n# Dependencies stage\nFROM base AS deps\nCOPY package.json ${packageManager}-lock.yaml ./\nRUN ${packageManager} install --frozen-lockfile --prod=false\n\n# Build stage\nFROM base AS build\nCOPY --from=deps /app/node_modules ./node_modules\nCOPY . .\nRUN ${packageManager} run build\n\n# Production dependencies\nFROM base AS prod-deps\nCOPY package.json ${packageManager}-lock.yaml ./\nRUN ${packageManager} install --frozen-lockfile --prod\n\n# Production stage\nFROM node:${nodeVersion} AS production\nWORKDIR /app\n\n# Create non-root user\nRUN addgroup --system --gid 1001 nodejs && \\\n    adduser --system --uid 1001 nodejs\n\n# Copy necessary files\nCOPY --from=prod-deps --chown=nodejs:nodejs /app/node_modules ./node_modules\nCOPY --from=build --chown=nodejs:nodejs /app/dist ./dist\nCOPY --from=build --chown=nodejs:nodejs /app/package.json ./package.json\n\n# Switch to non-root user\nUSER nodejs\n\n# Expose port\nEXPOSE ${port}\n\n# Health check\nHEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \\\n  CMD node -e \"require('http').get('http://localhost:${port}/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\"\n\n# Start application\nCMD [\"node\", \"dist/index.js\"]\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create development Dockerfile",
+      "path": "Dockerfile.dev",
+      "content": "FROM node:${nodeVersion}\n\nWORKDIR /app\n\n# Install pnpm\nRUN corepack enable && corepack prepare ${packageManager}@latest --activate\n\n# Copy package files\nCOPY package.json ${packageManager}-lock.yaml ./\n\n# Install dependencies\nRUN ${packageManager} install --frozen-lockfile\n\n# Copy source code\nCOPY . .\n\n# Expose port\nEXPOSE ${port}\n\n# Start development server\nCMD [\"${packageManager}\", \"run\", \"dev\"]\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create docker-compose.yml",
+      "path": "docker-compose.yml",
+      "content": "version: '3.8'\n\nservices:\n  app:\n    build:\n      context: .\n      dockerfile: Dockerfile.dev\n    container_name: ${projectName}-app\n    ports:\n      - \"${port}:${port}\"\n    volumes:\n      - .:/app\n      - /app/node_modules\n    environment:\n      - NODE_ENV=development\n      - PORT=${port}\n    depends_on:\n      ${usePostgres ? '- postgres\n      ' : ''}${useRedis ? '- redis\n      ' : ''}${useNginx ? '- nginx\n      ' : ''}restart: unless-stopped\n    networks:\n      - app-network\n\n  ${usePostgres ? 'postgres:\n    image: postgres:16-alpine\n    container_name: ' + projectName + '-postgres\n    environment:\n      - POSTGRES_USER=postgres\n      - POSTGRES_PASSWORD=postgres\n      - POSTGRES_DB=' + projectName + '\n    ports:\n      - \"5432:5432\"\n    volumes:\n      - postgres-data:/var/lib/postgresql/data\n    networks:\n      - app-network\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U postgres\"]\n      interval: 10s\n      timeout: 5s\n      retries: 5\n\n  ' : ''}${useRedis ? 'redis:\n    image: redis:7-alpine\n    container_name: ' + projectName + '-redis\n    ports:\n      - \"6379:6379\"\n    volumes:\n      - redis-data:/data\n    networks:\n      - app-network\n    healthcheck:\n      test: [\"CMD\", \"redis-cli\", \"ping\"]\n      interval: 10s\n      timeout: 3s\n      retries: 5\n\n  ' : ''}${useNginx ? 'nginx:\n    image: nginx:alpine\n    container_name: ' + projectName + '-nginx\n    ports:\n      - \"80:80\"\n      - \"443:443\"\n    volumes:\n      - ./nginx.conf:/etc/nginx/nginx.conf:ro\n      - ./ssl:/etc/nginx/ssl:ro\n    depends_on:\n      - app\n    networks:\n      - app-network\n    restart: unless-stopped\n\n  ' : ''}networks:\n  app-network:\n    driver: bridge\n\nvolumes:\n  ${usePostgres ? 'postgres-data:\n  ' : ''}${useRedis ? 'redis-data:\n  ' : ''}"
+    },
+    {
+      "type": "conditional",
+      "name": "Create nginx configuration",
+      "condition": "$useNginx === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": "nginx.conf",
+          "content": "events {\n    worker_connections 1024;\n}\n\nhttp {\n    upstream app {\n        server app:${port};\n    }\n\n    server {\n        listen 80;\n        server_name localhost;\n\n        # Security headers\n        add_header X-Frame-Options \"SAMEORIGIN\" always;\n        add_header X-Content-Type-Options \"nosniff\" always;\n        add_header X-XSS-Protection \"1; mode=block\" always;\n\n        # Gzip compression\n        gzip on;\n        gzip_vary on;\n        gzip_min_length 1024;\n        gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json;\n\n        location / {\n            proxy_pass http://app;\n            proxy_http_version 1.1;\n            proxy_set_header Upgrade $http_upgrade;\n            proxy_set_header Connection 'upgrade';\n            proxy_set_header Host $host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n            proxy_set_header X-Forwarded-Proto $scheme;\n            proxy_cache_bypass $http_upgrade;\n        }\n\n        # Health check endpoint\n        location /health {\n            proxy_pass http://app/health;\n            access_log off;\n        }\n    }\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "create-file",
+      "name": "Create .dockerignore",
+      "path": ".dockerignore",
+      "content": "node_modules\nnpm-debug.log\n.git\n.gitignore\n.env\n.env.local\n.env.*.local\ndist\ncoverage\n.vscode\n.idea\n*.md\n!README.md\nDockerfile*\ndocker-compose*\n.dockerignore\n.DS_Store\n*.log\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create docker-compose.prod.yml",
+      "path": "docker-compose.prod.yml",
+      "content": "version: '3.8'\n\nservices:\n  app:\n    build:\n      context: .\n      dockerfile: Dockerfile\n      target: production\n    container_name: ${projectName}-app-prod\n    ports:\n      - \"${port}:${port}\"\n    environment:\n      - NODE_ENV=production\n      - PORT=${port}\n    depends_on:\n      ${usePostgres ? '- postgres\n      ' : ''}${useRedis ? '- redis\n      ' : ''}restart: always\n    networks:\n      - app-network\n    deploy:\n      resources:\n        limits:\n          cpus: '1'\n          memory: 512M\n        reservations:\n          cpus: '0.5'\n          memory: 256M\n\n  ${usePostgres ? 'postgres:\n    image: postgres:16-alpine\n    container_name: ' + projectName + '-postgres-prod\n    environment:\n      - POSTGRES_USER=${POSTGRES_USER:-postgres}\n      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}\n      - POSTGRES_DB=' + projectName + '\n    volumes:\n      - postgres-data:/var/lib/postgresql/data\n    networks:\n      - app-network\n    restart: always\n\n  ' : ''}${useRedis ? 'redis:\n    image: redis:7-alpine\n    container_name: ' + projectName + '-redis-prod\n    volumes:\n      - redis-data:/data\n    networks:\n      - app-network\n    restart: always\n    command: redis-server --appendonly yes\n\n  ' : ''}${useNginx ? 'nginx:\n    image: nginx:alpine\n    container_name: ' + projectName + '-nginx-prod\n    ports:\n      - \"80:80\"\n      - \"443:443\"\n    volumes:\n      - ./nginx.conf:/etc/nginx/nginx.conf:ro\n      - ./ssl:/etc/nginx/ssl:ro\n    depends_on:\n      - app\n    networks:\n      - app-network\n    restart: always\n\n  ' : ''}networks:\n  app-network:\n    driver: bridge\n\nvolumes:\n  ${usePostgres ? 'postgres-data:\n  ' : ''}${useRedis ? 'redis-data:\n  ' : ''}"
+    },
+    {
+      "type": "create-file",
+      "name": "Create Makefile for Docker commands",
+      "path": "Makefile",
+      "content": ".PHONY: help build up down logs shell clean\n\nhelp: ## Show this help message\n\t@echo 'Usage: make [target]'\n\t@echo ''\n\t@echo 'Available targets:'\n\t@awk 'BEGIN {FS = \":.*?## \"} /^[a-zA-Z_-]+:.*?## / {printf \"  \\033[36m%-15s\\033[0m %s\\n\", $$1, $$2}' $(MAKEFILE_LIST)\n\nbuild: ## Build Docker images\n\tdocker-compose build\n\nup: ## Start containers in detached mode\n\tdocker-compose up -d\n\ndown: ## Stop and remove containers\n\tdocker-compose down\n\nlogs: ## Show container logs\n\tdocker-compose logs -f\n\nshell: ## Open shell in app container\n\tdocker-compose exec app sh\n\nclean: ## Remove containers, volumes, and images\n\tdocker-compose down -v --rmi all\n\nrestart: ## Restart all containers\n\tdocker-compose restart\n\nps: ## Show running containers\n\tdocker-compose ps\n\nprod-build: ## Build production images\n\tdocker-compose -f docker-compose.prod.yml build\n\nprod-up: ## Start production containers\n\tdocker-compose -f docker-compose.prod.yml up -d\n\nprod-down: ## Stop production containers\n\tdocker-compose -f docker-compose.prod.yml down\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create Docker README",
+      "path": "DOCKER.md",
+      "content": "# Docker Setup\n\n## Quick Start\n\n### Development\n\n```bash\n# Build and start containers\nmake build\nmake up\n\n# View logs\nmake logs\n\n# Stop containers\nmake down\n```\n\n### Production\n\n```bash\n# Build production images\nmake prod-build\n\n# Start production containers\nmake prod-up\n\n# Stop production containers\nmake prod-down\n```\n\n## Services\n\n- **app**: Main application (port ${port})\n${usePostgres ? '- **postgres**: PostgreSQL database (port 5432)\n' : ''}${useRedis ? '- **redis**: Redis cache (port 6379)\n' : ''}${useNginx ? '- **nginx**: Reverse proxy (ports 80, 443)\n' : ''}\n## Environment Variables\n\nCreate a `.env` file:\n\n```env\nNODE_ENV=development\nPORT=${port}\n${usePostgres ? 'POSTGRES_USER=postgres\nPOSTGRES_PASSWORD=postgres\nPOSTGRES_DB=' + projectName + '\nDATABASE_URL=postgresql://postgres:postgres@postgres:5432/' + projectName + '\n' : ''}${useRedis ? 'REDIS_URL=redis://redis:6379\n' : ''}\n```\n\n## Useful Commands\n\n```bash\n# View all available commands\nmake help\n\n# Open shell in app container\nmake shell\n\n# Restart containers\nmake restart\n\n# View running containers\nmake ps\n\n# Clean everything (containers, volumes, images)\nmake clean\n```\n\n## Multi-stage Build\n\nThe Dockerfile uses multi-stage builds for:\n\n1. **base**: Base Node.js image with pnpm\n2. **deps**: Install all dependencies\n3. **build**: Build the application\n4. **prod-deps**: Install only production dependencies\n5. **production**: Final optimized image\n\n## Security\n\n- Runs as non-root user (nodejs:nodejs)\n- Minimal Alpine-based images\n- Health checks configured\n- Security headers in nginx\n\n## Performance\n\n- Multi-stage builds reduce image size\n- Layer caching optimized\n- Gzip compression enabled\n- Resource limits configured\n"
+    },
+    {
+      "type": "log",
+      "message": "✓ Docker setup complete!",
+      "level": "success"
+    }
+  ],
+  "instructions": "Docker setup complete!\n\nFiles created:\n- ✓ Dockerfile (multi-stage production build)\n- ✓ Dockerfile.dev (development)\n- ✓ docker-compose.yml (development)\n- ✓ docker-compose.prod.yml (production)\n- ✓ .dockerignore\n${useNginx ? '- ✓ nginx.conf\n' : ''}- ✓ Makefile (helper commands)\n- ✓ DOCKER.md (documentation)\n\nServices configured:\n- ✓ App (port ${port})\n${usePostgres ? '- ✓ PostgreSQL (port 5432)\n' : ''}${useRedis ? '- ✓ Redis (port 6379)\n' : ''}${useNginx ? '- ✓ Nginx (ports 80, 443)\n' : ''}\nNext steps:\n1. Create .env file with required variables\n2. Run: make build\n3. Run: make up\n4. Access app at http://localhost${useNginx ? '' : ':' + port}\n\nUseful commands:\n- make help - Show all available commands\n- make logs - View container logs\n- make shell - Open shell in app container\n- make clean - Remove everything\n\nFor production:\n- make prod-build\n- make prod-up"
+}

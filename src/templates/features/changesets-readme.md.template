@@ -1,0 +1,31 @@
+# Changesets
+
+This project uses [Changesets](https://github.com/changesets/changesets) for version management and changelog generation.
+
+## Creating a changeset
+
+When you make changes that should be included in the changelog:
+
+```bash
+npx changeset
+```
+
+Follow the prompts to:
+1. Select the type of change (major, minor, patch)
+2. Write a summary of the changes
+
+## Versioning
+
+To bump versions and update changelogs:
+
+```bash
+npx changeset version
+```
+
+## Publishing
+
+To publish packages:
+
+```bash
+npx changeset publish
+```

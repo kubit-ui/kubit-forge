@@ -1,0 +1,144 @@
+{
+  "name": "testing-setup-complete",
+  "version": "1.0.0",
+  "description": "Complete testing setup with unit tests, E2E tests, coverage, and CI integration",
+  "author": "Kubit Team",
+  "tags": ["testing", "vitest", "playwright", "coverage", "quality"],
+  "variables": {
+    "useVitest": true,
+    "usePlaywright": true,
+    "useCypress": false,
+    "useTestingLibrary": true,
+    "coverageThreshold": 80,
+    "generateReports": true
+  },
+  "prerequisites": {
+    "files": ["package.json"]
+  },
+  "steps": [
+    {
+      "type": "log",
+      "message": "🧪 Setting up complete testing infrastructure...",
+      "level": "info"
+    },
+    {
+      "type": "conditional",
+      "name": "Setup Vitest",
+      "condition": "$useVitest === true",
+      "then": [
+        {
+          "type": "log",
+          "message": "Installing Vitest...",
+          "level": "info"
+        },
+        {
+          "type": "install-deps",
+          "devDependencies": ["vitest", "@vitest/ui", "@vitest/coverage-v8", "happy-dom"]
+        },
+        {
+          "type": "create-file",
+          "path": "vitest.config.ts",
+          "content": "import { defineConfig } from 'vitest/config';\nimport react from '@vitejs/plugin-react';\nimport path from 'path';\n\nexport default defineConfig({\n  plugins: [react()],\n  test: {\n    globals: true,\n    environment: 'happy-dom',\n    setupFiles: ['./src/test/setup.ts'],\n    coverage: {\n      provider: 'v8',\n      reporter: ['text', 'json', 'html', 'lcov'],\n      exclude: [\n        'node_modules/',\n        'src/test/',\n        '**/*.d.ts',\n        '**/*.config.*',\n        '**/mockData',\n        'dist/'\n      ],\n      thresholds: {\n        lines: ${coverageThreshold},\n        functions: ${coverageThreshold},\n        branches: ${coverageThreshold},\n        statements: ${coverageThreshold}\n      }\n    },\n    include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],\n    exclude: ['node_modules', 'dist', '.idea', '.git', '.cache']\n  },\n  resolve: {\n    alias: {\n      '@': path.resolve(__dirname, './src')\n    }\n  }\n});\n"
+        },
+        {
+          "type": "create-file",
+          "path": "src/test/setup.ts",
+          "content": "import { expect, afterEach } from 'vitest';\nimport { cleanup } from '@testing-library/react';\nimport * as matchers from '@testing-library/jest-dom/matchers';\n\n// Extend Vitest's expect with jest-dom matchers\nexpect.extend(matchers);\n\n// Cleanup after each test\nafterEach(() => {\n  cleanup();\n});\n\n// Mock window.matchMedia\nObject.defineProperty(window, 'matchMedia', {\n  writable: true,\n  value: (query: string) => ({\n    matches: false,\n    media: query,\n    onchange: null,\n    addListener: () => {},\n    removeListener: () => {},\n    addEventListener: () => {},\n    removeEventListener: () => {},\n    dispatchEvent: () => true,\n  }),\n});\n\n// Mock IntersectionObserver\nglobal.IntersectionObserver = class IntersectionObserver {\n  constructor() {}\n  disconnect() {}\n  observe() {}\n  takeRecords() {\n    return [];\n  }\n  unobserve() {}\n} as any;\n"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Setup Testing Library",
+      "condition": "$useTestingLibrary === true && isReact()",
+      "then": [
+        {
+          "type": "install-deps",
+          "devDependencies": [
+            "@testing-library/react",
+            "@testing-library/jest-dom",
+            "@testing-library/user-event"
+          ]
+        },
+        {
+          "type": "create-file",
+          "path": "src/test/utils.tsx",
+          "content": "import { ReactElement } from 'react';\nimport { render, RenderOptions } from '@testing-library/react';\n\n// Add custom render method with providers if needed\nconst AllTheProviders = ({ children }: { children: React.ReactNode }) => {\n  return <>{children}</>;\n};\n\nconst customRender = (\n  ui: ReactElement,\n  options?: Omit<RenderOptions, 'wrapper'>\n) => render(ui, { wrapper: AllTheProviders, ...options });\n\nexport * from '@testing-library/react';\nexport { customRender as render };\n"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Setup Playwright",
+      "condition": "$usePlaywright === true",
+      "then": [
+        {
+          "type": "log",
+          "message": "Installing Playwright...",
+          "level": "info"
+        },
+        {
+          "type": "install-deps",
+          "devDependencies": ["@playwright/test", "@axe-core/playwright"]
+        },
+        {
+          "type": "create-file",
+          "path": "playwright.config.ts",
+          "content": "import { defineConfig, devices } from '@playwright/test';\n\nexport default defineConfig({\n  testDir: './e2e',\n  fullyParallel: true,\n  forbidOnly: !!process.env.CI,\n  retries: process.env.CI ? 2 : 0,\n  workers: process.env.CI ? 1 : undefined,\n  reporter: [\n    ['html'],\n    ['json', { outputFile: 'test-results/results.json' }],\n    ['junit', { outputFile: 'test-results/junit.xml' }]\n  ],\n  use: {\n    baseURL: 'http://localhost:3000',\n    trace: 'on-first-retry',\n    screenshot: 'only-on-failure',\n    video: 'retain-on-failure'\n  },\n  projects: [\n    {\n      name: 'chromium',\n      use: { ...devices['Desktop Chrome'] }\n    },\n    {\n      name: 'firefox',\n      use: { ...devices['Desktop Firefox'] }\n    },\n    {\n      name: 'webkit',\n      use: { ...devices['Desktop Safari'] }\n    },\n    {\n      name: 'Mobile Chrome',\n      use: { ...devices['Pixel 5'] }\n    },\n    {\n      name: 'Mobile Safari',\n      use: { ...devices['iPhone 12'] }\n    }\n  ],\n  webServer: {\n    command: 'npm run dev',\n    url: 'http://localhost:3000',\n    reuseExistingServer: !process.env.CI,\n    timeout: 120 * 1000\n  }\n});\n"
+        },
+        {
+          "type": "create-file",
+          "path": "e2e/example.spec.ts",
+          "content": "import { test, expect } from '@playwright/test';\nimport AxeBuilder from '@axe-core/playwright';\n\ntest.describe('Homepage', () => {\n  test('should load successfully', async ({ page }) => {\n    await page.goto('/');\n    await expect(page).toHaveTitle(/.*/);\n  });\n\n  test('should be accessible', async ({ page }) => {\n    await page.goto('/');\n    \n    const accessibilityScanResults = await new AxeBuilder({ page })\n      .analyze();\n\n    expect(accessibilityScanResults.violations).toEqual([]);\n  });\n\n  test('should navigate correctly', async ({ page }) => {\n    await page.goto('/');\n    \n    // Add your navigation tests here\n  });\n});\n"
+        },
+        {
+          "type": "create-file",
+          "path": "e2e/fixtures.ts",
+          "content": "import { test as base } from '@playwright/test';\n\n// Extend basic test with custom fixtures\nexport const test = base.extend<{\n  // Add custom fixtures here\n}>({});\n\nexport { expect } from '@playwright/test';\n"
+        }
+      ]
+    },
+    {
+      "type": "create-file",
+      "name": "Create test utilities",
+      "path": "src/test/mocks.ts",
+      "content": "// Mock data and utilities\n\nexport const mockUser = {\n  id: '1',\n  name: 'Test User',\n  email: 'test@example.com'\n};\n\nexport const mockApiResponse = <T>(data: T, delay = 0): Promise<T> => {\n  return new Promise((resolve) => {\n    setTimeout(() => resolve(data), delay);\n  });\n};\n\nexport const mockApiError = (message: string, delay = 0): Promise<never> => {\n  return new Promise((_, reject) => {\n    setTimeout(() => reject(new Error(message)), delay);\n  });\n};\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create example component test",
+      "path": "src/components/Button.test.tsx",
+      "content": "import { describe, it, expect, vi } from 'vitest';\nimport { render, screen } from '../test/utils';\nimport userEvent from '@testing-library/user-event';\n\n// Example Button component test\nconst Button = ({ onClick, children }: any) => (\n  <button onClick={onClick}>{children}</button>\n);\n\ndescribe('Button', () => {\n  it('renders correctly', () => {\n    render(<Button>Click me</Button>);\n    expect(screen.getByText('Click me')).toBeInTheDocument();\n  });\n\n  it('handles click events', async () => {\n    const handleClick = vi.fn();\n    const user = userEvent.setup();\n    \n    render(<Button onClick={handleClick}>Click me</Button>);\n    \n    await user.click(screen.getByText('Click me'));\n    expect(handleClick).toHaveBeenCalledTimes(1);\n  });\n\n  it('is accessible', () => {\n    const { container } = render(<Button>Click me</Button>);\n    const button = container.querySelector('button');\n    expect(button).toBeInTheDocument();\n  });\n});\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Update package.json scripts",
+      "path": "package.json.scripts",
+      "content": "{\n  \"test\": \"vitest\",\n  \"test:ui\": \"vitest --ui\",\n  \"test:run\": \"vitest run\",\n  \"test:coverage\": \"vitest run --coverage\",\n  \"test:e2e\": \"playwright test\",\n  \"test:e2e:ui\": \"playwright test --ui\",\n  \"test:e2e:debug\": \"playwright test --debug\",\n  \"test:all\": \"npm run test:run && npm run test:e2e\"\n}\n"
+    },
+    {
+      "type": "conditional",
+      "name": "Create test reports configuration",
+      "condition": "$generateReports === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": ".github/workflows/test-report.yml",
+          "content": "name: Test Reports\n\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: '20'\n      \n      - name: Install dependencies\n        run: npm ci\n      \n      - name: Run tests with coverage\n        run: npm run test:coverage\n      \n      - name: Upload coverage to Codecov\n        uses: codecov/codecov-action@v3\n        with:\n          files: ./coverage/lcov.info\n          flags: unittests\n          name: codecov-umbrella\n      \n      - name: Run E2E tests\n        run: npm run test:e2e\n      \n      - name: Upload Playwright report\n        if: always()\n        uses: actions/upload-artifact@v3\n        with:\n          name: playwright-report\n          path: playwright-report/\n          retention-days: 30\n"
+        }
+      ]
+    },
+    {
+      "type": "create-file",
+      "name": "Create testing documentation",
+      "path": "TESTING.md",
+      "content": "# Testing Guide\n\n## Overview\n\nThis project uses a comprehensive testing setup:\n\n- **Unit Tests**: Vitest + Testing Library\n- **E2E Tests**: Playwright\n- **Coverage**: V8 coverage with ${coverageThreshold}% threshold\n- **Accessibility**: Axe-core integration\n\n## Running Tests\n\n### Unit Tests\n\n```bash\n# Run tests in watch mode\nnpm test\n\n# Run tests once\nnpm run test:run\n\n# Run with coverage\nnpm run test:coverage\n\n# Open UI\nnpm run test:ui\n```\n\n### E2E Tests\n\n```bash\n# Run E2E tests\nnpm run test:e2e\n\n# Run with UI\nnpm run test:e2e:ui\n\n# Debug mode\nnpm run test:e2e:debug\n```\n\n### All Tests\n\n```bash\n# Run all tests\nnpm run test:all\n```\n\n## Writing Tests\n\n### Unit Test Example\n\n```typescript\nimport { describe, it, expect } from 'vitest';\nimport { render, screen } from '@/test/utils';\n\ndescribe('MyComponent', () => {\n  it('renders correctly', () => {\n    render(<MyComponent />);\n    expect(screen.getByText('Hello')).toBeInTheDocument();\n  });\n});\n```\n\n### E2E Test Example\n\n```typescript\nimport { test, expect } from '@playwright/test';\n\ntest('user can login', async ({ page }) => {\n  await page.goto('/login');\n  await page.fill('input[name=\"email\"]', 'user@example.com');\n  await page.fill('input[name=\"password\"]', 'password');\n  await page.click('button[type=\"submit\"]');\n  await expect(page).toHaveURL('/dashboard');\n});\n```\n\n## Coverage\n\nCoverage reports are generated in:\n- `coverage/` - HTML report\n- `coverage/lcov.info` - LCOV format\n\nMinimum coverage threshold: ${coverageThreshold}%\n\n## Best Practices\n\n1. **Test Behavior, Not Implementation**\n2. **Use Testing Library queries** (getByRole, getByLabelText)\n3. **Test accessibility** with axe-core\n4. **Mock external dependencies**\n5. **Keep tests isolated** and independent\n6. **Use descriptive test names**\n7. **Follow AAA pattern** (Arrange, Act, Assert)\n\n## CI Integration\n\nTests run automatically on:\n- Every push to main/develop\n- Every pull request\n- Coverage reports uploaded to Codecov\n- E2E test reports saved as artifacts\n"
+    },
+    {
+      "type": "log",
+      "message": "✓ Complete testing setup finished!",
+      "level": "success"
+    }
+  ],
+  "instructions": "Testing infrastructure setup complete!\n\nConfigured:\n${useVitest ? '- ✓ Vitest with coverage (threshold: ' + coverageThreshold + '%)\n' : ''}${useTestingLibrary ? '- ✓ Testing Library for React\n' : ''}${usePlaywright ? '- ✓ Playwright for E2E tests\n' : ''}${generateReports ? '- ✓ Test reports and CI integration\n' : ''}- ✓ Accessibility testing with axe-core\n- ✓ Test utilities and mocks\n- ✓ Example tests\n\nFiles created:\n- vitest.config.ts\n- playwright.config.ts\n- src/test/setup.ts\n- src/test/utils.tsx\n- src/test/mocks.ts\n- e2e/example.spec.ts\n- TESTING.md\n\nNext steps:\n1. Install dependencies: npm install\n2. Run unit tests: npm test\n3. Run E2E tests: npm run test:e2e\n4. Check coverage: npm run test:coverage\n\nUseful commands:\n- npm test - Watch mode\n- npm run test:ui - Visual test UI\n- npm run test:e2e:ui - Playwright UI\n- npm run test:all - Run all tests"
+}
