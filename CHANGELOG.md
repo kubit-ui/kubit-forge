@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.0
+
+### Patch Changes
+
+- Reset canary
+
 ## 0.0.1-canary.1
 
 ### Patch Changes
