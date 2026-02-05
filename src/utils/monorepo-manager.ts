@@ -1,4 +1,4 @@
-import { glob } from 'fast-glob';
+import fg from 'fast-glob';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
@@ -91,7 +91,7 @@ export class MonorepoManager {
 
     for (const workspace of workspaces) {
       const pattern = join(this.cwd, workspace, 'package.json');
-      const packageFiles = await glob(pattern, { absolute: true });
+      const packageFiles = await fg(pattern, { absolute: true });
 
       for (const packageFile of packageFiles) {
         try {
