@@ -90,7 +90,6 @@ jobs:
       - name: Create canary changeset
         run: |
           COMMIT_MSG="${{ steps.commit.outputs.message }}"
-          COMMIT_SHA="${{ steps.commit.outputs.sha }}"
 
           # Clean commit message for changeset summary
           SUMMARY=$(echo "$COMMIT_MSG" | sed -E 's/^(feat|fix|docs|style|refactor|perf|test|chore|build|ci|break|breaking)(\([^)]+\))?!?:\s*//')
@@ -103,7 +102,7 @@ jobs:
           echo "\"kubit-forge\": patch" >> $CHANGESET_FILE
           echo "---" >> $CHANGESET_FILE
           echo "" >> $CHANGESET_FILE
-          echo "$SUMMARY (canary.$COMMIT_SHA)" >> $CHANGESET_FILE
+          echo "$SUMMARY" >> $CHANGESET_FILE
 
           echo "✅ Created canary changeset:"
           cat $CHANGESET_FILE
@@ -133,17 +132,6 @@ jobs:
         run: |
           echo "📦 Versioning package for canary..."
           pnpm changeset:version
-
-          # Append commit SHA to canary version
-          COMMIT_SHA="${{ steps.commit.outputs.sha }}"
-
-          # Update version to include commit SHA
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.version = pkg.version.replace(/-canary\.\d+/, '-canary.$COMMIT_SHA');
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-          "
 
           # Configure git
           git config --global user.name "github-actions[bot]"
