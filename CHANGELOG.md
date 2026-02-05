@@ -196,7 +196,7 @@ Kubit Forge 0.0.0 - A world-class, extensible CLI for modern web development wit
 
 ### Project Setup
 
-- **Package Name:** `@kubit-ui-web/kubit-forge`
+- **Package Name:** `kubit-forge`
 - **Version:** `0.0.0` (starting point)
 - **License:** MIT
 - **Node.js:** >= 20.0.0

@@ -81,7 +81,7 @@ jobs:
           CHANGESET_FILE=".changeset/beta-$CHANGESET_ID.md"
 
           echo "---" > $CHANGESET_FILE
-          echo "\"@kubit-ui-web/kubit-forge\": major" >> $CHANGESET_FILE
+          echo "\"kubit-forge\": major" >> $CHANGESET_FILE
           echo "---" >> $CHANGESET_FILE
           echo "" >> $CHANGESET_FILE
           echo "$SUMMARY" >> $CHANGESET_FILE
@@ -168,7 +168,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const version = '${{ steps.version.outputs.version }}';
-            const npmLink = `https://www.npmjs.com/package/@kubit-ui-web/kubit-forge/v/${version}`;
+            const npmLink = `https://www.npmjs.com/package/kubit-forge/v/${version}`;
 
             let comment = '## 🚀 Beta Package Published\n\n';
             comment += '**Branch:** `${{ github.ref_name }}`\n\n';
@@ -178,7 +178,7 @@ jobs:
             comment += '\n✅ Beta package has been successfully published to NPM!\n\n';
             comment += '**Install beta version:**\n';
             comment += '```sh\n';
-            comment += `pnpm add -g @kubit-ui-web/kubit-forge@${version}\n`;
+            comment += `pnpm add -g kubit-forge@${version}\n`;
             comment += '```';
 
             // Try to find an open PR for this branch

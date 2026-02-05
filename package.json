@@ -1,5 +1,5 @@
 {
-  "name": "@kubit-ui-web/kubit-forge",
+  "name": "kubit-forge",
   "version": "0.0.0",
   "description": "World-class CLI for modern web development with enterprise-grade features: plugins, recipes, DAG task engine, interactive dashboard, asset optimization, and SBOM generation",
   "main": "dist/index.js",

@@ -2,7 +2,7 @@
 
 > **A world-class, extensible CLI for modern web development with enterprise-grade features**
 
-[![Version](https://img.shields.io/npm/v/@kubit-ui-web/kubit-forge.svg)](https://www.npmjs.com/package/@kubit-ui-web/kubit-forge)
+[![Version](https://img.shields.io/npm/v/kubit-forge.svg)](https://www.npmjs.com/package/kubit-forge)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org/)
@@ -200,7 +200,7 @@ kubit-forge plugin:verify @kubit/plugin-analytics
 
 ```typescript
 // my-plugin.ts
-import { Plugin } from '@kubit-ui-web/kubit-forge';
+import { Plugin } from 'kubit-forge';
 
 export default {
   name: 'my-plugin',
@@ -618,26 +618,26 @@ export default {
 
 ```bash
 # Using pnpm (recommended)
-pnpm add -g @kubit-ui-web/kubit-forge
+pnpm add -g kubit-forge
 
 # Using npm
-npm install -g @kubit-ui-web/kubit-forge
+npm install -g kubit-forge
 
 # Using yarn
-yarn global add @kubit-ui-web/kubit-forge
+yarn global add kubit-forge
 ```
 
 ### Local Installation
 
 ```bash
 # Using pnpm
-pnpm add -D @kubit-ui-web/kubit-forge
+pnpm add -D kubit-forge
 
 # Using npm
-npm install --save-dev @kubit-ui-web/kubit-forge
+npm install --save-dev kubit-forge
 
 # Using yarn
-yarn add -D @kubit-ui-web/kubit-forge
+yarn add -D kubit-forge
 ```
 
 ### Verify Installation
@@ -834,7 +834,7 @@ Special thanks to:
 
 <div align="center">
 
-**[Website](https://kubit-ui.com)** • **[Documentation](https://docs.kubit-ui.com)** • **[GitHub](https://github.com/kubit-ui/kubit-forge)** • **[NPM](https://www.npmjs.com/package/@kubit-ui-web/kubit-forge)**
+**[Website](https://kubit-ui.com)** • **[Documentation](https://docs.kubit-ui.com)** • **[GitHub](https://github.com/kubit-ui/kubit-forge)** • **[NPM](https://www.npmjs.com/package/kubit-forge)**
 
 Made with ❤️ for the open-source community
 
