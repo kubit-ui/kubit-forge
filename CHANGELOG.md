@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.1-canary.1
+
+### Patch Changes
+
+- Include cli commands
+
 ## 0.0.1-canary.0
 
 ### Patch Changes
