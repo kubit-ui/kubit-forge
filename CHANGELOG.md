@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.2-canary.9
+
+### Patch Changes
+
+- Use correct template IDs matching actual template directories
+  - Change react-ts → react
+  - Change react-ts-bernova → react-bernova
+  - Add react-kubit-ui and kubit-full templates
+  - Change vanilla-ts → vanilla
+  - Add emoji icons and better descriptions
+
+  Fixes 'Template not found' errors during project creation.
+
 ## 0.0.2-canary.8
 
 ### Patch Changes
