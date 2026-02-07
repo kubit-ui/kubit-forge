@@ -26,6 +26,7 @@
 - [Asset Optimization](#asset-optimization)
 - [Security & SBOM](#security--sbom)
 - [Doctor Command](#doctor-command)
+- [Smart Dependency Management](#smart-dependency-management)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
@@ -466,6 +467,64 @@ Predictive Analysis:
 
 ---
 
+## Smart Dependency Management
+
+Intelligent dependency analysis and optimization:
+
+```bash
+# Visualize dependency tree
+kubit-forge deps:analyze
+
+# Explain why a package is installed
+kubit-forge deps:why <package>
+
+# Find and eliminate duplicates
+kubit-forge deps:dedupe
+
+# Smart update suggestions
+kubit-forge deps:update
+
+# Discover better alternatives
+kubit-forge deps:alternatives <package>
+
+# Export dependency report
+kubit-forge deps:export --format markdown
+```
+
+### Dependency Management Features
+
+- **Visual Dependency Tree** - Interactive tree visualization with filtering
+- **Package Origin Analysis** - Understand dependency chains
+- **Smart Deduplication** - Eliminate redundant packages automatically
+- **Intelligent Updates** - Safety analysis with breaking change detection
+- **Alternative Suggestions** - Discover lighter, modern replacements
+- **Security Focus** - Highlight vulnerabilities and critical updates
+- **Export Reports** - JSON, Markdown, CSV formats for documentation
+- **Bundle Optimization** - Reduce package count and bundle size
+
+### Example Workflow
+
+```bash
+# 1. Analyze current state
+kubit-forge deps:analyze --depth 3
+
+# 2. Check for duplicates
+kubit-forge deps:dedupe --dry-run
+
+# 3. Find better alternatives
+kubit-forge deps:alternatives moment
+
+# 4. Check for updates
+kubit-forge deps:update --security
+
+# 5. Export report
+kubit-forge deps:export --format markdown
+```
+
+**Learn more:** See [DEPENDENCY_MANAGEMENT.md](docs/DEPENDENCY_MANAGEMENT.md) for complete documentation.
+
+---
+
 ## Migrations & Upgrades
 
 Safe upgrades and automated refactoring:
@@ -778,6 +837,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - ✅ Asset optimization
 - ✅ SBOM generation
 - ✅ Doctor command
+- ✅ Smart Dependency Management
 
 ### Upcoming (v1.x)
 
