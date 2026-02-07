@@ -48,7 +48,7 @@
   "scripts": {
     "dist": "pnpm run build",
     "build": "pnpm run clean && tsup",
-    "dev": "tsup --watch",
+    "dev": "NODE_ENV=development tsup --watch",
     "dev:link": "pnpm build && pnpm link --global",
     "dev:unlink": "pnpm unlink --global kubit-forge",
     "test": "vitest run --coverage",

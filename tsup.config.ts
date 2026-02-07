@@ -1,16 +1,16 @@
-import { defineConfig } from 'tsup';
 import { cpSync } from 'fs';
 import { join } from 'path';
+import { defineConfig } from 'tsup';
+
+const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
-  entry: ['src/cli.ts', 'src/index.ts'],
-  format: ['esm'],
-  dts: true,
+  banner: {
+    js: '#!/usr/bin/env node',
+  },
   clean: true,
-  sourcemap: true,
-  splitting: false,
-  minify: false,
-  shims: true,
+  dts: true,
+  entry: ['src/cli.ts', 'src/index.ts'],
   // External dependencies - don't bundle React/Ink to avoid multiple instances
   external: [
     'react',
@@ -23,10 +23,9 @@ export default defineConfig({
     'ink-table',
     'ink-link',
   ],
+  format: ['esm'],
+  minify: !isDev, // Minify only in production
   // bundle: true by default - templates are loaded at import time
-  banner: {
-    js: '#!/usr/bin/env node',
-  },
   onSuccess: async () => {
     // Copy src/templates directory to dist
     const srcTemplates = join(process.cwd(), 'src', 'templates');
@@ -40,4 +39,8 @@ export default defineConfig({
     cpSync(physicalTemplates, distPhysicalTemplates, { recursive: true });
     console.log('✓ Physical templates copied to dist');
   },
+  shims: true,
+  sourcemap: isDev, // Enable sourcemaps only in development (saves ~1MB in production)
+  splitting: true, // Enable code splitting for better tree-shaking
+  treeshake: true, // Remove unused code
 });
