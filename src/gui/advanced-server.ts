@@ -145,45 +145,108 @@ export class AdvancedGuiServer {
       if (url === '/api/command/execute' && req.method === 'POST') {
         const body = await this.readBody(req);
         const { command } = JSON.parse(body);
-        const pm = this.config.project.packageManager;
+        const pm = this.config.project.packageManager || 'npm';
 
-        this.addLog('info', `Executing: ${pm} run ${command}`);
+        this.addLog('info', `🚀 Executing: ${pm} run ${command}`);
+        this.addLog('info', `📂 Working directory: ${this.cwd}`);
 
         try {
-          const result = await execa(pm, ['run', command], { cwd: this.cwd, reject: false });
+          // Execute with streaming output
+          const subprocess = execa(pm, ['run', command], {
+            all: true,
+            buffer: true,
+            cwd: this.cwd,
+            reject: false,
+          });
 
-          if (result.stdout) {
-            this.addLog('stdout', result.stdout);
+          // Capture stdout in real-time
+          if (subprocess.stdout) {
+            subprocess.stdout.on('data', (data) => {
+              const output = data.toString().trim();
+              if (output) {
+                this.addLog('stdout', output);
+              }
+            });
           }
-          if (result.stderr) {
-            this.addLog('stderr', result.stderr);
+
+          // Capture stderr in real-time
+          if (subprocess.stderr) {
+            subprocess.stderr.on('data', (data) => {
+              const output = data.toString().trim();
+              if (output) {
+                this.addLog('stderr', output);
+              }
+            });
+          }
+
+          const result = await subprocess;
+
+          // Add final output if not captured in real-time
+          if (result.stdout && !subprocess.stdout) {
+            const lines = result.stdout.split('\\n').filter((l) => l.trim());
+            lines.forEach((line) => this.addLog('stdout', line));
+          }
+          if (result.stderr && !subprocess.stderr) {
+            const lines = result.stderr.split('\\n').filter((l) => l.trim());
+            lines.forEach((line) => this.addLog('stderr', line));
           }
 
           if (result.exitCode === 0) {
-            this.addLog('success', `Command ${command} completed successfully`);
+            this.addLog('success', `✅ Command "${command}" completed successfully`);
             res.writeHead(200);
             res.end(
               JSON.stringify({
-                message: `${command} completed`,
-                output: result.stdout,
+                message: `${command} completed successfully`,
+                output: result.stdout || result.all || '',
                 success: true,
               })
             );
           } else {
-            this.addLog('error', `Command ${command} failed with exit code ${result.exitCode}`);
+            this.addLog(
+              'error',
+              `❌ Command "${command}" failed with exit code ${result.exitCode}`
+            );
             res.writeHead(200);
             res.end(
               JSON.stringify({
-                error: result.stderr || result.stdout || 'Command failed',
+                error: result.stderr || result.stdout || result.all || 'Command failed',
+                exitCode: result.exitCode,
                 message: `${command} failed`,
                 success: false,
               })
             );
           }
         } catch (error: any) {
-          this.addLog('error', `Error executing ${command}: ${error.message}`);
+          const errorMsg = error.message || String(error);
+          this.addLog('error', `💥 Error executing "${command}": ${errorMsg}`);
+
+          // Try to provide more helpful error messages
+          if (errorMsg.includes('ENOENT')) {
+            this.addLog('error', `Package manager "${pm}" not found. Please install it first.`);
+          } else if (
+            errorMsg.includes('command not found') ||
+            errorMsg.includes('not recognized')
+          ) {
+            try {
+              const pkg = JSON.parse(readFileSync(join(this.cwd, 'package.json'), 'utf-8'));
+              const availableScripts = Object.keys(pkg.scripts || {}).join(', ') || 'none';
+              this.addLog(
+                'error',
+                `Script "${command}" not found in package.json. Available scripts: ${availableScripts}`
+              );
+            } catch {
+              this.addLog('error', `Script "${command}" not found in package.json`);
+            }
+          }
+
           res.writeHead(200);
-          res.end(JSON.stringify({ error: error.message, success: false }));
+          res.end(
+            JSON.stringify({
+              error: errorMsg,
+              message: `Failed to execute ${command}`,
+              success: false,
+            })
+          );
         }
         return;
       }
@@ -458,7 +521,34 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .file.dir { border-left: 3px solid #df2b52; }
 .file-size { color: #999; font-size: 0.875rem; }
 .empty { text-align: center; padding: 3rem; color: #666; }
-.divider { border-top: 1px solid #333; margin: 2rem 0; }`;
+.divider { border-top: 1px solid #333; margin: 2rem 0; }
+.console-toggle { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #df2b52 0%, #c01f40 100%); color: #fff; border: none; cursor: pointer; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(223, 43, 82, 0.4); z-index: 999; transition: all 0.3s; }
+.console-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 25px rgba(223, 43, 82, 0.6); }
+.floating-console { position: fixed; background: #111; border: 2px solid #df2b52; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); z-index: 1000; display: flex; flex-direction: column; }
+.floating-console.minimized { height: 45px !important; }
+.floating-console.maximized { top: 20px !important; left: 20px !important; right: 20px !important; bottom: 20px !important; width: auto !important; height: auto !important; }
+.console-header { background: #df2b52; color: #fff; padding: 0.75rem 1rem; cursor: move; display: flex; justify-content: space-between; align-items: center; user-select: none; border-radius: 6px 6px 0 0; }
+.console-header-title { font-weight: 600; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem; }
+.console-controls { display: flex; gap: 0.5rem; }
+.console-control-btn { background: rgba(255, 255, 255, 0.2); border: none; color: #fff; width: 28px; height: 28px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+.console-control-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.console-body { flex: 1; overflow-y: auto; padding: 1rem; background: #000; font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace; font-size: 0.8rem; line-height: 1.5; }
+.console-body::-webkit-scrollbar { width: 8px; }
+.console-body::-webkit-scrollbar-track { background: #111; }
+.console-body::-webkit-scrollbar-thumb { background: #df2b52; border-radius: 4px; }
+.console-log { margin-bottom: 0.5rem; padding: 0.5rem; border-left: 3px solid transparent; border-radius: 2px; transition: background 0.2s; }
+.console-log:hover { background: #1a1a1a; }
+.console-log.info { border-left-color: #74c0fc; }
+.console-log.success { border-left-color: #51cf66; }
+.console-log.error { border-left-color: #ff6b6b; }
+.console-log.stderr { border-left-color: #ffa94d; }
+.console-log.stdout { border-left-color: #74c0fc; }
+.console-log-time { color: #666; margin-right: 0.75rem; font-size: 0.75rem; }
+.console-log-type { color: #df2b52; font-weight: 600; margin-right: 0.75rem; min-width: 60px; display: inline-block; font-size: 0.75rem; }
+.console-log-message { color: #e0e0e0; word-break: break-word; }
+.console-empty { color: #666; text-align: center; padding: 3rem 1rem; font-size: 0.9rem; }
+.console-resize-handle { position: absolute; bottom: 0; right: 0; width: 20px; height: 20px; cursor: nwse-resize; }
+.console-resize-handle::after { content: ''; position: absolute; bottom: 2px; right: 2px; width: 0; height: 0; border-style: solid; border-width: 0 0 8px 8px; border-color: transparent transparent #df2b52 transparent; }`;
   }
 
   private getApp() {
@@ -470,6 +560,7 @@ function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState('');
+  const [consoleOpen, setConsoleOpen] = useState(false);
 
   useEffect(() => { loadData(); }, []);
 
@@ -503,7 +594,7 @@ function App() {
       React.createElement('p', null, 'Advanced Project Manager')
     ),
     React.createElement('div', { className: 'tabs' },
-      ['dashboard', 'commands', 'console', 'git', 'dependencies', 'features', 'files', 'templates', 'config'].map(t =>
+      ['dashboard', 'commands', 'git', 'dependencies', 'features', 'files', 'templates', 'config'].map(t =>
         React.createElement('button', {
           key: t,
           className: 'tab' + (tab === t ? ' active' : ''),
@@ -514,7 +605,6 @@ function App() {
     React.createElement('div', { className: 'content' },
       tab === 'dashboard' && React.createElement(Dashboard, { data, onRefresh: loadData }),
       tab === 'commands' && React.createElement(Commands, { notify }),
-      tab === 'console' && React.createElement(Console, {}),
       tab === 'git' && React.createElement(Git, { data }),
       tab === 'dependencies' && React.createElement(Dependencies, { notify }),
       tab === 'features' && React.createElement(Features, { notify }),
@@ -522,7 +612,13 @@ function App() {
       tab === 'templates' && React.createElement(Templates, { notify }),
       tab === 'config' && React.createElement(Config, { notify })
     ),
-    notification && React.createElement('div', { className: 'notification' }, notification)
+    notification && React.createElement('div', { className: 'notification' }, notification),
+    React.createElement('button', {
+      className: 'console-toggle',
+      onClick: () => setConsoleOpen(!consoleOpen),
+      title: consoleOpen ? 'Close Console' : 'Open Console'
+    }, consoleOpen ? '✕' : '🖥'),
+    consoleOpen && React.createElement(FloatingConsole, { onClose: () => setConsoleOpen(false) })
   );
 }
 
@@ -608,6 +704,207 @@ function Commands({ notify }) {
             )
           )
         )
+  );
+}
+
+function FloatingConsole({ onClose }) {
+  const [logs, setLogs] = useState([]);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const [minimized, setMinimized] = useState(false);
+  const [maximized, setMaximized] = useState(false);
+  const [position, setPosition] = useState({ x: window.innerWidth - 620, y: window.innerHeight - 520 });
+  const [size, setSize] = useState({ width: 600, height: 500 });
+  const [dragging, setDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [resizing, setResizing] = useState(false);
+
+  useEffect(() => {
+    loadLogs();
+    const interval = setInterval(loadLogs, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (autoScroll && logs.length > 0) {
+      const consoleBody = document.querySelector('.console-body');
+      if (consoleBody) {
+        consoleBody.scrollTop = consoleBody.scrollHeight;
+      }
+    }
+  }, [logs, autoScroll]);
+
+  useEffect(() => {
+    if (dragging) {
+      const handleMouseMove = (e) => {
+        setPosition({
+          x: e.clientX - dragOffset.x,
+          y: e.clientY - dragOffset.y
+        });
+      };
+      const handleMouseUp = () => setDragging(false);
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [dragging, dragOffset]);
+
+  useEffect(() => {
+    if (resizing) {
+      const handleMouseMove = (e) => {
+        setSize({
+          width: Math.max(400, e.clientX - position.x),
+          height: Math.max(300, e.clientY - position.y)
+        });
+      };
+      const handleMouseUp = () => setResizing(false);
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [resizing, position]);
+
+  async function loadLogs() {
+    try {
+      const res = await fetch('/api/console/logs');
+      const data = await res.json();
+      setLogs(data.logs || []);
+    } catch (err) {
+      console.error('Failed to load logs:', err);
+    }
+  }
+
+  async function clearLogs() {
+    try {
+      await fetch('/api/console/clear', { method: 'POST' });
+      setLogs([]);
+    } catch (err) {
+      console.error('Failed to clear logs:', err);
+    }
+  }
+
+  function handleMouseDown(e) {
+    if (e.target.closest('.console-controls') || e.target.closest('.console-resize-handle')) return;
+    setDragging(true);
+    setDragOffset({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y
+    });
+  }
+
+  function toggleMinimize() {
+    setMinimized(!minimized);
+    if (maximized) setMaximized(false);
+  }
+
+  function toggleMaximize() {
+    setMaximized(!maximized);
+    if (minimized) setMinimized(false);
+  }
+
+  function getLogColor(type) {
+    switch(type) {
+      case 'error': return '#ff6b6b';
+      case 'success': return '#51cf66';
+      case 'stderr': return '#ffa94d';
+      case 'stdout': return '#74c0fc';
+      case 'info': return '#999';
+      default: return '#fff';
+    }
+  }
+
+  const consoleStyle = maximized 
+    ? {} 
+    : { 
+        left: position.x + 'px', 
+        top: position.y + 'px', 
+        width: size.width + 'px', 
+        height: size.height + 'px' 
+      };
+
+  return React.createElement('div', {
+    className: 'floating-console' + (minimized ? ' minimized' : '') + (maximized ? ' maximized' : ''),
+    style: consoleStyle
+  },
+    React.createElement('div', {
+      className: 'console-header',
+      onMouseDown: handleMouseDown
+    },
+      React.createElement('div', { className: 'console-header-title' },
+        React.createElement('span', null, '🖥'),
+        React.createElement('span', null, 'Console'),
+        React.createElement('span', { style: { fontSize: '0.75rem', color: '#fffa', marginLeft: '0.5rem' } }, 
+          \`(\${logs.length} logs)\`)
+      ),
+      React.createElement('div', { className: 'console-controls' },
+        React.createElement('button', {
+          className: 'console-control-btn',
+          onClick: clearLogs,
+          title: 'Clear logs'
+        }, '🗑'),
+        React.createElement('button', {
+          className: 'console-control-btn',
+          onClick: loadLogs,
+          title: 'Refresh'
+        }, '↻'),
+        React.createElement('button', {
+          className: 'console-control-btn',
+          onClick: toggleMinimize,
+          title: minimized ? 'Restore' : 'Minimize'
+        }, minimized ? '□' : '_'),
+        React.createElement('button', {
+          className: 'console-control-btn',
+          onClick: toggleMaximize,
+          title: maximized ? 'Restore' : 'Maximize'
+        }, maximized ? '◱' : '□'),
+        React.createElement('button', {
+          className: 'console-control-btn',
+          onClick: onClose,
+          title: 'Close'
+        }, '✕')
+      )
+    ),
+    !minimized && React.createElement('div', { className: 'console-body' },
+      logs.length === 0
+        ? React.createElement('div', { className: 'console-empty' }, 
+            '📟 No logs yet',
+            React.createElement('br'),
+            React.createElement('small', { style: { fontSize: '0.8rem' } }, 'Execute a command to see output here')
+          )
+        : logs.map((log, i) =>
+            React.createElement('div', { 
+              key: i,
+              className: \`console-log \${log.type}\`
+            },
+              React.createElement('span', { className: 'console-log-time' }, 
+                new Date(log.timestamp).toLocaleTimeString()
+              ),
+              React.createElement('span', { className: 'console-log-type' }, 
+                \`[\${log.type.toUpperCase()}]\`
+              ),
+              React.createElement('span', { 
+                className: 'console-log-message',
+                style: { color: getLogColor(log.type) }
+              }, log.message)
+            )
+          )
+    ),
+    !minimized && !maximized && React.createElement('div', {
+      className: 'console-resize-handle',
+      onMouseDown: (e) => {
+        e.stopPropagation();
+        setResizing(true);
+      }
+    })
   );
 }
 
