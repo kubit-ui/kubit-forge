@@ -65,6 +65,13 @@ export class AdvancedGuiServer {
       this.server.listen(this.port, this.host, () => {
         const url = `http://${this.host}:${this.port}`;
         this.logger.success(`\n🎨 Kubit Forge Advanced GUI running at: ${url}\n`);
+
+        // Add welcome logs
+        this.addLog('success', '🎨 Kubit Forge GUI started successfully!');
+        this.addLog('info', `🌐 Server running at: ${url}`);
+        this.addLog('info', '📟 Console is ready - Execute commands to see output here');
+        this.addLog('info', '💡 Tip: You can drag, resize, minimize, or maximize this console');
+
         resolve(url);
       });
     });
@@ -665,9 +672,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 .file-size { color: #999; font-size: 0.875rem; }
 .empty { text-align: center; padding: 3rem; color: #666; }
 .divider { border-top: 1px solid #333; margin: 2rem 0; }
-.console-toggle { position: fixed; bottom: 2rem; right: 2rem; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #df2b52 0%, #c01f40 100%); color: #fff; border: none; cursor: pointer; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(223, 43, 82, 0.4); z-index: 999; transition: all 0.3s; }
+.console-toggle { position: fixed !important; bottom: 2rem !important; right: 2rem !important; width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #df2b52 0%, #c01f40 100%); color: #fff; border: none; cursor: pointer; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(223, 43, 82, 0.4); z-index: 9999 !important; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
 .console-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 25px rgba(223, 43, 82, 0.6); }
-.floating-console { position: fixed; background: #111; border: 2px solid #df2b52; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); z-index: 1000; display: flex; flex-direction: column; }
+.floating-console { position: fixed !important; background: #111; border: 2px solid #df2b52; border-radius: 8px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8); z-index: 10000 !important; display: flex; flex-direction: column; }
 .floating-console.minimized { height: 45px !important; }
 .floating-console.maximized { top: 20px !important; left: 20px !important; right: 20px !important; bottom: 20px !important; width: auto !important; height: auto !important; }
 .console-header { background: #df2b52; color: #fff; padding: 0.75rem 1rem; cursor: move; display: flex; justify-content: space-between; align-items: center; user-select: none; border-radius: 6px 6px 0 0; }
@@ -703,9 +710,13 @@ function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState('');
-  const [consoleOpen, setConsoleOpen] = useState(false);
+  const [consoleOpen, setConsoleOpen] = useState(true);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { 
+    console.log('Kubit Forge GUI App mounted');
+    console.log('Console open state:', true);
+    loadData(); 
+  }, []);
 
   async function loadData() {
     try {
@@ -855,13 +866,27 @@ function FloatingConsole({ onClose }) {
   const [autoScroll, setAutoScroll] = useState(true);
   const [minimized, setMinimized] = useState(false);
   const [maximized, setMaximized] = useState(false);
-  const [position, setPosition] = useState({ x: window.innerWidth - 620, y: window.innerHeight - 520 });
-  const [size, setSize] = useState({ width: 600, height: 500 });
+  const [position, setPosition] = useState({ x: 50, y: 100 });
+  const [size, setSize] = useState({ width: 700, height: 500 });
   const [dragging, setDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [resizing, setResizing] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  // Initialize position on first render
+  useEffect(() => {
+    console.log('FloatingConsole mounted');
+    if (!initialized && typeof window !== 'undefined') {
+      const initialX = Math.max(50, window.innerWidth - 720);
+      const initialY = Math.max(50, window.innerHeight - 550);
+      console.log('Setting console position:', { x: initialX, y: initialY });
+      setPosition({ x: initialX, y: initialY });
+      setInitialized(true);
+    }
+  }, [initialized]);
 
   useEffect(() => {
+    console.log('Loading logs...');
     loadLogs();
     const interval = setInterval(loadLogs, 1000);
     return () => clearInterval(interval);
