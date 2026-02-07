@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.0.2-canary.7
+
+### Patch Changes
+
+- Implement template creation with real-time console logging
+  - Add /api/template/create endpoint for project initialization
+  - Enable real-time log streaming during template creation
+  - Add project name validation (lowercase, numbers, hyphens only)
+  - Improve Templates component with individual inputs per template
+  - Add keyboard shortcut (Enter) to create project
+  - Clear input field after successful creation
+  - Show visual indicators during creation process
+  - Add helpful user guidance to check floating console
+  - Improve Features component with better logging
+  - Update feature installation to stream logs in real-time
+  - Add descriptive messages with emoji icons for better UX
+  - Display inline progress indicators during operations
+  - Handle errors gracefully with user-friendly messages
+
+  Both template creation and feature installation now provide full
+  visibility through the floating console with real-time output.
+
 ## 0.0.2-canary.6
 
 ### Patch Changes
