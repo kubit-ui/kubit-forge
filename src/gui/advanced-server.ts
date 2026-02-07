@@ -548,14 +548,32 @@ export class AdvancedGuiServer {
 
   private getTemplates() {
     return [
-      { description: 'React with TypeScript', id: 'react-ts', name: 'React TypeScript' },
       {
-        description: 'React + Bernova Design System',
-        id: 'react-ts-bernova',
-        name: 'React + Bernova',
+        description: 'React with TypeScript and Vite - Modern React setup with hot reload',
+        id: 'react',
+        name: '⚛️ React',
       },
-      { description: 'React + Storybook', id: 'react-ts-storybook', name: 'React + Storybook' },
-      { description: 'Vanilla TypeScript', id: 'vanilla-ts', name: 'Vanilla TypeScript' },
+      {
+        description:
+          'React + Bernova Design System - Pre-configured with Bernova components and theming',
+        id: 'react-bernova',
+        name: '🎨 React + Bernova',
+      },
+      {
+        description: 'React + Kubit UI - Complete Kubit UI component library integration',
+        id: 'react-kubit-ui',
+        name: '🎯 React + Kubit UI',
+      },
+      {
+        description: 'Full Kubit Stack - React + Kubit UI + Bernova + All features pre-configured',
+        id: 'kubit-full',
+        name: '🚀 Kubit Full Stack',
+      },
+      {
+        description: 'Vanilla TypeScript - Lightweight setup with Vite and TypeScript',
+        id: 'vanilla',
+        name: '⚡ Vanilla TS',
+      },
     ];
   }
 
