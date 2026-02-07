@@ -25,6 +25,7 @@ export class AdvancedGuiServer {
   private config: KubitConfig;
   private cwd: string;
   private logger: Logger;
+  private consoleLogs: Array<{ timestamp: string; type: string; message: string }> = [];
 
   constructor(options: GuiServerOptions) {
     this.port = options.port || 3030;
@@ -32,6 +33,18 @@ export class AdvancedGuiServer {
     this.config = options.config;
     this.cwd = options.cwd;
     this.logger = options.logger;
+  }
+
+  private addLog(type: string, message: string) {
+    this.consoleLogs.push({
+      message,
+      timestamp: new Date().toISOString(),
+      type,
+    });
+    // Keep only last 100 logs
+    if (this.consoleLogs.length > 100) {
+      this.consoleLogs.shift();
+    }
   }
 
   async start(): Promise<string> {
@@ -133,9 +146,75 @@ export class AdvancedGuiServer {
         const body = await this.readBody(req);
         const { command } = JSON.parse(body);
         const pm = this.config.project.packageManager;
-        await execa(pm, ['run', command], { cwd: this.cwd });
+
+        this.addLog('info', `Executing: ${pm} run ${command}`);
+
+        try {
+          const result = await execa(pm, ['run', command], { cwd: this.cwd, reject: false });
+
+          if (result.stdout) {
+            this.addLog('stdout', result.stdout);
+          }
+          if (result.stderr) {
+            this.addLog('stderr', result.stderr);
+          }
+
+          if (result.exitCode === 0) {
+            this.addLog('success', `Command ${command} completed successfully`);
+            res.writeHead(200);
+            res.end(
+              JSON.stringify({
+                message: `${command} completed`,
+                output: result.stdout,
+                success: true,
+              })
+            );
+          } else {
+            this.addLog('error', `Command ${command} failed with exit code ${result.exitCode}`);
+            res.writeHead(200);
+            res.end(
+              JSON.stringify({
+                error: result.stderr || result.stdout || 'Command failed',
+                message: `${command} failed`,
+                success: false,
+              })
+            );
+          }
+        } catch (error: any) {
+          this.addLog('error', `Error executing ${command}: ${error.message}`);
+          res.writeHead(200);
+          res.end(JSON.stringify({ error: error.message, success: false }));
+        }
+        return;
+      }
+
+      if (url === '/api/console/logs') {
         res.writeHead(200);
-        res.end(JSON.stringify({ message: `Command ${command} executed`, success: true }));
+        res.end(JSON.stringify({ logs: this.consoleLogs }));
+        return;
+      }
+
+      if (url === '/api/console/clear' && req.method === 'POST') {
+        this.consoleLogs = [];
+        res.writeHead(200);
+        res.end(JSON.stringify({ success: true }));
+        return;
+      }
+
+      if (url === '/api/commands/available') {
+        try {
+          const pkg = JSON.parse(readFileSync(join(this.cwd, 'package.json'), 'utf-8'));
+          const scripts = pkg.scripts || {};
+          const commands = Object.keys(scripts).map((name) => ({
+            description: scripts[name],
+            name,
+          }));
+          res.writeHead(200);
+          res.end(JSON.stringify({ commands }));
+        } catch (error: any) {
+          res.writeHead(500);
+          res.end(JSON.stringify({ error: error.message }));
+        }
         return;
       }
 
@@ -424,7 +503,7 @@ function App() {
       React.createElement('p', null, 'Advanced Project Manager')
     ),
     React.createElement('div', { className: 'tabs' },
-      ['dashboard', 'commands', 'git', 'dependencies', 'features', 'files', 'templates', 'config'].map(t =>
+      ['dashboard', 'commands', 'console', 'git', 'dependencies', 'features', 'files', 'templates', 'config'].map(t =>
         React.createElement('button', {
           key: t,
           className: 'tab' + (tab === t ? ' active' : ''),
@@ -435,6 +514,7 @@ function App() {
     React.createElement('div', { className: 'content' },
       tab === 'dashboard' && React.createElement(Dashboard, { data, onRefresh: loadData }),
       tab === 'commands' && React.createElement(Commands, { notify }),
+      tab === 'console' && React.createElement(Console, {}),
       tab === 'git' && React.createElement(Git, { data }),
       tab === 'dependencies' && React.createElement(Dependencies, { notify }),
       tab === 'features' && React.createElement(Features, { notify }),
@@ -485,14 +565,14 @@ function Dashboard({ data, onRefresh }) {
 
 function Commands({ notify }) {
   const [running, setRunning] = useState({});
-  const commands = [
-    { name: 'dev', desc: 'Start dev server', icon: '🚀' },
-    { name: 'build', desc: 'Build production', icon: '🏗️' },
-    { name: 'test', desc: 'Run tests', icon: '🧪' },
-    { name: 'lint', desc: 'Lint code', icon: '🔍' },
-    { name: 'format', desc: 'Format code', icon: '✨' },
-    { name: 'typecheck', desc: 'Type check', icon: '📘' }
-  ];
+  const [commands, setCommands] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/commands/available')
+      .then(r => r.json())
+      .then(d => setCommands(d.commands || []))
+      .catch(console.error);
+  }, []);
 
   async function runCommand(cmd) {
     setRunning(prev => ({ ...prev, [cmd]: true }));
@@ -513,19 +593,111 @@ function Commands({ notify }) {
 
   return React.createElement('div', null,
     React.createElement('h2', { className: 'title' }, 'Commands'),
-    React.createElement('div', { className: 'grid' },
-      commands.map(cmd =>
-        React.createElement('div', {
-          key: cmd.name,
-          className: 'card clickable',
-          onClick: () => !running[cmd.name] && runCommand(cmd.name)
-        },
-          React.createElement('div', { style: { fontSize: '2rem', marginBottom: '0.5rem' } }, cmd.icon),
-          React.createElement('div', { className: 'card-title' }, cmd.name),
-          React.createElement('div', { className: 'card-desc' }, cmd.desc),
-          running[cmd.name] && React.createElement('div', { style: { marginTop: '0.5rem', color: '#df2b52' } }, 'Running...')
+    commands.length === 0 
+      ? React.createElement('div', { className: 'loading' }, 'Loading commands...')
+      : React.createElement('div', { className: 'grid' },
+          commands.map(cmd =>
+            React.createElement('div', {
+              key: cmd.name,
+              className: 'card clickable',
+              onClick: () => !running[cmd.name] && runCommand(cmd.name)
+            },
+              React.createElement('div', { className: 'card-title' }, cmd.name),
+              React.createElement('div', { className: 'card-desc', style: { fontSize: '0.75rem', fontFamily: 'monospace' } }, cmd.description),
+              running[cmd.name] && React.createElement('div', { style: { marginTop: '0.5rem', color: '#df2b52' } }, 'Running...')
+            )
+          )
         )
+  );
+}
+
+function Console() {
+  const [logs, setLogs] = useState([]);
+  const [autoScroll, setAutoScroll] = useState(true);
+
+  useEffect(() => {
+    loadLogs();
+    const interval = setInterval(loadLogs, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  async function loadLogs() {
+    try {
+      const res = await fetch('/api/console/logs');
+      const data = await res.json();
+      setLogs(data.logs || []);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function clearLogs() {
+    try {
+      await fetch('/api/console/clear', { method: 'POST' });
+      setLogs([]);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function getLogColor(type) {
+    switch(type) {
+      case 'error': return '#ff6b6b';
+      case 'success': return '#51cf66';
+      case 'stderr': return '#ffa94d';
+      case 'stdout': return '#74c0fc';
+      case 'info': return '#999';
+      default: return '#fff';
+    }
+  }
+
+  return React.createElement('div', null,
+    React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' } },
+      React.createElement('h2', { className: 'title', style: { marginBottom: 0 } }, 'Console'),
+      React.createElement('div', { style: { display: 'flex', gap: '1rem', alignItems: 'center' } },
+        React.createElement('label', { style: { display: 'flex', alignItems: 'center', gap: '0.5rem' } },
+          React.createElement('input', {
+            type: 'checkbox',
+            checked: autoScroll,
+            onChange: e => setAutoScroll(e.target.checked),
+            className: 'form-checkbox'
+          }),
+          'Auto-scroll'
+        ),
+        React.createElement('button', { className: 'btn-secondary btn', onClick: clearLogs }, 'Clear'),
+        React.createElement('button', { className: 'btn-secondary btn', onClick: loadLogs }, 'Refresh')
       )
+    ),
+    React.createElement('div', { 
+      className: 'console-output',
+      style: { 
+        background: '#000',
+        border: '1px solid #333',
+        borderRadius: '4px',
+        padding: '1rem',
+        height: '500px',
+        overflowY: 'auto',
+        fontFamily: 'monospace',
+        fontSize: '0.875rem'
+      }
+    },
+      logs.length === 0
+        ? React.createElement('div', { style: { color: '#666', textAlign: 'center', paddingTop: '2rem' } }, 'No logs yet. Execute a command to see output here.')
+        : logs.map((log, i) =>
+            React.createElement('div', { 
+              key: i,
+              style: { 
+                marginBottom: '0.5rem',
+                color: getLogColor(log.type),
+                borderBottom: '1px solid #222',
+                paddingBottom: '0.5rem'
+              }
+            },
+              React.createElement('span', { style: { color: '#666', marginRight: '1rem' } }, new Date(log.timestamp).toLocaleTimeString()),
+              React.createElement('span', { style: { color: '#df2b52', marginRight: '1rem' } }, \`[\${log.type}]\`),
+              React.createElement('span', null, log.message)
+            )
+          )
     )
   );
 }
