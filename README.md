@@ -27,6 +27,7 @@
 - [Security & SBOM](#security--sbom)
 - [Doctor Command](#doctor-command)
 - [Smart Dependency Management](#smart-dependency-management)
+- [Visual GUI & Configuration Editor](#visual-gui--configuration-editor)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
@@ -525,6 +526,64 @@ kubit-forge deps:export --format markdown
 
 ---
 
+## Visual GUI & Configuration Editor
+
+Modern web-based interface for managing your project:
+
+```bash
+# Launch full GUI dashboard
+kubit-forge gui
+
+# Open configuration editor directly
+kubit-forge visual:config
+
+# Custom port and host
+kubit-forge gui --port 8080 --host 0.0.0.0
+
+# Don't open browser automatically
+kubit-forge gui --no-open
+```
+
+### GUI Features
+
+- **Project Overview** - Visual project information dashboard
+  - Project name, stack, language
+  - Package manager and Node version
+  - Working directory and paths
+
+- **Command Palette** - Execute common commands with one click
+  - Dev server, build, test
+  - Lint, format, typecheck
+  - Visual feedback and status
+
+- **Visual Configuration Editor** - Edit `kubit.config.toml` with a beautiful interface
+  - Project settings (name, stack, language, package manager)
+  - Development options (port, host)
+  - Quality toggles (lint, format, typecheck, tests)
+  - Real-time preview
+  - Save directly to config file
+
+### Why Use the GUI?
+
+- **Beginner-Friendly** - No need to remember CLI commands
+- **Visual Feedback** - See changes in real-time
+- **No Syntax Errors** - Form validation prevents config mistakes
+- **Quick Access** - All features in one place
+- **Modern Design** - Beautiful gradient interface with smooth animations
+- **Responsive** - Works on desktop and tablets
+
+### GUI Architecture
+
+- **Zero Dependencies UI** - Lightweight HTML/CSS/JS served directly
+- **RESTful API** - `/api/config`, `/api/project/info`, `/api/commands`
+- **Hot Reload** - Changes reflected immediately
+- **Port Conflict Resolution** - Automatically finds available port
+- **Cross-Platform** - Works on macOS, Windows, Linux
+
+**Learn more:** See [GUI.md](docs/GUI.md) for complete documentation.
+
+---
+
 ## Migrations & Upgrades
 
 Safe upgrades and automated refactoring:
@@ -838,6 +897,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - ✅ SBOM generation
 - ✅ Doctor command
 - ✅ Smart Dependency Management
+- ✅ Visual GUI & Configuration Editor
 
 ### Upcoming (v1.x)
 

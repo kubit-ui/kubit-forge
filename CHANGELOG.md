@@ -66,6 +66,62 @@ A comprehensive suite of tools for intelligent dependency analysis, optimization
 - Added CI/CD integration examples
 - Included best practices and workflows
 
+#### Visual GUI & Configuration Editor
+
+Modern web-based interface for visual project management:
+
+- **`gui`** - Launch full GUI dashboard
+  - Beautiful gradient design with glassmorphism effects
+  - Three main tabs: Overview, Commands, Configuration
+  - Automatic port conflict resolution
+  - Cross-platform browser opening (macOS, Windows, Linux)
+  - Custom port and host options
+  - No-open flag for headless mode
+
+- **`visual:config`** - Open configuration editor directly
+  - Visual editing of `kubit.config.toml`
+  - Form-based interface prevents syntax errors
+  - Real-time validation
+  - Project settings (name, stack, language, package manager, port)
+  - Quality toggles (lint, format, typecheck, tests)
+  - Save button with success notification
+
+- **📊 Project Overview Tab**
+  - Visual project information cards
+  - Project name, stack, language
+  - Package manager and working directory
+  - Clean, organized display
+
+- **⚡ Commands Tab**
+  - Clickable command cards
+  - Common commands: dev, build, test, lint, format, typecheck
+  - Icon-based visual identification
+  - Hover effects and animations
+
+- **⚙️ Configuration Editor Tab**
+  - Form inputs for all config options
+  - Dropdowns, text inputs, checkboxes
+  - Organized by sections
+  - Instant feedback on changes
+
+### Features
+
+- **Zero Dependencies UI** - Lightweight HTML/CSS/JS, React via CDN
+- **RESTful API** - `/api/config`, `/api/project/info`, `/api/commands`
+- **Modern Design** - Gradient backgrounds, smooth animations, glassmorphism
+- **Responsive** - Works on desktop and tablets
+- **Accessibility** - Semantic HTML, keyboard navigation
+- **Performance** - < 500ms load time, minimal resource usage
+- **Security** - Local-only by default, configurable host binding
+
+### Documentation
+
+- Added comprehensive `GUI.md` documentation
+- Updated README.md with GUI section
+- Architecture details and API reference
+- Troubleshooting and FAQ
+- Development guide for extending the GUI
+
 ## 0.0.2-canary.0
 
 ### Patch Changes

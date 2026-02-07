@@ -2172,6 +2172,66 @@ program
   });
 
 // ============================================================================
+// GUI COMMANDS
+// ============================================================================
+
+import { guiCommand, visualConfigCommand } from './commands/gui.js';
+
+// gui - Launch GUI web interface
+program
+  .command('gui')
+  .description('Launch visual web-based GUI dashboard')
+  .option('--port <port>', 'Port number for GUI server', '3030')
+  .option('--host <host>', 'Host for GUI server', 'localhost')
+  .option('--no-open', 'Do not open browser automatically')
+  .action(async function (options) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await guiCommand(ctx, {
+        host: options.host,
+        noOpen: !options.open,
+        port: parseInt(options.port),
+      });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('GUI failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// visual:config - Visual configuration editor
+program
+  .command('visual:config')
+  .description('Open visual configuration editor')
+  .option('--port <port>', 'Port number for GUI server', '3030')
+  .option('--host <host>', 'Host for GUI server', 'localhost')
+  .option('--no-open', 'Do not open browser automatically')
+  .action(async function (options) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await visualConfigCommand(ctx, {
+        host: options.host,
+        noOpen: !options.open,
+        port: parseInt(options.port),
+      });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Visual config failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// ============================================================================
 // AUDIT COMMANDS (PHASE 4)
 // ============================================================================
 
