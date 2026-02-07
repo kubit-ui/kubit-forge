@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.2-canary.5
+
+### Patch Changes
+
+- Optimize build size by enabling minification and conditional sourcemaps
+  - Enable minification in production builds (~56% size reduction)
+  - Add conditional sourcemaps (enabled only in development)
+  - Enable code splitting and tree-shaking for better optimization
+  - Configure NODE_ENV for dev script to enable debug sourcemaps
+  - Reduce production bundle from 2.2MB to 920KB (-58%)
+
 ## 0.0.2-canary.4
 
 ### Patch Changes
