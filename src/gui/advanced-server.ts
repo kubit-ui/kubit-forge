@@ -301,6 +301,87 @@ export class AdvancedGuiServer {
         return;
       }
 
+      if (url === '/api/template/create' && req.method === 'POST') {
+        const body = await this.readBody(req);
+        const { name, targetDir, template } = JSON.parse(body);
+
+        const projectPath = targetDir ? join(targetDir, name) : join(this.cwd, '..', name);
+
+        this.addLog('info', `🚀 Creating project "${name}" from template "${template}"`);
+        this.addLog('info', `📂 Target directory: ${projectPath}`);
+
+        try {
+          // Execute kubit-forge init with streaming output
+          const subprocess = execa('kubit-forge', ['init', template, name], {
+            all: true,
+            buffer: false,
+            cwd: targetDir || join(this.cwd, '..'),
+            reject: false,
+          });
+
+          // Capture stdout in real-time
+          if (subprocess.stdout) {
+            subprocess.stdout.on('data', (data) => {
+              const output = data.toString().trim();
+              if (output) {
+                this.addLog('stdout', output);
+              }
+            });
+          }
+
+          // Capture stderr in real-time
+          if (subprocess.stderr) {
+            subprocess.stderr.on('data', (data) => {
+              const output = data.toString().trim();
+              if (output) {
+                this.addLog('stderr', output);
+              }
+            });
+          }
+
+          const result = await subprocess;
+
+          if (result.exitCode === 0) {
+            this.addLog('success', `✅ Project "${name}" created successfully!`);
+            this.addLog('info', `📍 Location: ${projectPath}`);
+            this.addLog('info', `💡 Next steps: cd ${name} && npm install && npm run dev`);
+
+            res.writeHead(200);
+            res.end(
+              JSON.stringify({
+                message: `Project ${name} created successfully`,
+                path: projectPath,
+                success: true,
+              })
+            );
+          } else {
+            this.addLog('error', `❌ Failed to create project "${name}"`);
+            res.writeHead(200);
+            res.end(
+              JSON.stringify({
+                error: result.stderr || result.all || 'Template creation failed',
+                exitCode: result.exitCode,
+                message: `Failed to create ${name}`,
+                success: false,
+              })
+            );
+          }
+        } catch (error: any) {
+          const errorMsg = error.message || String(error);
+          this.addLog('error', `💥 Error creating project: ${errorMsg}`);
+
+          res.writeHead(200);
+          res.end(
+            JSON.stringify({
+              error: errorMsg,
+              message: `Failed to create project ${name}`,
+              success: false,
+            })
+          );
+        }
+        return;
+      }
+
       if (url === '/api/features') {
         res.writeHead(200);
         res.end(JSON.stringify({ features: this.getFeatures() }));
@@ -310,9 +391,71 @@ export class AdvancedGuiServer {
       if (url === '/api/feature/install' && req.method === 'POST') {
         const body = await this.readBody(req);
         const { feature } = JSON.parse(body);
-        await execa('kubit-forge', ['add', feature], { cwd: this.cwd });
-        res.writeHead(200);
-        res.end(JSON.stringify({ message: `Feature ${feature} installed`, success: true }));
+
+        this.addLog('info', `🔧 Installing feature: ${feature}`);
+        this.addLog('info', `📂 Project: ${this.cwd}`);
+
+        try {
+          const subprocess = execa('kubit-forge', ['add', feature], {
+            all: true,
+            buffer: false,
+            cwd: this.cwd,
+            reject: false,
+          });
+
+          // Capture stdout in real-time
+          if (subprocess.stdout) {
+            subprocess.stdout.on('data', (data) => {
+              const output = data.toString().trim();
+              if (output) {
+                this.addLog('stdout', output);
+              }
+            });
+          }
+
+          // Capture stderr in real-time
+          if (subprocess.stderr) {
+            subprocess.stderr.on('data', (data) => {
+              const output = data.toString().trim();
+              if (output) {
+                this.addLog('stderr', output);
+              }
+            });
+          }
+
+          const result = await subprocess;
+
+          if (result.exitCode === 0) {
+            this.addLog('success', `✅ Feature "${feature}" installed successfully`);
+            res.writeHead(200);
+            res.end(
+              JSON.stringify({
+                message: `Feature ${feature} installed`,
+                success: true,
+              })
+            );
+          } else {
+            this.addLog('error', `❌ Failed to install feature "${feature}"`);
+            res.writeHead(200);
+            res.end(
+              JSON.stringify({
+                error: result.stderr || result.all || 'Installation failed',
+                message: `Failed to install ${feature}`,
+                success: false,
+              })
+            );
+          }
+        } catch (error: any) {
+          this.addLog('error', `💥 Error installing feature: ${error.message}`);
+          res.writeHead(200);
+          res.end(
+            JSON.stringify({
+              error: error.message,
+              message: `Failed to install ${feature}`,
+              success: false,
+            })
+          );
+        }
         return;
       }
 
@@ -1069,6 +1212,8 @@ function Features({ notify }) {
 
   async function install(id) {
     setInstalling(id);
+    notify(\`🔧 Installing "\${id}"... Check console for progress\`);
+    
     try {
       const res = await fetch('/api/feature/install', {
         method: 'POST',
@@ -1076,9 +1221,14 @@ function Features({ notify }) {
         body: JSON.stringify({ feature: id })
       });
       const data = await res.json();
-      notify(data.success ? \`✓ \${id} installed\` : \`✗ Failed\`);
+      
+      if (data.success) {
+        notify(\`✅ Feature "\${id}" installed successfully!\`);
+      } else {
+        notify(\`❌ Failed to install "\${id}": \${data.error || 'Unknown error'}\`);
+      }
     } catch (err) {
-      notify(\`✗ Error: \${err.message}\`);
+      notify(\`❌ Error: \${err.message}\`);
     } finally {
       setInstalling(null);
     }
@@ -1086,20 +1236,37 @@ function Features({ notify }) {
 
   return React.createElement('div', null,
     React.createElement('h2', { className: 'title' }, 'Add Features'),
-    React.createElement('div', { className: 'grid' },
-      features.map(f =>
-        React.createElement('div', { key: f.id, className: 'card' },
-          React.createElement('div', { className: 'card-title' }, f.name),
-          React.createElement('div', { className: 'card-desc' }, f.description),
-          React.createElement('button', {
-            className: 'btn',
-            onClick: () => install(f.id),
-            disabled: installing === f.id,
-            style: { marginTop: '1rem', width: '100%' }
-          }, installing === f.id ? 'Installing...' : 'Install')
+    React.createElement('p', { style: { color: '#999', marginBottom: '2rem' } },
+      'Add features to your project. Watch the floating console for installation progress.'
+    ),
+    features.length === 0
+      ? React.createElement('div', { className: 'empty' }, 'No features available')
+      : React.createElement('div', { className: 'grid' },
+          features.map(f =>
+            React.createElement('div', { key: f.id, className: 'card' },
+              React.createElement('div', { className: 'card-title' }, f.name),
+              React.createElement('div', { className: 'card-desc' }, f.description),
+              React.createElement('button', {
+                className: 'btn',
+                onClick: () => install(f.id),
+                disabled: installing === f.id,
+                style: { marginTop: '1rem', width: '100%' }
+              }, installing === f.id ? '⏳ Installing...' : '➕ Install'),
+              installing === f.id && React.createElement('div', { 
+                style: { 
+                  marginTop: '0.75rem', 
+                  padding: '0.5rem', 
+                  background: '#000', 
+                  borderRadius: '4px',
+                  borderLeft: '3px solid #df2b52',
+                  color: '#999',
+                  fontSize: '0.75rem',
+                  textAlign: 'center'
+                } 
+              }, '🖥️ Installing... Check console')
+            )
+          )
         )
-      )
-    )
   );
 }
 
@@ -1128,7 +1295,8 @@ function Files() {
 
 function Templates({ notify }) {
   const [templates, setTemplates] = useState([]);
-  const [name, setName] = useState('');
+  const [names, setNames] = useState({});
+  const [creating, setCreating] = useState(null);
 
   useEffect(() => {
     fetch('/api/templates')
@@ -1137,32 +1305,100 @@ function Templates({ notify }) {
       .catch(console.error);
   }, []);
 
-  async function create(id) {
+  function updateName(templateId, value) {
+    setNames(prev => ({ ...prev, [templateId]: value }));
+  }
+
+  async function create(templateId) {
+    const name = names[templateId] || '';
+    
     if (!name.trim()) {
-      notify('⚠ Enter a project name');
+      notify('⚠️ Please enter a project name');
       return;
     }
-    // Placeholder - would call create API
-    notify(\`✓ Creating \${name} with \${id}...\`);
+
+    // Validate project name
+    if (!/^[a-z0-9-]+$/.test(name)) {
+      notify('⚠️ Project name must contain only lowercase letters, numbers, and hyphens');
+      return;
+    }
+
+    setCreating(templateId);
+    notify(\`🚀 Creating "\${name}" from \${templateId} template... Check console for progress\`);
+
+    try {
+      const res = await fetch('/api/template/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          template: templateId, 
+          name: name.trim()
+        })
+      });
+      
+      const data = await res.json();
+      
+      if (data.success) {
+        notify(\`✅ Project "\${name}" created successfully!\`);
+        // Clear the input after successful creation
+        setNames(prev => ({ ...prev, [templateId]: '' }));
+      } else {
+        notify(\`❌ Failed to create project: \${data.error || 'Unknown error'}\`);
+      }
+    } catch (err) {
+      notify(\`❌ Error: \${err.message}\`);
+    } finally {
+      setCreating(null);
+    }
+  }
+
+  function handleKeyPress(e, templateId) {
+    if (e.key === 'Enter' && !creating) {
+      create(templateId);
+    }
   }
 
   return React.createElement('div', null,
     React.createElement('h2', { className: 'title' }, 'Create from Template'),
-    templates.map(t =>
-      React.createElement('div', { key: t.id, className: 'card', style: { marginBottom: '1rem' } },
-        React.createElement('div', { className: 'card-title' }, t.name),
-        React.createElement('div', { className: 'card-desc', style: { marginBottom: '1rem' } }, t.description),
-        React.createElement('div', { style: { display: 'flex', gap: '1rem' } },
-          React.createElement('input', {
-            className: 'form-input',
-            placeholder: 'my-project',
-            value: name,
-            onChange: e => setName(e.target.value)
-          }),
-          React.createElement('button', { className: 'btn', onClick: () => create(t.id) }, 'Create')
+    React.createElement('p', { style: { color: '#999', marginBottom: '2rem' } },
+      'Create a new project using one of the available templates. Watch the floating console for real-time progress.'
+    ),
+    templates.length === 0
+      ? React.createElement('div', { className: 'empty' }, 'No templates available')
+      : templates.map(t =>
+          React.createElement('div', { key: t.id, className: 'card', style: { marginBottom: '1rem' } },
+            React.createElement('div', { className: 'card-title' }, t.name),
+            React.createElement('div', { className: 'card-desc', style: { marginBottom: '1rem' } }, t.description),
+            React.createElement('div', { style: { display: 'flex', gap: '1rem', alignItems: 'center' } },
+              React.createElement('input', {
+                className: 'form-input',
+                placeholder: 'my-awesome-project',
+                value: names[t.id] || '',
+                onChange: e => updateName(t.id, e.target.value),
+                onKeyPress: e => handleKeyPress(e, t.id),
+                disabled: creating === t.id,
+                style: { flex: 1 }
+              }),
+              React.createElement('button', { 
+                className: 'btn', 
+                onClick: () => create(t.id),
+                disabled: creating === t.id || !names[t.id]?.trim(),
+                style: { minWidth: '120px' }
+              }, creating === t.id ? '⏳ Creating...' : '🚀 Create')
+            ),
+            creating === t.id && React.createElement('div', { 
+              style: { 
+                marginTop: '0.75rem', 
+                padding: '0.75rem', 
+                background: '#000', 
+                borderRadius: '4px',
+                borderLeft: '3px solid #df2b52',
+                color: '#999',
+                fontSize: '0.875rem'
+              } 
+            }, '🖥️ Creating project... Open the floating console to see progress')
+          )
         )
-      )
-    )
   );
 }
 
