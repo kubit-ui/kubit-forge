@@ -2,7 +2,7 @@ import { exec } from 'child_process';
 
 import type { CommandResult, PluginContext } from '../types/index.js';
 
-import { GuiServer } from '../gui/server.js';
+import { AdvancedGuiServer } from '../gui/advanced-server.js';
 
 /**
  * gui - Launch GUI web interface
@@ -14,7 +14,7 @@ export async function guiCommand(
   ctx.logger.step('🎨 Starting Kubit Forge GUI...');
 
   try {
-    const server = new GuiServer({
+    const server = new AdvancedGuiServer({
       config: ctx.config,
       cwd: ctx.cwd,
       host: options.host,
@@ -68,7 +68,7 @@ export async function visualConfigCommand(
   ctx.logger.step('⚙️ Opening Visual Configuration Editor...');
 
   try {
-    const server = new GuiServer({
+    const server = new AdvancedGuiServer({
       config: ctx.config,
       cwd: ctx.cwd,
       host: options.host,

@@ -1,0 +1,790 @@
+import type { IncomingMessage, ServerResponse } from 'http';
+
+import { execa } from 'execa';
+import { readFileSync, readdirSync, statSync } from 'fs';
+import { writeFileSync } from 'fs';
+import { createServer } from 'http';
+import { join } from 'path';
+import { stringify as tomlStringify } from 'smol-toml';
+
+import type { KubitConfig, Logger } from '../types/index.js';
+
+export interface GuiServerOptions {
+  port?: number;
+  host?: string;
+  open?: boolean;
+  config: KubitConfig;
+  cwd: string;
+  logger: Logger;
+}
+
+export class AdvancedGuiServer {
+  private server: any;
+  private port: number;
+  private host: string;
+  private config: KubitConfig;
+  private cwd: string;
+  private logger: Logger;
+
+  constructor(options: GuiServerOptions) {
+    this.port = options.port || 3030;
+    this.host = options.host || 'localhost';
+    this.config = options.config;
+    this.cwd = options.cwd;
+    this.logger = options.logger;
+  }
+
+  async start(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.server = createServer((req: IncomingMessage, res: ServerResponse) => {
+        this.handleRequest(req, res);
+      });
+
+      this.server.on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          this.port++;
+          this.server.listen(this.port, this.host);
+        } else {
+          reject(err);
+        }
+      });
+
+      this.server.listen(this.port, this.host, () => {
+        const url = `http://${this.host}:${this.port}`;
+        this.logger.success(`\n🎨 Kubit Forge Advanced GUI running at: ${url}\n`);
+        resolve(url);
+      });
+    });
+  }
+
+  async stop(): Promise<void> {
+    return new Promise((resolve) => {
+      if (this.server) {
+        this.server.close(() => {
+          this.logger.info('GUI server stopped');
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+
+  private handleRequest(req: IncomingMessage, res: ServerResponse): void {
+    const url = req.url || '/';
+
+    // API endpoints
+    if (url.startsWith('/api/')) {
+      this.handleApiRequest(url, req, res);
+      return;
+    }
+
+    // Serve static files
+    if (url === '/' || url === '/index.html') {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(this.getHtml());
+    } else if (url === '/styles.css') {
+      res.writeHead(200, { 'Content-Type': 'text/css' });
+      res.end(this.getStyles());
+    } else if (url === '/app.js') {
+      res.writeHead(200, { 'Content-Type': 'application/javascript' });
+      res.end(this.getApp());
+    } else {
+      res.writeHead(404, { 'Content-Type': 'text/plain' });
+      res.end('Not Found');
+    }
+  }
+
+  private async handleApiRequest(
+    url: string,
+    req: IncomingMessage,
+    res: ServerResponse
+  ): Promise<void> {
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    try {
+      if (url === '/api/dashboard') {
+        const stats = await this.getProjectStats();
+        const gitStatus = await this.getGitStatus();
+        res.writeHead(200);
+        res.end(JSON.stringify({ gitStatus, stats }));
+        return;
+      }
+
+      if (url === '/api/config' && req.method === 'GET') {
+        res.writeHead(200);
+        res.end(JSON.stringify({ config: this.config, cwd: this.cwd }));
+        return;
+      }
+
+      if (url === '/api/config' && req.method === 'POST') {
+        const body = await this.readBody(req);
+        const updatedConfig = JSON.parse(body);
+        const configPath = join(this.cwd, 'kubit.config.toml');
+        writeFileSync(configPath, tomlStringify(updatedConfig), 'utf-8');
+        this.config = updatedConfig;
+        res.writeHead(200);
+        res.end(JSON.stringify({ config: updatedConfig, success: true }));
+        return;
+      }
+
+      if (url === '/api/command/execute' && req.method === 'POST') {
+        const body = await this.readBody(req);
+        const { command } = JSON.parse(body);
+        const pm = this.config.project.packageManager;
+        await execa(pm, ['run', command], { cwd: this.cwd });
+        res.writeHead(200);
+        res.end(JSON.stringify({ message: `Command ${command} executed`, success: true }));
+        return;
+      }
+
+      if (url === '/api/dependencies') {
+        const deps = this.getDependencies();
+        res.writeHead(200);
+        res.end(JSON.stringify(deps));
+        return;
+      }
+
+      if (url === '/api/git/commits') {
+        const commits = await this.getGitCommits();
+        res.writeHead(200);
+        res.end(JSON.stringify({ commits }));
+        return;
+      }
+
+      if (url === '/api/templates') {
+        res.writeHead(200);
+        res.end(JSON.stringify({ templates: this.getTemplates() }));
+        return;
+      }
+
+      if (url === '/api/features') {
+        res.writeHead(200);
+        res.end(JSON.stringify({ features: this.getFeatures() }));
+        return;
+      }
+
+      if (url === '/api/feature/install' && req.method === 'POST') {
+        const body = await this.readBody(req);
+        const { feature } = JSON.parse(body);
+        await execa('kubit-forge', ['add', feature], { cwd: this.cwd });
+        res.writeHead(200);
+        res.end(JSON.stringify({ message: `Feature ${feature} installed`, success: true }));
+        return;
+      }
+
+      if (url === '/api/files') {
+        const files = this.listFiles();
+        res.writeHead(200);
+        res.end(JSON.stringify({ files }));
+        return;
+      }
+
+      res.writeHead(404);
+      res.end(JSON.stringify({ error: 'Not found' }));
+    } catch (error: any) {
+      res.writeHead(500);
+      res.end(JSON.stringify({ error: error.message }));
+    }
+  }
+
+  private async readBody(req: IncomingMessage): Promise<string> {
+    return new Promise((resolve) => {
+      let body = '';
+      req.on('data', (chunk) => {
+        body += chunk.toString();
+      });
+      req.on('end', () => resolve(body));
+    });
+  }
+
+  private async getProjectStats() {
+    try {
+      const pkg = JSON.parse(readFileSync(join(this.cwd, 'package.json'), 'utf-8'));
+      return {
+        dependencies: Object.keys(pkg.dependencies || {}).length,
+        devDependencies: Object.keys(pkg.devDependencies || {}).length,
+        name: pkg.name,
+        version: pkg.version,
+      };
+    } catch {
+      return { dependencies: 0, devDependencies: 0, name: 'Unknown', version: '0.0.0' };
+    }
+  }
+
+  private async getGitStatus() {
+    try {
+      const branch = await execa('git', ['branch', '--show-current'], { cwd: this.cwd });
+      const status = await execa('git', ['status', '--porcelain'], { cwd: this.cwd });
+      return {
+        branch: branch.stdout.trim(),
+        changes: status.stdout.split('\n').filter((l) => l).length,
+        clean: !status.stdout.trim(),
+      };
+    } catch {
+      return { branch: 'N/A', changes: 0, clean: true, error: 'Not a git repo' };
+    }
+  }
+
+  private async getGitCommits() {
+    try {
+      const result = await execa('git', ['log', '--oneline', '-10'], { cwd: this.cwd });
+      return result.stdout
+        .split('\n')
+        .filter((l) => l)
+        .map((line) => {
+          const [hash, ...msg] = line.split(' ');
+          return { hash, message: msg.join(' ') };
+        });
+    } catch {
+      return [];
+    }
+  }
+
+  private getDependencies() {
+    try {
+      const pkg = JSON.parse(readFileSync(join(this.cwd, 'package.json'), 'utf-8'));
+      return {
+        dependencies: Object.keys(pkg.dependencies || {}),
+        devDependencies: Object.keys(pkg.devDependencies || {}),
+      };
+    } catch {
+      return { dependencies: [], devDependencies: [] };
+    }
+  }
+
+  private getTemplates() {
+    return [
+      { description: 'React with TypeScript', id: 'react-ts', name: 'React TypeScript' },
+      {
+        description: 'React + Bernova Design System',
+        id: 'react-ts-bernova',
+        name: 'React + Bernova',
+      },
+      { description: 'React + Storybook', id: 'react-ts-storybook', name: 'React + Storybook' },
+      { description: 'Vanilla TypeScript', id: 'vanilla-ts', name: 'Vanilla TypeScript' },
+    ];
+  }
+
+  private getFeatures() {
+    return [
+      { description: 'ESLint code linting', id: 'eslint', name: 'ESLint' },
+      { description: 'Prettier formatting', id: 'prettier', name: 'Prettier' },
+      { description: 'Vitest unit testing', id: 'vitest', name: 'Vitest' },
+      { description: 'Testing Library', id: 'testing-library', name: 'Testing Library' },
+      { description: 'Playwright E2E', id: 'playwright', name: 'Playwright' },
+      { description: 'Storybook', id: 'storybook', name: 'Storybook' },
+      { description: 'Husky git hooks', id: 'husky', name: 'Husky' },
+      { description: 'Styled Components', id: 'styled-components', name: 'Styled Components' },
+      { description: 'React Router', id: 'react-router', name: 'React Router' },
+    ];
+  }
+
+  private listFiles() {
+    try {
+      const files: any[] = [];
+      const items = readdirSync(this.cwd);
+
+      for (const item of items) {
+        if (item.startsWith('.') || item === 'node_modules' || item === 'dist') {
+          continue;
+        }
+
+        const fullPath = join(this.cwd, item);
+        const stat = statSync(fullPath);
+
+        files.push({
+          name: item,
+          size: stat.isFile() ? stat.size : 0,
+          type: stat.isDirectory() ? 'directory' : 'file',
+        });
+      }
+
+      return files.sort((a, b) => {
+        if (a.type === b.type) {
+          return a.name.localeCompare(b.name);
+        }
+        return a.type === 'directory' ? -1 : 1;
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  private getHtml() {
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kubit Forge GUI</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="root"></div>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>`;
+  }
+
+  private getStyles() {
+    return `* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; color: #fff; min-height: 100vh; }
+#root { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+.header { text-align: center; padding: 2rem 0; border-bottom: 2px solid #df2b52; margin-bottom: 2rem; }
+.header h1 { font-size: 2.5rem; color: #fff; margin-bottom: 0.5rem; }
+.header p { color: #999; }
+.tabs { display: flex; gap: 0.5rem; margin-bottom: 2rem; border-bottom: 1px solid #333; flex-wrap: wrap; }
+.tab { background: transparent; border: none; color: #999; padding: 1rem 1.5rem; cursor: pointer; font-size: 1rem; border-bottom: 2px solid transparent; }
+.tab:hover { color: #fff; background: #111; }
+.tab.active { color: #fff; border-bottom-color: #df2b52; background: #111; }
+.content { background: #111; border-radius: 4px; padding: 2rem; border: 1px solid #333; }
+.title { font-size: 1.5rem; margin-bottom: 1.5rem; color: #fff; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+.card { background: #000; padding: 1.5rem; border-radius: 4px; border: 1px solid #333; }
+.card:hover { border-color: #df2b52; }
+.card.clickable { cursor: pointer; }
+.card.clickable:hover { background: #1a1a1a; }
+.card-title { font-weight: 600; color: #fff; margin-bottom: 0.5rem; }
+.card-desc { color: #999; font-size: 0.875rem; }
+.stat-value { font-size: 2rem; font-weight: 700; color: #df2b52; text-align: center; }
+.stat-label { font-size: 0.875rem; color: #999; text-align: center; text-transform: uppercase; letter-spacing: 1px; margin-top: 0.5rem; }
+.git-info { background: #000; padding: 1rem; border-radius: 4px; border-left: 3px solid #df2b52; margin-bottom: 1rem; }
+.git-branch { font-weight: 600; color: #df2b52; }
+.commit { padding: 0.75rem; background: #000; border: 1px solid #333; border-radius: 4px; margin-bottom: 0.5rem; }
+.commit-hash { font-family: monospace; color: #df2b52; margin-right: 0.5rem; }
+.deps { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+.dep { background: #000; padding: 0.5rem 1rem; border: 1px solid #333; border-radius: 4px; font-size: 0.875rem; }
+.dep.prod { border-left: 3px solid #df2b52; }
+.dep.dev { border-left: 3px solid #666; }
+.form-group { margin-bottom: 1rem; }
+.form-label { display: block; margin-bottom: 0.5rem; color: #fff; font-weight: 500; }
+.form-input, .form-select { width: 100%; padding: 0.75rem; border-radius: 4px; border: 1px solid #333; background: #000; color: #fff; font-size: 1rem; }
+.form-input:focus, .form-select:focus { outline: none; border-color: #df2b52; }
+.form-checkbox { accent-color: #df2b52; margin-right: 0.5rem; }
+.checkbox-group { display: flex; align-items: center; margin-bottom: 0.5rem; }
+.btn { background: #df2b52; color: #fff; border: none; padding: 1rem 2rem; border-radius: 4px; font-size: 1rem; font-weight: 600; cursor: pointer; }
+.btn:hover { background: #c01f40; }
+.btn:disabled { background: #666; cursor: not-allowed; }
+.btn-secondary { background: #333; }
+.btn-secondary:hover { background: #444; }
+.notification { position: fixed; top: 2rem; right: 2rem; background: #df2b52; color: #fff; padding: 1rem 1.5rem; border-radius: 4px; z-index: 1000; }
+.loading { text-align: center; padding: 3rem; color: #999; }
+.loading-spinner { border: 4px solid #333; border-top-color: #df2b52; border-radius: 50%; width: 50px; height: 50px; margin: 0 auto 1rem; animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.file { display: flex; justify-content: space-between; padding: 0.75rem; background: #000; border: 1px solid #333; border-radius: 4px; margin-bottom: 0.5rem; font-family: monospace; }
+.file.dir { border-left: 3px solid #df2b52; }
+.file-size { color: #999; font-size: 0.875rem; }
+.empty { text-align: center; padding: 3rem; color: #666; }
+.divider { border-top: 1px solid #333; margin: 2rem 0; }`;
+  }
+
+  private getApp() {
+    return `const { useState, useEffect } = React;
+const { createRoot } = ReactDOM;
+
+function App() {
+  const [tab, setTab] = useState('dashboard');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [notification, setNotification] = useState('');
+
+  useEffect(() => { loadData(); }, []);
+
+  async function loadData() {
+    try {
+      const res = await fetch('/api/dashboard');
+      const json = await res.json();
+      setData(json);
+      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
+  }
+
+  function notify(msg) {
+    setNotification(msg);
+    setTimeout(() => setNotification(''), 3000);
+  }
+
+  if (loading) {
+    return React.createElement('div', { className: 'loading' },
+      React.createElement('div', { className: 'loading-spinner' }),
+      React.createElement('div', null, 'Loading...')
+    );
+  }
+
+  return React.createElement('div', null,
+    React.createElement('div', { className: 'header' },
+      React.createElement('h1', null, 'Kubit Forge'),
+      React.createElement('p', null, 'Advanced Project Manager')
+    ),
+    React.createElement('div', { className: 'tabs' },
+      ['dashboard', 'commands', 'git', 'dependencies', 'features', 'files', 'templates', 'config'].map(t =>
+        React.createElement('button', {
+          key: t,
+          className: 'tab' + (tab === t ? ' active' : ''),
+          onClick: () => setTab(t)
+        }, t.charAt(0).toUpperCase() + t.slice(1))
+      )
+    ),
+    React.createElement('div', { className: 'content' },
+      tab === 'dashboard' && React.createElement(Dashboard, { data, onRefresh: loadData }),
+      tab === 'commands' && React.createElement(Commands, { notify }),
+      tab === 'git' && React.createElement(Git, { data }),
+      tab === 'dependencies' && React.createElement(Dependencies, { notify }),
+      tab === 'features' && React.createElement(Features, { notify }),
+      tab === 'files' && React.createElement(Files, {}),
+      tab === 'templates' && React.createElement(Templates, { notify }),
+      tab === 'config' && React.createElement(Config, { notify })
+    ),
+    notification && React.createElement('div', { className: 'notification' }, notification)
+  );
+}
+
+function Dashboard({ data, onRefresh }) {
+  const stats = data?.stats || {};
+  const git = data?.gitStatus || {};
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Dashboard'),
+    React.createElement('div', { className: 'grid' },
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'stat-value' }, stats.name || 'N/A'),
+        React.createElement('div', { className: 'stat-label' }, 'Project')
+      ),
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'stat-value' }, stats.version || '0.0.0'),
+        React.createElement('div', { className: 'stat-label' }, 'Version')
+      ),
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'stat-value' }, stats.dependencies || 0),
+        React.createElement('div', { className: 'stat-label' }, 'Dependencies')
+      ),
+      React.createElement('div', { className: 'card' },
+        React.createElement('div', { className: 'stat-value' }, stats.devDependencies || 0),
+        React.createElement('div', { className: 'stat-label' }, 'Dev Dependencies')
+      )
+    ),
+    React.createElement('div', { className: 'divider' }),
+    React.createElement('div', { className: 'git-info' },
+      React.createElement('div', null,
+        'Branch: ',
+        React.createElement('span', { className: 'git-branch' }, git.branch || 'N/A')
+      ),
+      React.createElement('div', null, 'Changes: ', git.changes || 0),
+      React.createElement('div', null, 'Status: ', git.clean ? '✓ Clean' : '⚠ Modified')
+    ),
+    React.createElement('button', { className: 'btn', onClick: onRefresh, style: { marginTop: '1rem' } }, 'Refresh')
+  );
+}
+
+function Commands({ notify }) {
+  const [running, setRunning] = useState({});
+  const commands = [
+    { name: 'dev', desc: 'Start dev server', icon: '🚀' },
+    { name: 'build', desc: 'Build production', icon: '🏗️' },
+    { name: 'test', desc: 'Run tests', icon: '🧪' },
+    { name: 'lint', desc: 'Lint code', icon: '🔍' },
+    { name: 'format', desc: 'Format code', icon: '✨' },
+    { name: 'typecheck', desc: 'Type check', icon: '📘' }
+  ];
+
+  async function runCommand(cmd) {
+    setRunning(prev => ({ ...prev, [cmd]: true }));
+    try {
+      const res = await fetch('/api/command/execute', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: cmd })
+      });
+      const data = await res.json();
+      notify(data.success ? \`✓ \${cmd} completed\` : \`✗ \${cmd} failed\`);
+    } catch (err) {
+      notify(\`✗ Error: \${err.message}\`);
+    } finally {
+      setRunning(prev => ({ ...prev, [cmd]: false }));
+    }
+  }
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Commands'),
+    React.createElement('div', { className: 'grid' },
+      commands.map(cmd =>
+        React.createElement('div', {
+          key: cmd.name,
+          className: 'card clickable',
+          onClick: () => !running[cmd.name] && runCommand(cmd.name)
+        },
+          React.createElement('div', { style: { fontSize: '2rem', marginBottom: '0.5rem' } }, cmd.icon),
+          React.createElement('div', { className: 'card-title' }, cmd.name),
+          React.createElement('div', { className: 'card-desc' }, cmd.desc),
+          running[cmd.name] && React.createElement('div', { style: { marginTop: '0.5rem', color: '#df2b52' } }, 'Running...')
+        )
+      )
+    )
+  );
+}
+
+function Git({ data }) {
+  const [commits, setCommits] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/git/commits')
+      .then(r => r.json())
+      .then(d => setCommits(d.commits || []))
+      .catch(console.error);
+  }, []);
+
+  const git = data?.gitStatus || {};
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Git'),
+    React.createElement('div', { className: 'git-info' },
+      React.createElement('div', null, 'Branch: ', React.createElement('span', { className: 'git-branch' }, git.branch || 'N/A')),
+      React.createElement('div', null, 'Changes: ', git.changes || 0)
+    ),
+    React.createElement('h3', { className: 'title', style: { marginTop: '2rem', fontSize: '1.25rem' } }, 'Recent Commits'),
+    commits.length === 0
+      ? React.createElement('div', { className: 'empty' }, 'No commits found')
+      : commits.map(c =>
+          React.createElement('div', { key: c.hash, className: 'commit' },
+            React.createElement('span', { className: 'commit-hash' }, c.hash),
+            React.createElement('span', null, c.message)
+          )
+        )
+  );
+}
+
+function Dependencies({ notify }) {
+  const [deps, setDeps] = useState({ dependencies: [], devDependencies: [] });
+
+  useEffect(() => {
+    fetch('/api/dependencies')
+      .then(r => r.json())
+      .then(setDeps)
+      .catch(console.error);
+  }, []);
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Dependencies'),
+    React.createElement('h3', { style: { marginBottom: '1rem', color: '#df2b52' } }, 'Production (', deps.dependencies.length, ')'),
+    React.createElement('div', { className: 'deps' },
+      deps.dependencies.map(d =>
+        React.createElement('div', { key: d, className: 'dep prod' }, d)
+      )
+    ),
+    React.createElement('h3', { style: { marginTop: '2rem', marginBottom: '1rem', color: '#666' } }, 'Development (', deps.devDependencies.length, ')'),
+    React.createElement('div', { className: 'deps' },
+      deps.devDependencies.map(d =>
+        React.createElement('div', { key: d, className: 'dep dev' }, d)
+      )
+    )
+  );
+}
+
+function Features({ notify }) {
+  const [features, setFeatures] = useState([]);
+  const [installing, setInstalling] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/features')
+      .then(r => r.json())
+      .then(d => setFeatures(d.features || []))
+      .catch(console.error);
+  }, []);
+
+  async function install(id) {
+    setInstalling(id);
+    try {
+      const res = await fetch('/api/feature/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feature: id })
+      });
+      const data = await res.json();
+      notify(data.success ? \`✓ \${id} installed\` : \`✗ Failed\`);
+    } catch (err) {
+      notify(\`✗ Error: \${err.message}\`);
+    } finally {
+      setInstalling(null);
+    }
+  }
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Add Features'),
+    React.createElement('div', { className: 'grid' },
+      features.map(f =>
+        React.createElement('div', { key: f.id, className: 'card' },
+          React.createElement('div', { className: 'card-title' }, f.name),
+          React.createElement('div', { className: 'card-desc' }, f.description),
+          React.createElement('button', {
+            className: 'btn',
+            onClick: () => install(f.id),
+            disabled: installing === f.id,
+            style: { marginTop: '1rem', width: '100%' }
+          }, installing === f.id ? 'Installing...' : 'Install')
+        )
+      )
+    )
+  );
+}
+
+function Files() {
+  const [files, setFiles] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/files')
+      .then(r => r.json())
+      .then(d => setFiles(d.files || []))
+      .catch(console.error);
+  }, []);
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Files'),
+    files.length === 0
+      ? React.createElement('div', { className: 'empty' }, 'No files found')
+      : files.map(f =>
+          React.createElement('div', { key: f.name, className: 'file' + (f.type === 'directory' ? ' dir' : '') },
+            React.createElement('span', null, f.type === 'directory' ? '📁 ' : '📄 ', f.name),
+            f.size > 0 && React.createElement('span', { className: 'file-size' }, (f.size / 1024).toFixed(1), ' KB')
+          )
+        )
+  );
+}
+
+function Templates({ notify }) {
+  const [templates, setTemplates] = useState([]);
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    fetch('/api/templates')
+      .then(r => r.json())
+      .then(d => setTemplates(d.templates || []))
+      .catch(console.error);
+  }, []);
+
+  async function create(id) {
+    if (!name.trim()) {
+      notify('⚠ Enter a project name');
+      return;
+    }
+    // Placeholder - would call create API
+    notify(\`✓ Creating \${name} with \${id}...\`);
+  }
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Create from Template'),
+    templates.map(t =>
+      React.createElement('div', { key: t.id, className: 'card', style: { marginBottom: '1rem' } },
+        React.createElement('div', { className: 'card-title' }, t.name),
+        React.createElement('div', { className: 'card-desc', style: { marginBottom: '1rem' } }, t.description),
+        React.createElement('div', { style: { display: 'flex', gap: '1rem' } },
+          React.createElement('input', {
+            className: 'form-input',
+            placeholder: 'my-project',
+            value: name,
+            onChange: e => setName(e.target.value)
+          }),
+          React.createElement('button', { className: 'btn', onClick: () => create(t.id) }, 'Create')
+        )
+      )
+    )
+  );
+}
+
+function Config({ notify }) {
+  const [config, setConfig] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/config')
+      .then(r => r.json())
+      .then(d => setConfig(d.config))
+      .catch(console.error);
+  }, []);
+
+  async function save() {
+    try {
+      const res = await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(config)
+      });
+      const data = await res.json();
+      notify(data.success ? '✓ Config saved' : '✗ Save failed');
+    } catch (err) {
+      notify(\`✗ Error: \${err.message}\`);
+    }
+  }
+
+  function update(section, key, value) {
+    setConfig(prev => ({
+      ...prev,
+      [section]: { ...prev[section], [key]: value }
+    }));
+  }
+
+  if (!config) return React.createElement('div', { className: 'loading' }, 'Loading...');
+
+  return React.createElement('div', null,
+    React.createElement('h2', { className: 'title' }, 'Configuration'),
+    React.createElement('div', { className: 'card', style: { marginBottom: '1rem' } },
+      React.createElement('h3', { style: { marginBottom: '1rem' } }, 'Project'),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', { className: 'form-label' }, 'Name'),
+        React.createElement('input', {
+          className: 'form-input',
+          value: config.project.name,
+          onChange: e => update('project', 'name', e.target.value)
+        })
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', { className: 'form-label' }, 'Stack'),
+        React.createElement('select', {
+          className: 'form-select',
+          value: config.project.stack,
+          onChange: e => update('project', 'stack', e.target.value)
+        },
+          React.createElement('option', { value: 'react' }, 'React'),
+          React.createElement('option', { value: 'vanilla' }, 'Vanilla')
+        )
+      ),
+      React.createElement('div', { className: 'form-group' },
+        React.createElement('label', { className: 'form-label' }, 'Package Manager'),
+        React.createElement('select', {
+          className: 'form-select',
+          value: config.project.packageManager,
+          onChange: e => update('project', 'packageManager', e.target.value)
+        },
+          React.createElement('option', { value: 'pnpm' }, 'pnpm'),
+          React.createElement('option', { value: 'npm' }, 'npm'),
+          React.createElement('option', { value: 'yarn' }, 'yarn')
+        )
+      )
+    ),
+    config.quality && React.createElement('div', { className: 'card', style: { marginBottom: '1rem' } },
+      React.createElement('h3', { style: { marginBottom: '1rem' } }, 'Quality'),
+      ['lint', 'format', 'typecheck', 'unitTest'].map(key =>
+        React.createElement('div', { key, className: 'checkbox-group' },
+          React.createElement('input', {
+            type: 'checkbox',
+            className: 'form-checkbox',
+            checked: config.quality[key],
+            onChange: e => update('quality', key, e.target.checked)
+          }),
+          React.createElement('label', null, key.charAt(0).toUpperCase() + key.slice(1))
+        )
+      )
+    ),
+    React.createElement('button', { className: 'btn', onClick: save }, 'Save Configuration')
+  );
+}
+
+const root = createRoot(document.getElementById('root'));
+root.render(React.createElement(App));`;
+  }
+}
