@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.0.2-canary.4
+
+### Patch Changes
+
+- Add Console tab and improve command execution with real-time logging
+
+  Add comprehensive logging system and improve error handling for command execution:
+
+  Console Tab (New):
+  - Real-time log viewer with auto-refresh every 2 seconds
+  - Color-coded log types: error (red), success (green), stderr (orange), stdout (blue), info (gray)
+  - Timestamps for each log entry
+  - Clear and Refresh buttons
+  - Auto-scroll toggle
+  - Displays stdout, stderr, and exit codes
+  - Keeps last 100 log entries in memory
+
+  Command Improvements:
+  - Load commands dynamically from package.json scripts
+  - No longer hardcoded - adapts to each project
+  - Displays actual script command in description
+  - Better error messages with detailed output
+
+  Error Handling:
+  - Capture both stdout and stderr from command execution
+  - Use execa with reject: false to handle failures gracefully
+  - Log all command execution steps (start, output, result)
+  - Return detailed error information including exit codes
+  - Show actual error output to user in console
+
+  New API Endpoints:
+  - GET /api/console/logs - Retrieve console logs
+  - POST /api/console/clear - Clear console logs
+  - GET /api/commands/available - Get available npm scripts dynamically
+
+  Technical Changes:
+  - Add consoleLogs array to AdvancedGuiServer class
+  - Implement addLog() method for centralized logging
+  - Update /api/command/execute with comprehensive error handling
+  - Console component with real-time polling
+  - Commands component now fetches from /api/commands/available
+
+  Benefits:
+  - See exactly what happens when commands execute
+  - Debug failed commands with full output
+  - No more 500 errors without context
+  - All scripts from package.json automatically available
+  - Professional logging experience like real terminals
+
+  Files modified:
+  - src/gui/advanced-server.ts (963 lines, +120 lines)
+
+  All features tested and working. Console provides full visibility into command execution.
+
 ## 0.0.2-canary.3
 
 ### Patch Changes
