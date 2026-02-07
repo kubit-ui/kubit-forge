@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.0.2-canary.8
+
+### Patch Changes
+
+- Make console visible by default with better initialization
+  - Console opens automatically on GUI start
+  - Fix positioning issues with safe initial values
+  - Add welcome logs with helpful tips
+  - Increase z-index to ensure visibility
+  - Add debugging logs for troubleshooting
+
 ## 0.0.2-canary.7
 
 ### Patch Changes
