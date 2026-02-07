@@ -2016,6 +2016,162 @@ program
   });
 
 // ============================================================================
+// SMART DEPENDENCY MANAGEMENT COMMANDS
+// ============================================================================
+
+import {
+  depsAlternativesCommand,
+  depsAnalyzeCommand,
+  depsDedupeCommand,
+  depsExportCommand,
+  depsUpdateCommand,
+  depsWhyCommand,
+} from './commands/deps.js';
+
+// deps:analyze - Visual dependency tree
+program
+  .command('deps:analyze')
+  .description('Analyze and visualize dependency tree')
+  .option('--depth <number>', 'Maximum depth to display', '2')
+  .option('--filter <package>', 'Filter by package name')
+  .action(async function (options) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await depsAnalyzeCommand(ctx, {
+        depth: parseInt(options.depth),
+        filter: options.filter,
+        json: globalOpts.json,
+      });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Dependency analysis failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// deps:why - Explain why a package is installed
+program
+  .command('deps:why <package>')
+  .description('Explain why a package is installed')
+  .action(async function (packageName) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await depsWhyCommand(ctx, packageName, { json: globalOpts.json });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Package analysis failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// deps:dedupe - Deduplicate dependencies
+program
+  .command('deps:dedupe')
+  .description('Deduplicate and optimize dependencies')
+  .option('--dry-run', 'Show what would be done without executing')
+  .action(async function (options) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await depsDedupeCommand(ctx, {
+        dryRun: options.dryRun,
+        json: globalOpts.json,
+      });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Deduplication failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// deps:update - Smart dependency updates
+program
+  .command('deps:update')
+  .description('Check for and suggest smart dependency updates')
+  .option('--interactive', 'Interactive update mode')
+  .option('--breaking', 'Include breaking changes')
+  .option('--security', 'Only show security updates')
+  .action(async function (options) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await depsUpdateCommand(ctx, {
+        breakingChanges: options.breaking,
+        interactive: options.interactive,
+        json: globalOpts.json,
+        security: options.security,
+      });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Update check failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// deps:alternatives - Suggest alternative packages
+program
+  .command('deps:alternatives <package>')
+  .description('Suggest alternative packages')
+  .action(async function (packageName) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await depsAlternativesCommand(ctx, packageName, { json: globalOpts.json });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Alternatives search failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// deps:export - Export dependency report
+program
+  .command('deps:export')
+  .description('Export dependency information to a report')
+  .option('--format <type>', 'Export format: json, markdown, csv', 'json')
+  .option('--output <path>', 'Output file path')
+  .action(async function (options) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await depsExportCommand(ctx, {
+        format: options.format,
+        output: options.output,
+      });
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Export failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// ============================================================================
 // AUDIT COMMANDS (PHASE 4)
 // ============================================================================
 
