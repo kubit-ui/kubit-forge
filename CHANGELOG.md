@@ -2,9 +2,69 @@
 
 ## 0.0.2-canary.1
 
-### Patch Changes
+### Added
 
-- Merge branch 'fff' into next
+#### Smart Dependency Management System
+
+A comprehensive suite of tools for intelligent dependency analysis, optimization, and management:
+
+- **`deps:analyze`** - Visualize dependency tree with interactive filtering
+  - Tree-style visualization with unicode characters
+  - Configurable depth and package filtering
+  - Separate production and dev dependency views
+  - Summary statistics (total, production, development)
+
+- **`deps:why <package>`** - Explain why a package is installed
+  - Shows which packages require this dependency
+  - Displays installation location and version
+  - Identifies dependency type (production, development, peer, optional)
+  - Lists version requirements from each dependent
+  - Traces transitive dependency chains
+
+- **`deps:dedupe`** - Find and eliminate duplicate dependencies
+  - Identifies duplicate packages with different versions
+  - Shows potential space savings
+  - Lists all locations of duplicates
+  - Automatic deduplication across package managers
+  - Safe operations with dry-run mode
+
+- **`deps:update`** - Smart dependency update suggestions
+  - Scans for available updates (current, wanted, latest)
+  - Identifies breaking changes with visual indicators
+  - Highlights security vulnerabilities
+  - Provides changelog links
+  - Smart recommendations based on update safety
+  - Filter by security-only updates
+
+- **`deps:alternatives <package>`** - Suggest better package alternatives
+  - Curated database of known alternatives (axios, moment, lodash, etc.)
+  - Comparison metrics (bundle size, downloads, stars)
+  - Maintenance status indicators
+  - Migration rationale and guides
+  - TypeScript support information
+
+- **`deps:export`** - Export dependency reports
+  - Multiple formats: JSON, Markdown, CSV
+  - Complete dependency tree export
+  - Duplicate packages list
+  - Available updates summary
+  - Breaking change indicators
+
+### Features
+
+- **Package Manager Support** - Works with npm, yarn, and pnpm
+- **Visual Tree Display** - Beautiful unicode tree visualization
+- **Security Focus** - Highlights vulnerabilities and critical updates
+- **Bundle Optimization** - Reduces package count and bundle size
+- **CI/CD Integration** - JSON output for automation
+- **Comprehensive Testing** - Full test coverage for analyzer
+
+### Documentation
+
+- Added comprehensive `DEPENDENCY_MANAGEMENT.md` guide
+- Updated README.md with new section
+- Added CI/CD integration examples
+- Included best practices and workflows
 
 ## 0.0.2-canary.0
 
