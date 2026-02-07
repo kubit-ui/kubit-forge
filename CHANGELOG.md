@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.1
+
+### Patch Changes
+
+- Merge branch 'fff' into next
+
 ## 0.0.2-canary.0
 
 ### Patch Changes
