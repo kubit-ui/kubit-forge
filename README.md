@@ -12,6 +12,25 @@
 
 ---
 
+## 📚 Documentation
+
+**[📖 Complete Documentation](./docs/README.md)** - Comprehensive guides for all features
+
+### Quick Access
+
+- **[Getting Started](./docs/PROJECT-INITIALIZATION.md)** - Create your first project
+- **[Add Features](./docs/ADD-COMMAND.md)** - Extend your project
+- **[CLI Commands](./docs/DEVELOPMENT-COMMANDS.md)** - Daily workflow
+- **[Visual GUI](./docs/VISUAL-GUI.md)** - Web-based interface
+- **[Plugin System](./docs/PLUGIN-SYSTEM.md)** - Extend functionality
+- **[Recipe System](./docs/RECIPE-SYSTEM.md)** - Automate workflows
+- **[Doctor Command](./docs/DOCTOR-COMMAND.md)** - AI diagnostics
+- **[Configuration](./docs/CONFIGURATION.md)** - Configure your project
+
+[📑 Documentation Index](./docs/INDEX.md) - Complete documentation overview
+
+---
+
 ## Table of Contents
 
 - [Why Kubit Forge?](#why-kubit-forge)
@@ -58,6 +77,8 @@
 
 ### Project Initialization & Scaffolding
 
+**[📖 Full Documentation](./docs/PROJECT-INITIALIZATION.md)**
+
 Create production-ready projects in seconds:
 
 ```bash
@@ -98,6 +119,8 @@ kubit-forge template:use react-ts-bernova my-app
 
 ### Add Command - Feature Installation
 
+**[📖 Full Documentation](./docs/ADD-COMMAND.md)**
+
 Add features to existing projects with zero configuration:
 
 ```bash
@@ -127,6 +150,8 @@ kubit-forge add react-router
 
 ### Development Commands
 
+**[📖 Full Documentation](./docs/DEVELOPMENT-COMMANDS.md)**
+
 Streamlined development workflow:
 
 ```bash
@@ -154,6 +179,8 @@ kubit-forge check
 
 ### Quality & Diagnostics
 
+**[📖 Full Documentation](./docs/DOCTOR-COMMAND.md)**
+
 ```bash
 # Show project information
 kubit-forge info --detailed
@@ -171,6 +198,8 @@ kubit-forge doctor --predictive
 ---
 
 ## Plugin System
+
+**[📖 Full Documentation](./docs/PLUGIN-SYSTEM.md)**
 
 Extend Kubit Forge with powerful plugins:
 
@@ -225,6 +254,8 @@ export default {
 ---
 
 ## Recipe System
+
+**[📖 Full Documentation](./docs/RECIPE-SYSTEM.md)**
 
 Automate complex workflows with declarative recipes:
 
@@ -290,6 +321,8 @@ depends_on = ["install-deps"]
 
 ## Monorepo Support
 
+**[Full Documentation](./docs/MONOREPO-SUPPORT.md)**
+
 First-class support for monorepo tools:
 
 ### Supported Tools
@@ -328,6 +361,8 @@ kubit-forge monorepo:info
 
 ## Interactive Dashboard
 
+**[📖 Full Documentation](./docs/INTERACTIVE-DASHBOARD.md)**
+
 Launch a beautiful TUI dashboard for project management:
 
 ```bash
@@ -354,6 +389,8 @@ kubit-forge dashboard
 ---
 
 ## Asset Optimization
+
+**[📖 Full Documentation](./docs/ASSET-OPTIMIZATION.md)**
 
 Optimize and deploy assets with ease:
 
@@ -389,6 +426,8 @@ kubit-forge assets:cdn:sync --provider cloudflare
 
 ## Security & SBOM
 
+**[📖 Full Documentation](./docs/SECURITY-SBOM.md)**
+
 Generate Software Bill of Materials and security audits:
 
 ### SBOM Commands
@@ -421,6 +460,8 @@ kubit-forge security:audit
 ---
 
 ## Doctor Command
+
+**[📖 Full Documentation](./docs/DOCTOR-COMMAND.md)**
 
 AI-powered diagnostics with auto-fix capabilities:
 
@@ -469,6 +510,8 @@ Predictive Analysis:
 ---
 
 ## Smart Dependency Management
+
+**[📖 Full Documentation](./docs/DEPENDENCY_MANAGEMENT.md)**
 
 Intelligent dependency analysis and optimization:
 
@@ -528,6 +571,8 @@ kubit-forge deps:export --format markdown
 
 ## Visual GUI & Configuration Editor
 
+**[📖 Full Documentation](./docs/VISUAL-GUI.md)** | **[GUI Technical Docs](./docs/GUI.md)**
+
 Modern web-based interface for managing your project:
 
 ```bash
@@ -586,6 +631,8 @@ kubit-forge gui --no-open
 
 ## Migrations & Upgrades
 
+**[📖 Full Documentation](./docs/MIGRATIONS-UPGRADES.md)**
+
 Safe upgrades and automated refactoring:
 
 ```bash
@@ -610,6 +657,8 @@ kubit-forge migrate:list
 ---
 
 ## Code Generation
+
+**[📖 Full Documentation](./docs/CODE-GENERATION.md)**
 
 Generate code scaffolds with best practices:
 
@@ -643,6 +692,8 @@ kubit-forge generate test Button
 ---
 
 ## Configuration
+
+**[📖 Full Documentation](./docs/CONFIGURATION.md)**
 
 Configure Kubit Forge with `kubit.config.toml`:
 
@@ -680,6 +731,8 @@ dist = "./dist"
 ---
 
 ## Environment Variables
+
+**[📖 Full Documentation](./docs/ENVIRONMENT-MANAGEMENT.md)**
 
 Manage environment variables securely:
 
