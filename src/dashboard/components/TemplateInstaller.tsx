@@ -41,6 +41,34 @@ export const TemplateInstaller: React.FC<TemplateInstallerProps> = ({ ctx, onBac
     loadTemplates();
   }, []);
 
+  const mapTemplateToValue = (template: TemplateInfo): string => {
+    // Map registry template names to create command template values
+    const nameMap: Record<string, string> = {
+      'kubit/react-kubit-ui': 'react-kubit-ui',
+      'kubit/react-lib-bernova': 'react-lib-bernova',
+      'kubit/react-minimal': 'react-bernova',
+      'kubit/react-recommended': 'react-ts-vite-bernova',
+      'kubit/vanilla-js': 'vanilla-js',
+      'kubit/vanilla-ts': 'vanilla-ts',
+    };
+
+    return nameMap[template.name] || 'react-ts-vite-bernova';
+  };
+
+  const installTemplate = async (template: TemplateInfo) => {
+    const templateValue = mapTemplateToValue(template);
+
+    // Store the template selection in a global variable that the dashboard can read
+    (global as any).__selectedTemplate = templateValue;
+
+    // Show message
+    ctx.logger.info(`\n✨ Template seleccionado: ${template.name}`);
+    ctx.logger.info('🚀 Cerrando dashboard e iniciando wizard de creación...\n');
+
+    // Exit the dashboard - the parent command will show instructions
+    exit();
+  };
+
   // Keyboard navigation
   useInput(async (input, key) => {
     if (key.escape || input === 'b') {
@@ -65,34 +93,6 @@ export const TemplateInstaller: React.FC<TemplateInstallerProps> = ({ ctx, onBac
       await installTemplate(templates[selectedIndex]);
     }
   });
-
-  const installTemplate = async (template: TemplateInfo) => {
-    const templateValue = mapTemplateToValue(template);
-
-    // Store the template selection in a global variable that the dashboard can read
-    (global as any).__selectedTemplate = templateValue;
-
-    // Show message
-    ctx.logger.info(`\n✨ Template seleccionado: ${template.name}`);
-    ctx.logger.info('🚀 Cerrando dashboard e iniciando wizard de creación...\n');
-
-    // Exit the dashboard - the parent command will show instructions
-    exit();
-  };
-
-  const mapTemplateToValue = (template: TemplateInfo): string => {
-    // Map registry template names to create command template values
-    const nameMap: Record<string, string> = {
-      'kubit/react-kubit-ui': 'react-kubit-ui',
-      'kubit/react-lib-bernova': 'react-lib-bernova',
-      'kubit/react-minimal': 'react-bernova',
-      'kubit/react-recommended': 'react-ts-vite-bernova',
-      'kubit/vanilla-js': 'vanilla-js',
-      'kubit/vanilla-ts': 'vanilla-ts',
-    };
-
-    return nameMap[template.name] || 'react-ts-vite-bernova';
-  };
 
   if (isLoading) {
     return (

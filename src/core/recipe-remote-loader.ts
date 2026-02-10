@@ -232,7 +232,8 @@ export class RecipeRemoteLoader {
       return recipe;
     } catch (error) {
       throw new Error(
-        `Failed to load recipe from registry: ${error instanceof Error ? error.message : String(error)}`
+        `Failed to load recipe from registry: ${error instanceof Error ? error.message : String(error)}`,
+        { cause: error }
       );
     }
   }

@@ -372,7 +372,7 @@ export class DependencyAnalyzer {
           break;
       }
     } catch (error) {
-      throw new Error(`Failed to deduplicate: ${error}`);
+      throw new Error(`Failed to deduplicate: ${error}`, { cause: error });
     }
 
     const afterCount = await this.countTotalDependencies();

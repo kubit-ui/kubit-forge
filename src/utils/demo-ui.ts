@@ -112,7 +112,8 @@ export function runUIDemo(): void {
   // 14. Footer
   console.log(colors.muted('  Learn more: ') + colors.link('https://kubit-forge.org'));
   console.log(
-    colors.muted('  Report issues: ') + colors.link('https://github.com/kubit-ui/kubit-forge/issues')
+    colors.muted('  Report issues: ') +
+      colors.link('https://github.com/kubit-ui/kubit-forge/issues')
   );
   console.log('');
 }

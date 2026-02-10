@@ -1,0 +1,2 @@
+overrides:
+  eslint-config-kubit: link:../../../OPEN_SOURCE/eslint-config-kubit

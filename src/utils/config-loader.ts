@@ -42,7 +42,8 @@ export class ConfigLoader {
       return config;
     } catch (error) {
       throw new Error(
-        `Failed to load config from ${configFile}: ${error instanceof Error ? error.message : 'Unknown error'}`
+        `Failed to load config from ${configFile}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { cause: error }
       );
     }
   }

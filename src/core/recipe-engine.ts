@@ -215,10 +215,6 @@ export interface RecipeExecutionResult {
  * Enhanced Recipe Engine
  * Supports complex workflows with conditional logic, loops, and parallel execution
  */
-// Export as main RecipeEngine
-export { RecipeEngineV2 as RecipeEngine };
-export { RecipeV2 as Recipe };
-
 class RecipeEngineV2 {
   private logger: Logger;
   private cwd: string;
@@ -683,3 +679,7 @@ class RecipeEngineV2 {
     return context.variables.has(condition);
   }
 }
+
+// Export as main RecipeEngine
+export { RecipeEngineV2 as RecipeEngine };
+export { RecipeV2 as Recipe };

@@ -32,7 +32,7 @@ export class HookManager {
     pluginName?: string
   ): void {
     // Handle overloaded parameters
-    let priority = 0;
+    let priority: number;
     let actualPluginName: string | undefined;
 
     if (typeof priorityOrPluginName === 'number') {
