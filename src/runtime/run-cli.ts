@@ -27,6 +27,12 @@ export interface RunCLIOptions {
   cwd?: string;
 
   /**
+   * Directory where kubit.config.toml is located
+   * If provided, this takes precedence over loadConfigFromCLIDir
+   */
+  configDir?: string;
+
+  /**
    * Path to config file (defaults to kubit.config.toml)
    */
   configPath?: string;
@@ -59,6 +65,8 @@ export interface RunCLIOptions {
   /**
    * Whether to load config from CLI directory instead of cwd
    * Useful for CLIs that bundle their own plugins
+   * Note: If configDir is provided, this option is ignored
+   * @deprecated Use configDir instead for more explicit control
    */
   loadConfigFromCLIDir?: boolean;
 }
@@ -74,7 +82,8 @@ export interface RunCLIOptions {
  *
  * await runCLI({
  *   name: 'my-cli',
- *   version: '1.0.0',
+ *   onfigDir: userConfigDir,
+    cversion: '1.0.0',
  *   description: 'My awesome CLI',
  * });
  * ```
@@ -82,6 +91,7 @@ export interface RunCLIOptions {
 export async function runCLI(options: RunCLIOptions = {}): Promise<void> {
   const {
     banner,
+    configDir: userConfigDir,
     cwd = process.cwd(),
     description = 'Modern development CLI powered by Kubit Forge',
     examples = [],
@@ -109,8 +119,13 @@ export async function runCLI(options: RunCLIOptions = {}): Promise<void> {
 
   // Determine config directory
   let configDir = cwd;
-  if (loadConfigFromCLIDir) {
+  if (userConfigDir) {
+    // User explicitly provided config directory
+    configDir = userConfigDir;
+  } else if (loadConfigFromCLIDir) {
     // For bundled CLIs, use the CLI's directory
+    // NOTE: This uses import.meta.url from kubit-forge, not the caller
+    // It's better to use configDir option instead
     const cliFileUrl = import.meta.url;
     const cliFilePath = fileURLToPath(cliFileUrl);
     const cliDir = dirname(cliFilePath);
