@@ -37,6 +37,7 @@ export const KubitConfigSchema = z.object({
   plugins: z
     .object({
       enabled: z.array(z.string()).optional(),
+      internal: z.array(z.string()).optional(), // Local plugins (file paths)
     })
     .optional(),
 
