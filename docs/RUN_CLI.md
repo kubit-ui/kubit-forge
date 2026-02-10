@@ -58,16 +58,22 @@ await runCLI({
 
 ### For Bundled CLIs
 
-If your CLI bundles plugins internally (like `@gruposantander/mb-ui-cli`), use `loadConfigFromCLIDir`:
+If your CLI bundles plugins internally (like `@gruposantander/mb-ui-cli`), use `configDir`:
 
 ```typescript
 import { runCLI } from 'kubit-forge';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+// Get CLI directory
+const cliDir = dirname(fileURLToPath(import.meta.url));
+const configDir = join(cliDir, '..'); // Go up to root
 
 await runCLI({
+  configDir, // ← Explicitly specify config directory
   name: 'mb-cli',
   version: '16.0.0',
   description: 'Model Bank Development CLI',
-  loadConfigFromCLIDir: true, // ← Load config from CLI's directory
 });
 ```
 
@@ -137,10 +143,10 @@ interface RunCLIOptions {
   examples?: string[];
 
   /**
-   * Whether to load config from CLI directory instead of cwd
-   * Useful for CLIs that bundle their own plugins
+   * Directory where kubit.config.toml is located
+   * If not provided, defaults to process.cwd()
    */
-  loadConfigFromCLIDir?: boolean;
+  configDir?: string;
 }
 ```
 
@@ -180,12 +186,17 @@ All CLIs created with `runCLI()` get these global options for free:
 // src/index.ts
 #!/usr/bin/env node
 import { runCLI } from 'kubit-forge';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const cliDir = dirname(fileURLToPath(import.meta.url));
+const configDir = join(cliDir, '..');
 
 await runCLI({
+  configDir,
   name: 'enterprise-cli',
   version: '2.0.0',
   description: 'Enterprise Development CLI',
-  loadConfigFromCLIDir: true,
   banner: (version) => `
 ╔══════════════════════════════════════════╗
 ║  Enterprise CLI v${version.padEnd(23)}║
