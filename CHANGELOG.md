@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.0.2-canary.14
+
+### Patch Changes
+
+- Remove deprecated loadConfigFromCLIDir option
+  - Remove loadConfigFromCLIDir from RunCLIOptions interface
+  - configDir is now the only way to specify config location
+  - Update documentation with configDir examples
+  - Remove unused imports (dirname, join, fileURLToPath)
+  - Fix JSDoc example with correct syntax
+  - Simplify config directory logic
+
+  This simplifies the API and makes config location explicit.
+
 ## 0.0.2-canary.13
 
 ### Patch Changes
