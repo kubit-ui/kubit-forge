@@ -91,6 +91,121 @@ export class PluginManager {
   }
 
   /**
+   * Load internal (local) plugins from file paths
+   */
+  async loadInternalPlugins(pluginPaths: string[], ctx: PluginContext): Promise<void> {
+    for (const pluginPath of pluginPaths) {
+      try {
+        await this.loadInternalPlugin(pluginPath, ctx);
+      } catch (error) {
+        this.logger.warn(
+          `Failed to load internal plugin '${pluginPath}': ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
+      }
+    }
+  }
+
+  /**
+   * Load a single internal plugin from a file path
+   */
+  private async loadInternalPlugin(pluginPath: string, ctx: PluginContext): Promise<void> {
+    const { join } = await import('path');
+    const { pathToFileURL } = await import('url');
+
+    // Resolve absolute path
+    const absolutePath = join(this.cwd, pluginPath);
+
+    // Convert to file URL for ESM import
+    const fileUrl = pathToFileURL(absolutePath).href;
+
+    this.logger.debug(`Loading internal plugin from: ${absolutePath}`);
+
+    // Import the plugin module
+    let pluginModule: { default?: Plugin; [key: string]: unknown };
+
+    try {
+      pluginModule = await import(fileUrl);
+    } catch (error) {
+      throw new Error(
+        `Cannot import plugin from '${pluginPath}': ${error instanceof Error ? error.message : 'Unknown error'}`,
+        { cause: error }
+      );
+    }
+
+    const plugin = (pluginModule.default || pluginModule) as Plugin;
+
+    if (!plugin.name || !plugin.version) {
+      throw new Error(`Invalid plugin at '${pluginPath}': missing name or version`);
+    }
+
+    // Register the plugin
+    await this.registerPlugin(plugin, ctx);
+
+    this.logger.debug(`Loaded internal plugin: ${plugin.name}@${plugin.version}`);
+  }
+
+  /**
+   * Register a plugin and call its lifecycle hooks
+   */
+  private async registerPlugin(plugin: Plugin, ctx: PluginContext): Promise<void> {
+    // Store plugin
+    this.plugins.set(plugin.name, plugin);
+
+    // Register version
+    this.versionManager.registerInstalled(plugin.name, plugin.version);
+
+    // Call onLoad hook
+    if (plugin.onLoad) {
+      this.logger.debug(`Calling onLoad for plugin: ${plugin.name}`);
+      await plugin.onLoad(ctx);
+    }
+
+    // Call onConfigLoaded hook
+    if (plugin.onConfigLoaded) {
+      this.logger.debug(`Calling onConfigLoaded for plugin: ${plugin.name}`);
+      await plugin.onConfigLoaded(ctx);
+    }
+
+    // Register commands
+    if (plugin.registerCommands) {
+      const commands = plugin.registerCommands();
+      for (const cmd of commands) {
+        this.commands.set(cmd.name, cmd);
+      }
+      this.logger.debug(`Registered ${commands.length} commands from plugin: ${plugin.name}`);
+    }
+
+    // Register tasks
+    if (plugin.registerTasks) {
+      const tasks = plugin.registerTasks();
+      for (const task of tasks) {
+        this.tasks.set(task.name, task);
+      }
+      this.logger.debug(`Registered ${tasks.length} tasks from plugin: ${plugin.name}`);
+    }
+
+    // Register generators
+    if (plugin.registerGenerators) {
+      const generators = plugin.registerGenerators();
+      for (const gen of generators) {
+        this.generators.set(gen.kind, gen);
+      }
+      this.logger.debug(`Registered ${generators.length} generators from plugin: ${plugin.name}`);
+    }
+
+    // Register providers
+    if (plugin.registerProviders) {
+      const providers = plugin.registerProviders();
+      for (const prov of providers) {
+        const existing = this.providers.get(prov.command) || [];
+        existing.push(prov);
+        this.providers.set(prov.command, existing);
+      }
+      this.logger.debug(`Registered ${providers.length} providers from plugin: ${plugin.name}`);
+    }
+  }
+
+  /**
    * Load a single plugin
    */
   private async loadPlugin(
@@ -354,17 +469,17 @@ export class PluginManager {
   }
 
   /**
-   * Check if plugin is loaded
+   * Check if a plugin is loaded
    */
-  isLoaded(pluginName: string): boolean {
-    return this.plugins.has(pluginName);
+  hasPlugin(name: string): boolean {
+    return this.plugins.has(name);
   }
 
   /**
-   * Get loaded plugin by name
+   * Get a loaded plugin by name
    */
-  getPlugin(pluginName: string): Plugin | undefined {
-    return this.plugins.get(pluginName);
+  getPlugin(name: string): Plugin | undefined {
+    return this.plugins.get(name);
   }
 
   /**
