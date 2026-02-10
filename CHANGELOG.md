@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.2-canary.13
+
+### Patch Changes
+
+- Merge pull request #2 from kubit-ui/feat/add-run-cli-dir-configuration
+
+  add configDir option to runCLI for explicit config location
+
 ## 0.0.2-canary.12
 
 ### Patch Changes
