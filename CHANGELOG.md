@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.12
+
+### Patch Changes
+
+- Include runCli
+
 ## 0.0.2-canary.11
 
 ### Patch Changes
