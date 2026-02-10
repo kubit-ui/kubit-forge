@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.0.2-canary.11
+
+### Patch Changes
+
+- Migrate to kubit-forge internal plugins system
+  - Replace manual plugin loading with PluginManager.loadInternalPlugins()
+  - Configure plugins.internal in kubit.config.toml
+  - Simplify CLI initialization by ~30 lines using kubit-forge features
+  - Use PluginManager.getCommands() and getGenerators() for registration
+  - Remove custom plugin lifecycle hook handling
+
+  This leverages kubit-forge's new internal plugins support (plugins.internal)
+  which allows loading local plugins without npm publish.
+
+  Benefits:
+  - Less boilerplate code
+  - Consistent plugin loading mechanism
+  - Better integration with kubit-forge ecosystem
+  - Easier to add more internal plugins in the future
+
+  Breaking: None - CLI functionality remains unchanged
+
 ## 0.0.2-canary.10
 
 ### Patch Changes
