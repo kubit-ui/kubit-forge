@@ -173,7 +173,7 @@ function setupGlobalOptions(program: Command): void {
 /**
  * Load configuration with proper error handling
  */
-async function loadConfig(configLoader: ConfigLoader, configDir: string): Promise<KubitConfig> {
+async function loadConfig(configLoader: ConfigLoader): Promise<KubitConfig> {
   try {
     const config = await configLoader.load();
     if (!config) {
