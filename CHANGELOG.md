@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.16
+
+### Patch Changes
+
+- Update documentation [skip-ci]
+
 ## 0.0.2-canary.15
 
 ### Patch Changes
