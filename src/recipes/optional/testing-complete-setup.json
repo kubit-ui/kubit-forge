@@ -1,0 +1,85 @@
+{
+  "name": "testing-complete-setup",
+  "version": "1.0.0",
+  "description": "Complete testing setup with Vitest, React Testing Library, and coverage",
+  "author": "Kubit Team",
+  "tags": ["testing", "vitest", "coverage", "react-testing-library", "ci-cd"],
+  "category": "testing",
+  "requires": {
+    "kubitVersion": "^3.0.0",
+    "tools": ["git"]
+  },
+  "variables": {
+    "coverageThreshold": {
+      "type": "number",
+      "description": "Minimum coverage threshold (%)",
+      "default": 80
+    },
+    "includeE2E": {
+      "type": "boolean",
+      "description": "Include Playwright for E2E testing",
+      "default": false
+    }
+  },
+  "steps": [
+    {
+      "id": "install-dependencies",
+      "name": "Install testing dependencies",
+      "type": "shell",
+      "script": "pnpm add -D vitest @testing-library/react @testing-library/jest-dom @testing-library/user-event @vitest/ui @vitest/coverage-v8 jsdom"
+    },
+    {
+      "id": "create-vitest-config",
+      "name": "Create Vitest configuration",
+      "type": "file",
+      "operation": "create",
+      "target": "vitest.config.ts",
+      "content": "import { defineConfig } from 'vitest/config';\nimport react from '@vitejs/plugin-react';\nimport { resolve } from 'path';\n\nexport default defineConfig({\n  plugins: [react()],\n  test: {\n    globals: true,\n    environment: 'jsdom',\n    setupFiles: ['./vitest.setup.ts'],\n    coverage: {\n      provider: 'v8',\n      reporter: ['text', 'json', 'html', 'lcov'],\n      exclude: [\n        'node_modules/',\n        'dist/',\n        '**/*.d.ts',\n        '**/*.config.*',\n        '**/mockData',\n        'tests/setup',\n      ],\n      thresholds: {\n        lines: {{ coverageThreshold }},\n        functions: {{ coverageThreshold }},\n        branches: {{ coverageThreshold }},\n        statements: {{ coverageThreshold }},\n      },\n    },\n  },\n  resolve: {\n    alias: {\n      '@': resolve(__dirname, './src'),\n    },\n  },\n});\n"
+    },
+    {
+      "id": "create-vitest-setup",
+      "name": "Create Vitest setup file",
+      "type": "file",
+      "operation": "create",
+      "target": "vitest.setup.ts",
+      "content": "import '@testing-library/jest-dom';\nimport { cleanup } from '@testing-library/react';\nimport { afterEach } from 'vitest';\n\n// Cleanup after each test\nafterEach(() => {\n  cleanup();\n});\n"
+    },
+    {
+      "id": "create-test-example",
+      "name": "Create example test file",
+      "type": "file",
+      "operation": "create",
+      "target": "src/components/__tests__/App.test.tsx",
+      "content": "import { describe, it, expect } from 'vitest';\nimport { render, screen } from '@testing-library/react';\nimport App from '../App';\n\ndescribe('App', () => {\n  it('renders without crashing', () => {\n    render(<App />);\n    expect(screen.getByText(/hello/i)).toBeInTheDocument();\n  });\n});\n"
+    },
+    {
+      "id": "add-test-scripts",
+      "name": "Add test scripts to package.json",
+      "type": "shell",
+      "script": "npm pkg set scripts.test='vitest' scripts.test:ui='vitest --ui' scripts.test:coverage='vitest --coverage' scripts.test:watch='vitest --watch'"
+    },
+    {
+      "id": "create-ci-test-workflow",
+      "name": "Create CI testing workflow",
+      "type": "file",
+      "operation": "create",
+      "target": ".github/workflows/test.yml",
+      "content": "name: Tests\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    \n    steps:\n      - uses: actions/checkout@v4\n      \n      - uses: pnpm/action-setup@v2\n        with:\n          version: 10\n      \n      - uses: actions/setup-node@v4\n        with:\n          node-version: '20'\n          cache: 'pnpm'\n      \n      - name: Install dependencies\n        run: pnpm install\n      \n      - name: Run tests\n        run: pnpm test:coverage\n      \n      - name: Upload coverage to Codecov\n        uses: codecov/codecov-action@v4\n        with:\n          files: ./coverage/lcov.info\n          flags: unittests\n"
+    },
+    {
+      "id": "create-gitignore-entry",
+      "name": "Add test artifacts to .gitignore",
+      "type": "file",
+      "operation": "append",
+      "target": ".gitignore",
+      "content": "\n# Test artifacts\ncoverage/\n.vitest/\n"
+    },
+    {
+      "id": "install-playwright",
+      "name": "Install Playwright (optional)",
+      "type": "shell",
+      "script": "if [ \"{{ includeE2E }}\" = \"true\" ]; then pnpm add -D @playwright/test && pnpm playwright install; fi",
+      "condition": "{{ includeE2E }}"
+    }
+  ]
+}

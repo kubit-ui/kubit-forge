@@ -400,45 +400,6 @@ kubit-forge env info
 kubit-forge env generate-example
 ```
 
-## Asset Commands
-
-### Asset Optimization
-
-```bash
-# Optimize all assets
-kubit-forge assets:optimize
-
-# Optimize with custom quality
-kubit-forge assets:optimize --quality 85
-
-# Optimize specific types
-kubit-forge assets:optimize --images
-kubit-forge assets:optimize --fonts
-kubit-forge assets:optimize --icons
-```
-
-### Compress Assets
-
-```bash
-# Compress with gzip and brotli
-kubit-forge assets:compress
-
-# Specific algorithm
-kubit-forge assets:compress --algorithm gzip
-kubit-forge assets:compress --algorithm brotli
-```
-
-### CDN Sync
-
-```bash
-# Sync to CDN
-kubit-forge assets:cdn:sync
-
-# Specific provider
-kubit-forge assets:cdn:sync --provider cloudflare
-kubit-forge assets:cdn:sync --provider s3
-```
-
 ## Dependency Commands
 
 ### Dependency Analysis
@@ -489,9 +450,6 @@ kubit-forge build
 
 # Preview build
 kubit-forge preview
-
-# Optimize assets
-kubit-forge assets:optimize
 ```
 
 ### Debugging
@@ -541,9 +499,6 @@ kubit-forge check || exit 1
 echo "Building..."
 kubit-forge build || exit 1
 
-echo "Optimizing assets..."
-kubit-forge assets:optimize
-
 echo "Deploying..."
 # deployment commands...
 ```
@@ -585,7 +540,6 @@ Commands exit with standard codes:
 
 - [Configuration](./CONFIGURATION.md) - Configure commands
 - [Doctor Command](./DOCTOR-COMMAND.md) - Diagnostics
-- [Visual GUI](./VISUAL-GUI.md) - Run commands visually
 
 ---
 

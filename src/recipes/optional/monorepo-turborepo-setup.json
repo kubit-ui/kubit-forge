@@ -1,0 +1,91 @@
+{
+  "name": "monorepo-turborepo-setup",
+  "version": "1.0.0",
+  "description": "Complete Turborepo monorepo setup with caching and pipelines",
+  "author": "Kubit Team",
+  "tags": ["monorepo", "turborepo", "workspace", "caching", "ci-cd"],
+  "category": "monorepo",
+  "requires": {
+    "kubitVersion": "^3.0.0",
+    "tools": ["git", "pnpm"]
+  },
+  "variables": {
+    "workspaces": {
+      "type": "array",
+      "description": "Workspace names (e.g., app, packages/ui, packages/utils)",
+      "default": ["apps/web", "packages/ui", "packages/utils"]
+    },
+    "enableRemoteCache": {
+      "type": "boolean",
+      "description": "Enable Turborepo remote caching",
+      "default": false
+    }
+  },
+  "steps": [
+    {
+      "id": "install-turborepo",
+      "name": "Install Turborepo",
+      "type": "shell",
+      "script": "pnpm add -D turbo"
+    },
+    {
+      "id": "create-turbo-config",
+      "name": "Create Turbo configuration",
+      "type": "file",
+      "operation": "create",
+      "target": "turbo.json",
+      "content": "{\n  \"$schema\": \"https://turbo.build/schema.json\",\n  \"globalDependencies\": [\"**/.env.*local\"],\n  \"pipeline\": {\n    \"build\": {\n      \"dependsOn\": [\"^build\"],\n      \"outputs\": [\"dist/**\", \".next/**\", \"!.next/cache/**\"]\n    },\n    \"test\": {\n      \"dependsOn\": [\"build\"],\n      \"outputs\": [\"coverage/**\"]\n    },\n    \"lint\": {\n      \"outputs\": []\n    },\n    \"dev\": {\n      \"cache\": false,\n      \"persistent\": true\n    },\n    \"clean\": {\n      \"cache\": false\n    }\n  }\n}\n"
+    },
+    {
+      "id": "create-workspace-structure",
+      "name": "Create workspace directories",
+      "type": "shell",
+      "script": "for workspace in {{ workspaces }}; do mkdir -p $workspace/src; done"
+    },
+    {
+      "id": "update-package-json",
+      "name": "Configure pnpm workspaces",
+      "type": "file",
+      "operation": "create",
+      "target": "pnpm-workspace.yaml",
+      "content": "packages:\n  - 'apps/*'\n  - 'packages/*'\n"
+    },
+    {
+      "id": "add-turbo-scripts",
+      "name": "Add Turbo scripts to root package.json",
+      "type": "shell",
+      "script": "npm pkg set scripts.build='turbo run build' scripts.dev='turbo run dev' scripts.test='turbo run test' scripts.lint='turbo run lint' scripts.clean='turbo run clean'"
+    },
+    {
+      "id": "create-shared-tsconfig",
+      "name": "Create shared TypeScript configuration",
+      "type": "file",
+      "operation": "create",
+      "target": "packages/tsconfig/base.json",
+      "content": "{\n  \"$schema\": \"https://json.schemastore.org/tsconfig\",\n  \"compilerOptions\": {\n    \"target\": \"ES2020\",\n    \"lib\": [\"ES2020\", \"DOM\", \"DOM.Iterable\"],\n    \"module\": \"ESNext\",\n    \"moduleResolution\": \"bundler\",\n    \"resolveJsonModule\": true,\n    \"jsx\": \"react-jsx\",\n    \"strict\": true,\n    \"esModuleInterop\": true,\n    \"skipLibCheck\": true,\n    \"forceConsistentCasingInFileNames\": true,\n    \"declaration\": true,\n    \"declarationMap\": true,\n    \"sourceMap\": true\n  },\n  \"exclude\": [\"node_modules\", \"dist\"]\n}\n"
+    },
+    {
+      "id": "create-ci-workflow",
+      "name": "Create Turborepo CI workflow",
+      "type": "file",
+      "operation": "create",
+      "target": ".github/workflows/ci.yml",
+      "content": "name: CI\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main]\n\njobs:\n  build:\n    runs-on: ubuntu-latest\n    \n    steps:\n      - uses: actions/checkout@v4\n        with:\n          fetch-depth: 2\n      \n      - uses: pnpm/action-setup@v2\n        with:\n          version: 10\n      \n      - uses: actions/setup-node@v4\n        with:\n          node-version: '20'\n          cache: 'pnpm'\n      \n      - name: Install dependencies\n        run: pnpm install\n      \n      - name: Build\n        run: pnpm turbo build\n      \n      - name: Test\n        run: pnpm turbo test\n      \n      - name: Lint\n        run: pnpm turbo lint\n"
+    },
+    {
+      "id": "create-gitignore",
+      "name": "Add Turborepo to .gitignore",
+      "type": "file",
+      "operation": "append",
+      "target": ".gitignore",
+      "content": "\n# Turborepo\n.turbo/\n"
+    },
+    {
+      "id": "setup-remote-cache",
+      "name": "Setup remote cache (optional)",
+      "type": "shell",
+      "script": "if [ \"{{ enableRemoteCache }}\" = \"true\" ]; then pnpm turbo login; fi",
+      "condition": "{{ enableRemoteCache }}"
+    }
+  ]
+}

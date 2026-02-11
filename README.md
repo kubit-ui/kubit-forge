@@ -21,10 +21,10 @@
 - **[Getting Started](./docs/PROJECT-INITIALIZATION.md)** - Create your first project
 - **[Add Features](./docs/ADD-COMMAND.md)** - Extend your project
 - **[CLI Commands](./docs/DEVELOPMENT-COMMANDS.md)** - Daily workflow
-- **[Visual GUI](./docs/VISUAL-GUI.md)** - Web-based interface
 - **[Plugin System](./docs/PLUGIN-SYSTEM.md)** - Extend functionality
-- **[Recipe System](./docs/RECIPE-SYSTEM.md)** - Automate workflows
-- **[Doctor Command](./docs/DOCTOR-COMMAND.md)** - AI diagnostics
+- **[Plugins vs Recipes](./docs/PLUGINS-VS-RECIPES.md)** - Understanding the difference
+- **[Optional Plugins](./docs/PLUGIN-SECURITY.md)** - Security, Doctor Advanced
+- **[Optional Recipes](./docs/RECIPES-OPTIONAL.md)** - Automated workflows
 - **[Configuration](./docs/CONFIGURATION.md)** - Configure your project
 
 [📑 Documentation Index](./docs/INDEX.md) - Complete documentation overview
@@ -41,12 +41,8 @@
 - [Plugin System](#plugin-system)
 - [Recipe System](#recipe-system)
 - [Monorepo Support](#monorepo-support)
-- [Interactive Dashboard](#interactive-dashboard)
-- [Asset Optimization](#asset-optimization)
-- [Security & SBOM](#security--sbom)
 - [Doctor Command](#doctor-command)
 - [Smart Dependency Management](#smart-dependency-management)
-- [Visual GUI & Configuration Editor](#visual-gui--configuration-editor)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
@@ -61,11 +57,10 @@
 - **TypeScript First** - Full type safety and IntelliSense support
 - **Lightning Fast** - Powered by Vite for instant HMR and optimized builds
 - **Extensible** - Plugin and recipe systems for unlimited customization
-- **Enterprise Ready** - SBOM generation, security audits, and compliance tools
+- **Enterprise Ready** - Advanced diagnostics and compliance tools
 
 ### Developer Experience
 
-- **Interactive Dashboard** - Beautiful TUI for project management
 - **AI-Powered Diagnostics** - Intelligent issue detection and auto-fix
 - **Predictive Analysis** - Prevent problems before they happen
 - **Package Manager Agnostic** - Works with npm, yarn, and pnpm
@@ -199,7 +194,11 @@ kubit-forge doctor --predictive
 
 ## Plugin System
 
-**[📖 Full Documentation](./docs/PLUGIN-SYSTEM.md)**
+**[📖 Full Documentation](./docs/PLUGIN-SYSTEM.md)** | **[Plugins vs Recipes Guide](./docs/PLUGINS-VS-RECIPES.md)**
+
+### Core CLI Philosophy
+
+Kubit Forge core is intentionally **lightweight and focused** on essential commands. Advanced features are available as **optional plugins** that you install only when needed.
 
 Extend Kubit Forge with powerful plugins:
 
@@ -359,106 +358,6 @@ kubit-forge monorepo:info
 
 ---
 
-## Interactive Dashboard
-
-**[📖 Full Documentation](./docs/INTERACTIVE-DASHBOARD.md)**
-
-Launch a beautiful TUI dashboard for project management:
-
-```bash
-kubit-forge dashboard
-```
-
-### Dashboard Features
-
-- **Real-time Project Status** - Live updates on project health
-- **Command Execution** - Run commands from the UI
-- **Live Logs** - Stream logs in real-time
-- **Plugin Management** - Visual plugin control
-- **System Metrics** - CPU, memory, uptime monitoring
-- **Keyboard Navigation** - Intuitive controls (1-5 for views, q to quit)
-
-### Views
-
-1. **Overview** - Project status and quick actions
-2. **Commands** - Execute common commands
-3. **Plugins** - Manage installed plugins
-4. **Logs** - View real-time logs
-5. **System** - System metrics and information
-
----
-
-## Asset Optimization
-
-**[📖 Full Documentation](./docs/ASSET-OPTIMIZATION.md)**
-
-Optimize and deploy assets with ease:
-
-### Asset Commands
-
-```bash
-# Optimize images, fonts, and icons
-kubit-forge assets:optimize --quality 85
-
-# Compress assets
-kubit-forge assets:compress --algorithm both
-
-# Sync to CDN
-kubit-forge assets:cdn:sync --provider cloudflare
-```
-
-### Supported CDN Providers
-
-- **Cloudflare**
-- **AWS S3**
-- **Azure Blob Storage**
-- **Custom providers** (via plugin)
-
-### Optimization Features
-
-- **Image Optimization** - WebP, AVIF conversion
-- **Font Subsetting** - Reduce font file sizes
-- **Icon Optimization** - SVG minification
-- **Compression** - Gzip and Brotli compression
-- **Cache Busting** - Automatic versioning
-
----
-
-## Security & SBOM
-
-**[📖 Full Documentation](./docs/SECURITY-SBOM.md)**
-
-Generate Software Bill of Materials and security audits:
-
-### SBOM Commands
-
-```bash
-# Generate SBOM
-kubit-forge sbom:generate --format json
-
-# Validate dependencies
-kubit-forge sbom:validate
-
-# Security audit
-kubit-forge security:audit
-```
-
-### Supported Formats
-
-- **JSON** - Standard JSON format
-- **XML** - XML format
-- **SPDX** - Software Package Data Exchange
-- **CycloneDX** - OWASP CycloneDX format
-
-### Security Features
-
-- **Dependency Scanning** - Identify vulnerable dependencies
-- **License Compliance** - Check license compatibility
-- **Supply Chain Security** - Verify package integrity
-- **Automated Reporting** - Generate compliance reports
-
----
-
 ## Doctor Command
 
 **[📖 Full Documentation](./docs/DOCTOR-COMMAND.md)**
@@ -566,66 +465,6 @@ kubit-forge deps:export --format markdown
 ```
 
 **Learn more:** See [DEPENDENCY_MANAGEMENT.md](docs/DEPENDENCY_MANAGEMENT.md) for complete documentation.
-
----
-
-## Visual GUI & Configuration Editor
-
-**[📖 Full Documentation](./docs/VISUAL-GUI.md)** | **[GUI Technical Docs](./docs/GUI.md)**
-
-Modern web-based interface for managing your project:
-
-```bash
-# Launch full GUI dashboard
-kubit-forge gui
-
-# Open configuration editor directly
-kubit-forge visual:config
-
-# Custom port and host
-kubit-forge gui --port 8080 --host 0.0.0.0
-
-# Don't open browser automatically
-kubit-forge gui --no-open
-```
-
-### GUI Features
-
-- **Project Overview** - Visual project information dashboard
-  - Project name, stack, language
-  - Package manager and Node version
-  - Working directory and paths
-
-- **Command Palette** - Execute common commands with one click
-  - Dev server, build, test
-  - Lint, format, typecheck
-  - Visual feedback and status
-
-- **Visual Configuration Editor** - Edit `kubit.config.toml` with a beautiful interface
-  - Project settings (name, stack, language, package manager)
-  - Development options (port, host)
-  - Quality toggles (lint, format, typecheck, tests)
-  - Real-time preview
-  - Save directly to config file
-
-### Why Use the GUI?
-
-- **Beginner-Friendly** - No need to remember CLI commands
-- **Visual Feedback** - See changes in real-time
-- **No Syntax Errors** - Form validation prevents config mistakes
-- **Quick Access** - All features in one place
-- **Modern Design** - Beautiful gradient interface with smooth animations
-- **Responsive** - Works on desktop and tablets
-
-### GUI Architecture
-
-- **Zero Dependencies UI** - Lightweight HTML/CSS/JS served directly
-- **RESTful API** - `/api/config`, `/api/project/info`, `/api/commands`
-- **Hot Reload** - Changes reflected immediately
-- **Port Conflict Resolution** - Automatically finds available port
-- **Cross-Platform** - Works on macOS, Windows, Linux
-
-**Learn more:** See [GUI.md](docs/GUI.md) for complete documentation.
 
 ---
 
@@ -945,12 +784,8 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - ✅ Plugin system
 - ✅ Recipe system
 - ✅ Monorepo support
-- ✅ Interactive dashboard
-- ✅ Asset optimization
-- ✅ SBOM generation
 - ✅ Doctor command
 - ✅ Smart Dependency Management
-- ✅ Visual GUI & Configuration Editor
 
 ### Upcoming (v1.x)
 

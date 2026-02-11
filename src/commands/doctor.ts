@@ -4,18 +4,10 @@ import semver from 'semver';
 
 import type { CommandResult, PluginContext, DoctorResult, DoctorCheck } from '../types/index.js';
 
-import { DoctorAutoFix } from '../core/doctor-auto-fix.js';
-import { DoctorIDEIntegration } from '../core/doctor-ide-integration.js';
-import { DoctorPredictive } from '../core/doctor-predictive.js';
-import { DoctorRecommendations } from '../core/doctor-recommendations.js';
 import { ProjectDetector } from '../utils/project-detector.js';
 
 export interface DoctorCommandOptions {
-  fix?: boolean;
-  predictive?: boolean;
-  format?: 'text' | 'json' | 'vscode' | 'sarif' | 'checkstyle';
-  output?: string;
-  recommendations?: boolean;
+  json?: boolean;
 }
 
 export async function doctorCommand(
@@ -76,75 +68,11 @@ export async function doctorCommand(
   const hasWarnings = checks.some((c) => c.status === 'warning');
   const status = hasErrors ? 'error' : hasWarnings ? 'warning' : 'ok';
 
-  // Generate recommendations
+  // Generate simple recommendations
   const recommendations: string[] = [];
   for (const check of checks) {
     if (check.status !== 'ok' && check.solution) {
       recommendations.push(check.solution);
-    }
-  }
-
-  // Auto-fix issues if requested
-  if (options.fix) {
-    ctx.logger.step('\n🔧 Auto-fixing issues...\n');
-    const autoFix = new DoctorAutoFix(ctx.logger, ctx.cwd);
-    const issues = await autoFix.detectIssues();
-    const fixableIssues = issues.filter((i) => i.autoFixAvailable);
-
-    if (fixableIssues.length > 0) {
-      ctx.logger.info(`Found ${fixableIssues.length} fixable issues\n`);
-      const results = await autoFix.fixAll(fixableIssues);
-
-      for (const result of results) {
-        if (result.fixed) {
-          ctx.logger.success(`✓ Fixed: ${result.issue.description}`);
-          result.changes.forEach((change) => ctx.logger.info(`  - ${change}`));
-        } else {
-          ctx.logger.error(`✗ Failed to fix: ${result.issue.description}`);
-          if (result.error) {
-            ctx.logger.error(`  Error: ${result.error}`);
-          }
-        }
-      }
-    } else {
-      ctx.logger.info('No auto-fixable issues found');
-    }
-  }
-
-  // Predictive diagnostics
-  if (options.predictive) {
-    ctx.logger.step('\n🔮 Predictive Diagnostics...\n');
-    const predictive = new DoctorPredictive(ctx.logger, ctx.cwd);
-    const predictedIssues = await predictive.predictIssues();
-    const priorityIssues = predictive.getPriorityRecommendations(predictedIssues);
-
-    if (priorityIssues.length > 0) {
-      ctx.logger.info('Potential issues detected:\n');
-      for (const issue of priorityIssues) {
-        const riskScore = predictive.getRiskScore(issue);
-        const icon = issue.severity === 'high' ? '🔴' : issue.severity === 'medium' ? '🟡' : '🟢';
-        ctx.logger.info(`${icon} ${issue.description}`);
-        ctx.logger.info(`   Risk: ${riskScore.toFixed(0)}% | Category: ${issue.category}`);
-        ctx.logger.info('   Prevention steps:');
-        issue.preventionSteps.slice(0, 2).forEach((step) => {
-          ctx.logger.info(`     • ${step}`);
-        });
-        ctx.logger.info('');
-      }
-    } else {
-      ctx.logger.success('No high-risk issues predicted');
-    }
-  }
-
-  // Personalized recommendations
-  if (options.recommendations !== false) {
-    ctx.logger.step('\n📋 Personalized Recommendations...\n');
-    const recommendationsEngine = new DoctorRecommendations(ctx.logger, ctx.cwd);
-    const personalizedRecs = await recommendationsEngine.generateRecommendations(checks);
-
-    if (personalizedRecs.length > 0) {
-      const formatted = recommendationsEngine.formatRecommendations(personalizedRecs.slice(0, 5));
-      ctx.logger.info(formatted);
     }
   }
 
@@ -154,26 +82,11 @@ export async function doctorCommand(
     status,
   };
 
-  // IDE Integration - Export diagnostics
-  if (options.format && options.format !== 'text') {
-    const ideIntegration = new DoctorIDEIntegration(ctx.logger, ctx.cwd);
-
-    switch (options.format) {
-      case 'json':
-        ctx.logger.info(JSON.stringify(result, null, 2));
-        break;
-
-      case 'vscode':
-      case 'sarif':
-      case 'checkstyle':
-        await ideIntegration.saveDiagnostics(checks, options.format, options.output);
-        break;
-    }
+  // Display results
+  if (options.json) {
+    ctx.logger.json(result);
   } else {
-    // Display results in terminal
-    if (ctx.config) {
-      displayDoctorResults(result, ctx);
-    }
+    displayDoctorResults(result, ctx);
   }
 
   return {

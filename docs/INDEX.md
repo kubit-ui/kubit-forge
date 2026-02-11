@@ -132,6 +132,7 @@ Welcome to the Kubit Forge documentation. This index will help you find the info
 ```bash
 # Project initialization
 kubit-forge init <template> <name>
+kubit-forge create <template> <name>
 
 # Add features
 kubit-forge add <feature>
@@ -140,42 +141,50 @@ kubit-forge add <feature>
 kubit-forge dev
 kubit-forge build
 kubit-forge test
+kubit-forge preview
 
 # Quality checks
 kubit-forge lint
 kubit-forge format
 kubit-forge typecheck
-kubit-forge check
 kubit-forge doctor
 
 # Plugin management
 kubit-forge plugin:install <plugin>
 kubit-forge plugin:list
+kubit-forge plugin:verify <plugin>
 
 # Recipe execution
-kubit-forge recipe:run <recipe>
+kubit-forge recipe:list
+kubit-forge recipe apply <recipe>
 
-# Dependency management
+# Dependency analysis
 kubit-forge deps:analyze
-kubit-forge deps:update
-
-# Asset optimization
-kubit-forge assets:optimize
-
-# User interfaces
-kubit-forge gui
-kubit-forge dashboard
 
 # Code generation
 kubit-forge generate <type> <name>
 
-# Configuration
-kubit-forge visual:config
+# Environment management
+kubit-forge env:init
+kubit-forge env:validate
+
+# Monorepo
+kubit-forge monorepo:init
+kubit-forge monorepo:list
+
+# Migrations
+kubit-forge migrate <codename>
 
 # Information
 kubit-forge info
 kubit-forge --version
 kubit-forge --help
+
+# Optional Plugin Commands (requires plugin installation)
+kubit-forge sbom:generate          # @kubit/plugin-security
+kubit-forge security:audit          # @kubit/plugin-security
+kubit-forge doctor:fix              # @kubit/plugin-doctor-advanced
+kubit-forge doctor:predictive       # @kubit/plugin-doctor-advanced
 ```
 
 ## Use Cases
@@ -221,19 +230,19 @@ kubit-forge --help
 #### 🔧 **Maintaining an Existing Project**
 
 1. [Doctor Command](./DOCTOR-COMMAND.md)
-2. [Dependency Management](./DEPENDENCY-MANAGEMENT.md)
-3. [Migrations & Upgrades](./MIGRATIONS-UPGRADES.md)
+2. [Migrations & Upgrades](./MIGRATIONS-UPGRADES.md)
+3. [Doctor Advanced Plugin](./PLUGIN-DOCTOR-ADVANCED.md) - Auto-fix
 
 #### 🎨 **Optimizing Performance**
 
-1. [Asset Optimization](./ASSET-OPTIMIZATION.md)
-2. [Doctor Command](./DOCTOR-COMMAND.md) - Performance analysis
-3. [Dependency Management](./DEPENDENCY-MANAGEMENT.md) - Bundle optimization
+1. [Doctor Command](./DOCTOR-COMMAND.md) - Performance analysis
+2. Use native tools: `pnpm why`, `npx depcheck`
+3. [Optional Recipes](./RECIPES-OPTIONAL.md) - Testing setup
 
 #### 🤝 **Team Collaboration**
 
 1. [Recipe System](./RECIPE-SYSTEM.md)
-2. [Visual GUI](./VISUAL-GUI.md)
+2. [Optional Recipes](./RECIPES-OPTIONAL.md)
 3. [Configuration](./CONFIGURATION.md)
 
 ## Troubleshooting

@@ -1,0 +1,68 @@
+{
+  "name": "security-sbom-workflow",
+  "version": "1.0.0",
+  "description": "Complete security and SBOM generation workflow for CI/CD",
+  "author": "Kubit Team",
+  "tags": ["security", "sbom", "audit", "compliance", "ci-cd"],
+  "category": "security",
+  "requires": {
+    "kubitVersion": "^3.0.0",
+    "plugins": ["@kubit/plugin-security"]
+  },
+  "variables": {
+    "sbomFormat": {
+      "type": "string",
+      "description": "SBOM format (cyclonedx, spdx, json, xml)",
+      "default": "cyclonedx"
+    },
+    "auditLevel": {
+      "type": "string",
+      "description": "Minimum severity level (low, moderate, high, critical)",
+      "default": "moderate"
+    }
+  },
+  "steps": [
+    {
+      "id": "install-plugin",
+      "name": "Install security plugin",
+      "type": "shell",
+      "script": "pnpm add -D @kubit/plugin-security"
+    },
+    {
+      "id": "enable-plugin",
+      "name": "Enable security plugin",
+      "type": "file",
+      "operation": "append",
+      "target": "kubit.config.toml",
+      "content": "\n[plugins]\nenabled = [\"@kubit/plugin-security\"]\n"
+    },
+    {
+      "id": "create-security-workflow",
+      "name": "Create GitHub Actions security workflow",
+      "type": "file",
+      "operation": "create",
+      "target": ".github/workflows/security.yml",
+      "content": "name: Security Audit\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main]\n  schedule:\n    - cron: '0 0 * * 1' # Weekly on Monday\n\njobs:\n  security:\n    runs-on: ubuntu-latest\n    \n    steps:\n      - uses: actions/checkout@v4\n      \n      - uses: pnpm/action-setup@v2\n        with:\n          version: 10\n      \n      - uses: actions/setup-node@v4\n        with:\n          node-version: '20'\n          cache: 'pnpm'\n      \n      - name: Install dependencies\n        run: pnpm install\n      \n      - name: Security Audit\n        run: pnpm kubit-forge security:audit --level {{ auditLevel }}\n      \n      - name: Generate SBOM\n        run: pnpm kubit-forge sbom:generate --format {{ sbomFormat }}\n      \n      - name: Upload SBOM\n        uses: actions/upload-artifact@v4\n        with:\n          name: sbom\n          path: sbom.*\n          retention-days: 90\n      \n      - name: Security Check\n        run: pnpm kubit-forge security:check\n"
+    },
+    {
+      "id": "create-npm-scripts",
+      "name": "Add security scripts to package.json",
+      "type": "shell",
+      "script": "npm pkg set scripts.security='kubit-forge security:audit' scripts.security:fix='kubit-forge security:audit --fix' scripts.sbom='kubit-forge sbom:generate' scripts.security:scan='kubit-forge security:scan'"
+    },
+    {
+      "id": "create-prerelease-hook",
+      "name": "Add prerelease security check",
+      "type": "shell",
+      "script": "npm pkg set scripts.prerelease='pnpm run security && pnpm run sbom'"
+    },
+    {
+      "id": "create-gitignore-entry",
+      "name": "Add SBOM to .gitignore",
+      "type": "file",
+      "operation": "append",
+      "target": ".gitignore",
+      "content": "\n# SBOM files\nsbom.json\nsbom.xml\nsbom-*.json\n"
+    }
+  ]
+}

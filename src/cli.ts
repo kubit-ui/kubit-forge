@@ -2,10 +2,8 @@ import { Command } from 'commander';
 
 import type { GlobalOptions, PluginContext } from './types/index.js';
 
-import { bernovaCommand } from './commands/bernova.js';
 import { createCommand } from './commands/create.js';
 import { doctorCommand } from './commands/doctor.js';
-import { ecosystemCommand } from './commands/ecosystem.js';
 import { generateCommand } from './commands/generate/index.js';
 import { initCommand } from './commands/init.js';
 import {
@@ -198,210 +196,26 @@ program
   });
 
 // ============================================================================
-// DOCTOR COMMAND (ENHANCED PHASE 8)
+// DOCTOR COMMAND
 // ============================================================================
 
 program
   .command('doctor')
-  .description('Run comprehensive diagnostics on your project')
-  .option('--fix', 'Auto-fix detected issues')
-  .option('--predictive', 'Run predictive diagnostics to identify potential future issues')
-  .option('--format <type>', 'Output format: text, json, vscode, sarif, checkstyle', 'text')
-  .option('--output <path>', 'Output file path for diagnostics')
-  .option('--recommendations', 'Show personalized recommendations (default: true)')
-  .option('--no-recommendations', 'Disable personalized recommendations')
-  .option('--category <category>', 'Filter by category')
-  .option('--severity <level>', 'Filter by severity: error, warning, info')
-  .option('--report <format>', 'Generate shareable report (markdown, json, bundle)')
-  .addHelpText(
-    'after',
-    `
-Examples:
-  $ kubit-cli doctor                              # Run basic diagnostics
-  $ kubit-cli doctor --fix                        # Auto-fix issues
-  $ kubit-cli doctor --predictive                 # Include predictive analysis
-  $ kubit-cli doctor --fix --predictive           # Full diagnostic with fixes
-  $ kubit-cli doctor --format=vscode              # Export for VS Code
-  $ kubit-cli doctor --format=sarif --output=results.sarif  # For GitHub
-  $ kubit-cli doctor --no-recommendations         # Skip recommendations
-
-Learn more: https://github.com/kubit-ui/kubit-cli/blob/main/DOCTOR_ENHANCED.md
-`
-  )
-  .action(async (options, command) => {
+  .description('Run basic diagnostics on your project')
+  .action(async (_options, command) => {
     const globalOpts = command.optsWithGlobals() as GlobalOptions;
     const ctx = await createContext(globalOpts);
 
     try {
-      // Pass enhanced options to doctor command
       const result = await doctorCommand(ctx, {
-        fix: options.fix,
-        format: options.format,
-        output: options.output,
-        predictive: options.predictive,
-        recommendations: options.recommendations,
+        json: globalOpts.json,
       });
-
-      // Generate legacy report if requested (backward compatibility)
-      if (options.report) {
-        ctx.logger.step(`\n📄 Generating ${options.report} report...`);
-
-        if (options.report === 'markdown') {
-          ctx.logger.success('Report generated: doctor-report.md');
-          ctx.logger.info('Contains: system info, config, diagnostics, recommendations');
-        } else if (options.report === 'json') {
-          ctx.logger.json({
-            config: ctx.config,
-            result,
-            system: {
-              arch: process.arch,
-              node: process.version,
-              platform: process.platform,
-            },
-            timestamp: new Date().toISOString(),
-          });
-        } else if (options.report === 'bundle') {
-          ctx.logger.success('Bundle generated: doctor-bundle.zip');
-          ctx.logger.info('Contains: config, logs, diagnostics (secrets redacted)');
-        }
-      }
-
-      if (globalOpts.json && !options.report && options.format === 'text') {
-        ctx.logger.json(result);
-      }
 
       if (result.status === 'error') {
         process.exit(1);
       }
     } catch (error) {
       ctx.logger.error('Doctor failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// ============================================================================
-// DASHBOARD COMMAND
-// ============================================================================
-
-program
-  .command('dashboard')
-  .description('Launch interactive TUI dashboard')
-  .action(async (_options, command) => {
-    const globalOpts = command.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const { dashboardCommand } = await import('./commands/dashboard.js');
-      const result = await dashboardCommand(ctx);
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Dashboard failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// ============================================================================
-// ASSETS COMMANDS
-// ============================================================================
-
-import {
-  assetsOptimizeCommand,
-  assetsCompressCommand,
-  assetsCdnSyncCommand,
-} from './commands/assets.js';
-
-// assets:optimize
-program
-  .command('assets:optimize')
-  .description('Optimize images, fonts, and other assets')
-  .option('--path <path>', 'Assets path to optimize')
-  .option('--types <types>', 'Asset types to optimize (images,fonts,icons)', 'images,fonts,icons')
-  .option('--quality <quality>', 'Optimization quality (1-100)', '85')
-  .option('--recursive', 'Scan directories recursively', true)
-  .option('--dry-run', 'Preview changes without modifying files')
-  .action(async (options, command) => {
-    const globalOpts = command.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await assetsOptimizeCommand(ctx, {
-        dryRun: options.dryRun,
-        path: options.path,
-        quality: parseInt(options.quality, 10),
-        recursive: options.recursive,
-        types: options.types?.split(','),
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Assets optimization failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// assets:compress
-program
-  .command('assets:compress')
-  .description('Compress assets with gzip/brotli')
-  .option('--path <path>', 'Path to compress')
-  .option('--algorithm <algorithm>', 'Compression algorithm (gzip,brotli,both)', 'both')
-  .option('--level <level>', 'Compression level (1-9)', '9')
-  .option('--extensions <extensions>', 'File extensions to compress', '.js,.css,.html,.svg,.json')
-  .action(async (options, command) => {
-    const globalOpts = command.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await assetsCompressCommand(ctx, {
-        algorithm: options.algorithm as 'gzip' | 'brotli' | 'both',
-        extensions: options.extensions?.split(','),
-        level: parseInt(options.level, 10),
-        path: options.path,
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Assets compression failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// assets:cdn:sync
-program
-  .command('assets:cdn:sync')
-  .description('Sync assets to CDN')
-  .option('--provider <provider>', 'CDN provider (cloudflare,aws,azure,custom)', 'cloudflare')
-  .option('--bucket <bucket>', 'CDN bucket/container name', 'assets')
-  .option('--region <region>', 'CDN region', 'auto')
-  .option('--path <path>', 'Assets path to sync')
-  .option('--dry-run', 'Preview sync without uploading')
-  .option('--invalidate', 'Invalidate CDN cache after sync')
-  .action(async (options, command) => {
-    const globalOpts = command.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await assetsCdnSyncCommand(ctx, {
-        bucket: options.bucket,
-        dryRun: options.dryRun,
-        invalidate: options.invalidate,
-        path: options.path,
-        provider: options.provider as 'cloudflare' | 'aws' | 'azure' | 'custom',
-        region: options.region,
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('CDN sync failed', error as Error);
       process.exit(1);
     }
   });
@@ -1248,27 +1062,6 @@ program
   });
 
 // ============================================================================
-// REFACTOR COMMANDS
-// ============================================================================
-
-import { refactorRenameCommand } from './commands/refactor.js';
-
-program
-  .command('refactor:rename')
-  .description('Rename symbol across codebase')
-  .argument('<old>', 'Old name')
-  .argument('<new>', 'New name')
-  .option('--dry-run', 'Show what would be changed')
-  .action(async (oldName, newName, options, command) => {
-    const globalOpts = command.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-    const result = await refactorRenameCommand(oldName, newName, options, ctx);
-    if (result.status === 'error') {
-      process.exit(1);
-    }
-  });
-
-// ============================================================================
 // PLUGIN SDK COMMANDS
 // ============================================================================
 
@@ -1872,163 +1665,12 @@ program
   });
 
 // ============================================================================
-// BERNOVA COMMANDS (Kubit Ecosystem)
-// ============================================================================
-
-// Bernova init
-program
-  .command('bernova:init')
-  .description('Initialize Bernova in your project')
-  .action(async function () {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await bernovaCommand({ init: true }, ctx);
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Bernova init failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// Bernova generate
-program
-  .command('bernova:generate')
-  .description('Generate Bernova styles')
-  .option('--foundation', 'Generate only foundations')
-  .option('--component', 'Generate only components')
-  .option('--watch', 'Watch mode for development')
-  .action(async (options, command) => {
-    const globalOpts = command.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await bernovaCommand(options, ctx);
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Bernova generation failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// Bernova validate
-program
-  .command('bernova:validate')
-  .description('Validate Bernova configuration')
-  .action(async function () {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await bernovaCommand({ validate: true }, ctx);
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Bernova validation failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// ============================================================================
-// KUBIT ECOSYSTEM COMMANDS
-// ============================================================================
-
-// Ecosystem info
-program
-  .command('ecosystem:info')
-  .description('Show Kubit ecosystem status')
-  .action(async function () {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await ecosystemCommand({ info: true }, ctx);
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Ecosystem info failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// Ecosystem health
-program
-  .command('ecosystem:health')
-  .description('Check Kubit ecosystem health')
-  .action(async function () {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await ecosystemCommand({ health: true }, ctx);
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Ecosystem health check failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// Ecosystem upgrade
-program
-  .command('ecosystem:upgrade')
-  .description('Upgrade Kubit ecosystem packages')
-  .action(async function () {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await ecosystemCommand({ upgrade: true }, ctx);
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Ecosystem upgrade failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// Ecosystem sync
-program
-  .command('ecosystem:sync')
-  .description('Sync Kubit ecosystem versions')
-  .action(async function () {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await ecosystemCommand({ sync: true }, ctx);
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Ecosystem sync failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// ============================================================================
 // SMART DEPENDENCY MANAGEMENT COMMANDS
 // ============================================================================
 
-import {
-  depsAlternativesCommand,
-  depsAnalyzeCommand,
-  depsDedupeCommand,
-  depsExportCommand,
-  depsUpdateCommand,
-  depsWhyCommand,
-} from './commands/deps.js';
+import { depsAnalyzeCommand } from './commands/deps.js';
 
-// deps:analyze - Visual dependency tree
+// deps:analyze - Basic dependency information
 program
   .command('deps:analyze')
   .description('Analyze and visualize dependency tree')
@@ -2051,209 +1693,6 @@ program
     } catch (error) {
       ctx.logger.error('Dependency analysis failed', error as Error);
       process.exit(1);
-    }
-  });
-
-// deps:why - Explain why a package is installed
-program
-  .command('deps:why <package>')
-  .description('Explain why a package is installed')
-  .action(async function (packageName) {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await depsWhyCommand(ctx, packageName, { json: globalOpts.json });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Package analysis failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// deps:dedupe - Deduplicate dependencies
-program
-  .command('deps:dedupe')
-  .description('Deduplicate and optimize dependencies')
-  .option('--dry-run', 'Show what would be done without executing')
-  .action(async function (options) {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await depsDedupeCommand(ctx, {
-        dryRun: options.dryRun,
-        json: globalOpts.json,
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Deduplication failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// deps:update - Smart dependency updates
-program
-  .command('deps:update')
-  .description('Check for and suggest smart dependency updates')
-  .option('--interactive', 'Interactive update mode')
-  .option('--breaking', 'Include breaking changes')
-  .option('--security', 'Only show security updates')
-  .action(async function (options) {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await depsUpdateCommand(ctx, {
-        breakingChanges: options.breaking,
-        interactive: options.interactive,
-        json: globalOpts.json,
-        security: options.security,
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Update check failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// deps:alternatives - Suggest alternative packages
-program
-  .command('deps:alternatives <package>')
-  .description('Suggest alternative packages')
-  .action(async function (packageName) {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await depsAlternativesCommand(ctx, packageName, { json: globalOpts.json });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Alternatives search failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// deps:export - Export dependency report
-program
-  .command('deps:export')
-  .description('Export dependency information to a report')
-  .option('--format <type>', 'Export format: json, markdown, csv', 'json')
-  .option('--output <path>', 'Output file path')
-  .action(async function (options) {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await depsExportCommand(ctx, {
-        format: options.format,
-        output: options.output,
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Export failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// ============================================================================
-// GUI COMMANDS
-// ============================================================================
-
-import { guiCommand, visualConfigCommand } from './commands/gui.js';
-
-// gui - Launch GUI web interface
-program
-  .command('gui')
-  .description('Launch visual web-based GUI dashboard')
-  .option('--port <port>', 'Port number for GUI server', '3030')
-  .option('--host <host>', 'Host for GUI server', 'localhost')
-  .option('--no-open', 'Do not open browser automatically')
-  .action(async function (options) {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await guiCommand(ctx, {
-        host: options.host,
-        noOpen: !options.open,
-        port: parseInt(options.port),
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('GUI failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// visual:config - Visual configuration editor
-program
-  .command('visual:config')
-  .description('Open visual configuration editor')
-  .option('--port <port>', 'Port number for GUI server', '3030')
-  .option('--host <host>', 'Host for GUI server', 'localhost')
-  .option('--no-open', 'Do not open browser automatically')
-  .action(async function (options) {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-
-    try {
-      const result = await visualConfigCommand(ctx, {
-        host: options.host,
-        noOpen: !options.open,
-        port: parseInt(options.port),
-      });
-
-      if (result.status === 'error') {
-        process.exit(1);
-      }
-    } catch (error) {
-      ctx.logger.error('Visual config failed', error as Error);
-      process.exit(1);
-    }
-  });
-
-// ============================================================================
-// AUDIT COMMANDS (PHASE 4)
-// ============================================================================
-
-// Audit SBOM
-program
-  .command('audit:sbom')
-  .description('Generate Software Bill of Materials (SBOM)')
-  .action(async function () {
-    const globalOpts = this.optsWithGlobals() as GlobalOptions;
-    const ctx = await createContext(globalOpts);
-    const verification = new PluginVerification(ctx.logger);
-
-    ctx.logger.step('Generating SBOM...');
-
-    const sbom = verification.generateSBOM(ctx.cwd);
-
-    if (globalOpts.json) {
-      ctx.logger.json(sbom);
-    } else {
-      ctx.logger.success(`SBOM generated for ${sbom.metadata.component.name}`);
-      ctx.logger.info(`Components: ${sbom.components.length}`);
-      ctx.logger.info(`Format: ${sbom.bomFormat} ${sbom.specVersion}`);
     }
   });
 
