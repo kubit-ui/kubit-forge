@@ -42,12 +42,12 @@ kubit-forge env init --env development,staging,production
 
 ```
 project/
-├── .env                    # Local development (gitignored)
-├── .env.example            # Template for team
-├── .env.development        # Development config
-├── .env.staging           # Staging config
-├── .env.production        # Production config
-└── .env.test              # Test config
+ .env                    # Local development (gitignored)
+ .env.example            # Template for team
+ .env.development        # Development config
+ .env.staging           # Staging config
+ .env.production        # Production config
+ .env.test              # Test config
 ```
 
 ### Environment File Structure
@@ -156,15 +156,15 @@ kubit-forge env validate --detailed
 
 ```
 Environment Validation
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✓ NODE_ENV: "development" (valid)
-✓ PORT: 3000 (valid number, 1000-65535)
-✓ DATABASE_URL: "postgresql://..." (valid URL)
-✗ API_KEY: Too short (16 chars, minimum 32)
-⚠ API_SECRET: Missing (optional)
-✗ STRIPE_SECRET_KEY: Invalid format
-✓ FEATURE_NEW_DASHBOARD: true (valid boolean)
+
+ NODE_ENV: "development" (valid)
+ PORT: 3000 (valid number, 1000-65535)
+ DATABASE_URL: "postgresql://..." (valid URL)
+ API_KEY: Too short (16 chars, minimum 32)
+ API_SECRET: Missing (optional)
+ STRIPE_SECRET_KEY: Invalid format
+ FEATURE_NEW_DASHBOARD: true (valid boolean)
 
 Errors: 2
 Warnings: 1
@@ -276,17 +276,17 @@ kubit-forge env scan --git-history
 
 ```
 Secret Detection Scan
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-✗ src/config.ts:12
+
+ src/config.ts:12
   Hardcoded API key detected
   const API_KEY = "sk_live_abc123xyz";
 
-✗ src/utils/stripe.ts:5
+ src/utils/stripe.ts:5
   Stripe secret key in code
   stripe.secretKey = "sk_test_xyz789";
 
-⚠ .env
+ .env
   Committed to git (should be in .gitignore)
 
 Found 2 secrets, 1 warning
@@ -318,7 +318,7 @@ kubit-forge env info --mask
 
 ```
 Environment Information
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 Application:
   NODE_ENV: development
@@ -384,8 +384,8 @@ kubit-forge env diff --missing
 **Example Output:**
 
 ```
-Environment Diff: .env → .env.example
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Environment Diff: .env  .env.example
+
 
 Missing in .env.example:
   + NEW_FEATURE_FLAG
@@ -396,8 +396,8 @@ Missing in .env:
   - OLD_CONFIG_VALUE
 
 Different values:
-  PORT: 3000 → 8080
-  LOG_LEVEL: debug → info
+  PORT: 3000  8080
+  LOG_LEVEL: debug  info
 
 Recommendation: Update .env.example
 ```

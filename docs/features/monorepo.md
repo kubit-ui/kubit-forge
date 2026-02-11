@@ -40,16 +40,16 @@ kubit-forge monorepo:add apps/web
 
 ```
 monorepo/
-├── pnpm-workspace.yaml
-├── package.json
-├── packages/
-│   ├── ui/
-│   │   └── package.json
-│   └── core/
-│       └── package.json
-└── apps/
-    └── web/
-        └── package.json
+ pnpm-workspace.yaml
+ package.json
+ packages/
+    ui/
+       package.json
+    core/
+        package.json
+ apps/
+     web/
+         package.json
 ```
 
 **pnpm-workspace.yaml:**
@@ -220,27 +220,27 @@ kubit-forge monorepo:list --json
 ```
 Monorepo Packages (5):
 
-📦 apps/web (1.0.0)
+ apps/web (1.0.0)
    Path: apps/web
    Type: application
    Dependencies: @company/ui, @company/core
 
-📦 apps/admin (1.0.0)
+ apps/admin (1.0.0)
    Path: apps/admin
    Type: application
    Dependencies: @company/ui, @company/auth
 
-📦 @company/ui (0.1.0)
+ @company/ui (0.1.0)
    Path: packages/ui
    Type: library
    Dependencies: react, styled-components
 
-📦 @company/core (0.1.0)
+ @company/core (0.1.0)
    Path: packages/core
    Type: library
    Dependencies: None
 
-📦 @company/auth (0.1.0)
+ @company/auth (0.1.0)
    Path: packages/auth
    Type: library
    Dependencies: @company/core
@@ -303,16 +303,16 @@ kubit-forge monorepo:graph --check-circular
 Workspace Dependency Graph:
 
 apps/web
-├── @company/ui
-│   └── @company/core
-└── @company/auth
-    └── @company/core
+ @company/ui
+    @company/core
+ @company/auth
+     @company/core
 
 apps/admin
-├── @company/ui
-│   └── @company/core
-└── @company/auth
-    └── @company/core
+ @company/ui
+    @company/core
+ @company/auth
+     @company/core
 ```
 
 ### Information
@@ -468,10 +468,10 @@ kubit-forge monorepo:add packages/new-lib --template typescript-lib
 
 ```
 monorepo/
-├── apps/        # Applications
-├── packages/    # Shared libraries
-├── tools/       # Build tools
-└── configs/     # Shared configs
+ apps/        # Applications
+ packages/    # Shared libraries
+ tools/       # Build tools
+ configs/     # Shared configs
 ```
 
 ### 3. Centralize Configuration
@@ -480,9 +480,9 @@ Share ESLint, TypeScript, and other configs across packages.
 
 ```
 configs/
-├── eslint-config/
-├── tsconfig/
-└── prettier-config/
+ eslint-config/
+ tsconfig/
+ prettier-config/
 ```
 
 ### 4. Use Build Cache

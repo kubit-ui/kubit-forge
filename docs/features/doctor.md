@@ -43,24 +43,24 @@ Checks project configuration files for errors and best practices.
 
 **Checks:**
 
-- ✅ TypeScript configuration validity
-- ✅ ESLint rules consistency
-- ✅ Prettier configuration
-- ✅ Vite/build configuration
-- ✅ Package.json scripts
-- ✅ tsconfig.json issues
+-  TypeScript configuration validity
+-  ESLint rules consistency
+-  Prettier configuration
+-  Vite/build configuration
+-  Package.json scripts
+-  tsconfig.json issues
 
 **Example Output:**
 
 ```
-⚠ Configuration Issues (2 found)
+ Configuration Issues (2 found)
 
-  ✓ TypeScript configuration is valid
-  ⚠ ESLint: Missing recommended rules
-    → Auto-fix: kubit-forge doctor --fix
+   TypeScript configuration is valid
+   ESLint: Missing recommended rules
+     Auto-fix: kubit-forge doctor --fix
 
-  ⚠ Vite: Build target outdated (es2015 → es2020)
-    → Recommendation: Update vite.config.ts
+   Vite: Build target outdated (es2015  es2020)
+     Recommendation: Update vite.config.ts
 ```
 
 ### Dependency Health
@@ -69,32 +69,32 @@ Analyzes project dependencies for issues.
 
 **Checks:**
 
-- ✅ Outdated packages
-- ✅ Security vulnerabilities
-- ✅ Duplicate dependencies
-- ✅ Missing peer dependencies
-- ✅ Unused dependencies
-- ✅ License compatibility
+-  Outdated packages
+-  Security vulnerabilities
+-  Duplicate dependencies
+-  Missing peer dependencies
+-  Unused dependencies
+-  License compatibility
 
 **Example Output:**
 
 ```
-⚠ Dependency Issues (4 found)
+ Dependency Issues (4 found)
 
-  ⚠ Security: 2 vulnerabilities found
-    → react-dom@17.0.2 (high severity)
-    → axios@0.21.1 (moderate severity)
-    → Action: kubit-forge deps:update --security
+   Security: 2 vulnerabilities found
+     react-dom@17.0.2 (high severity)
+     axios@0.21.1 (moderate severity)
+     Action: kubit-forge deps:update --security
 
-  ⚠ Outdated: 12 packages have updates available
-    → Major updates: 3 packages
-    → Minor updates: 5 packages
-    → Patch updates: 4 packages
-    → Action: kubit-forge deps:update
+   Outdated: 12 packages have updates available
+     Major updates: 3 packages
+     Minor updates: 5 packages
+     Patch updates: 4 packages
+     Action: kubit-forge deps:update
 
-  ⚠ Duplicates: 3 duplicate packages detected
-    → lodash@4.17.21 (appears 3 times)
-    → Action: kubit-forge deps:dedupe
+   Duplicates: 3 duplicate packages detected
+     lodash@4.17.21 (appears 3 times)
+     Action: kubit-forge deps:dedupe
 ```
 
 ### Security Scan
@@ -103,29 +103,29 @@ Comprehensive security analysis.
 
 **Checks:**
 
-- ✅ Known vulnerabilities (CVE database)
-- ✅ Malicious packages
-- ✅ License violations
-- ✅ Exposed secrets in code
-- ✅ Insecure dependencies
-- ✅ Supply chain risks
+-  Known vulnerabilities (CVE database)
+-  Malicious packages
+-  License violations
+-  Exposed secrets in code
+-  Insecure dependencies
+-  Supply chain risks
 
 **Example Output:**
 
 ```
-✗ Security Issues (3 found)
+ Security Issues (3 found)
 
-  ✗ HIGH: Prototype pollution in lodash@4.17.15
-    → CVE-2020-8203
-    → Fix: Update to lodash@4.17.21
+   HIGH: Prototype pollution in lodash@4.17.15
+     CVE-2020-8203
+     Fix: Update to lodash@4.17.21
 
-  ⚠ MEDIUM: Exposed API key in .env.example
-    → File: .env.example:3
-    → Action: Remove or use placeholder
+   MEDIUM: Exposed API key in .env.example
+     File: .env.example:3
+     Action: Remove or use placeholder
 
-  ⚠ LOW: Permissive CORS configuration
-    → File: src/server.ts:12
-    → Recommendation: Restrict allowed origins
+   LOW: Permissive CORS configuration
+     File: src/server.ts:12
+     Recommendation: Restrict allowed origins
 ```
 
 ### Performance Analysis
@@ -134,29 +134,29 @@ Identifies performance bottlenecks.
 
 **Checks:**
 
-- ✅ Bundle size analysis
-- ✅ Large dependencies
-- ✅ Unoptimized images
-- ✅ Missing code splitting
-- ✅ Build performance
-- ✅ Development server speed
+-  Bundle size analysis
+-  Large dependencies
+-  Unoptimized images
+-  Missing code splitting
+-  Build performance
+-  Development server speed
 
 **Example Output:**
 
 ```
-⚠ Performance Issues (3 found)
+ Performance Issues (3 found)
 
-  ⚠ Large bundle size: 2.4 MB (recommended < 500 KB)
-    → Largest chunks:
+   Large bundle size: 2.4 MB (recommended < 500 KB)
+     Largest chunks:
       - vendor.js: 1.8 MB
       - main.js: 600 KB
-    → Recommendation: Enable code splitting
+     Recommendation: Enable code splitting
 
-  ⚠ Unoptimized images: 15 images > 500 KB
-    → Total size: 8.2 MB
-    → Action: kubit-forge assets:optimize
+   Unoptimized images: 15 images > 500 KB
+     Total size: 8.2 MB
+     Action: kubit-forge assets:optimize
 
-  ✓ No blocking resources found
+   No blocking resources found
 ```
 
 ### Code Quality
@@ -165,28 +165,28 @@ Analyzes code quality and best practices.
 
 **Checks:**
 
-- ✅ Linting errors
-- ✅ Type errors
-- ✅ Unused code
-- ✅ Code complexity
-- ✅ Test coverage
-- ✅ Documentation coverage
+-  Linting errors
+-  Type errors
+-  Unused code
+-  Code complexity
+-  Test coverage
+-  Documentation coverage
 
 **Example Output:**
 
 ```
-⚠ Code Quality Issues (5 found)
+ Code Quality Issues (5 found)
 
-  ⚠ ESLint: 23 errors, 45 warnings
-    → Action: kubit-forge lint --fix
+   ESLint: 23 errors, 45 warnings
+     Action: kubit-forge lint --fix
 
-  ⚠ TypeScript: 12 type errors
-    → Most common: implicit any (8 occurrences)
-    → Action: kubit-forge typecheck
+   TypeScript: 12 type errors
+     Most common: implicit any (8 occurrences)
+     Action: kubit-forge typecheck
 
-  ⚠ Test Coverage: 45% (recommended > 80%)
-    → Uncovered files: 23
-    → Action: Add more tests
+   Test Coverage: 45% (recommended > 80%)
+     Uncovered files: 23
+     Action: Add more tests
 ```
 
 ### IDE Integration
@@ -195,25 +195,25 @@ Checks IDE setup and configuration.
 
 **Checks:**
 
-- ✅ VS Code extensions
-- ✅ Editor settings
-- ✅ Debugger configuration
-- ✅ Workspace recommendations
-- ✅ Task configuration
+-  VS Code extensions
+-  Editor settings
+-  Debugger configuration
+-  Workspace recommendations
+-  Task configuration
 
 **Example Output:**
 
 ```
-⚠ IDE Setup (2 recommendations)
+ IDE Setup (2 recommendations)
 
-  ⚠ Missing recommended VS Code extensions:
-    → ESLint
-    → Prettier
-    → TypeScript Vue Plugin
-    → Action: Install recommended extensions
+   Missing recommended VS Code extensions:
+     ESLint
+     Prettier
+     TypeScript Vue Plugin
+     Action: Install recommended extensions
 
-  ✓ Debugger configuration is valid
-  ✓ Workspace settings are optimal
+   Debugger configuration is valid
+   Workspace settings are optimal
 ```
 
 ### Git & Version Control
@@ -222,39 +222,39 @@ Analyzes version control setup.
 
 **Checks:**
 
-- ✅ .gitignore completeness
-- ✅ Large files in repository
-- ✅ Commit message format
-- ✅ Branch protection
-- ✅ Git hooks setup
+-  .gitignore completeness
+-  Large files in repository
+-  Commit message format
+-  Branch protection
+-  Git hooks setup
 
 **Example Output:**
 
 ```
-⚠ Version Control Issues (2 found)
+ Version Control Issues (2 found)
 
-  ⚠ .gitignore: Missing important patterns
-    → Missing: node_modules/.cache
-    → Missing: .env.local
-    → Action: kubit-forge doctor --fix
+   .gitignore: Missing important patterns
+     Missing: node_modules/.cache
+     Missing: .env.local
+     Action: kubit-forge doctor --fix
 
-  ⚠ Large files in repository:
-    → dist/bundle.js: 3.2 MB
-    → Action: Add to .gitignore
+   Large files in repository:
+     dist/bundle.js: 3.2 MB
+     Action: Add to .gitignore
 ```
 
 ## Auto-Fix Capabilities
 
 ### What Can Be Auto-Fixed?
 
-- ✅ Configuration syntax errors
-- ✅ Missing configuration files
-- ✅ Outdated dependencies (with confirmation)
-- ✅ ESLint/Prettier issues
-- ✅ .gitignore patterns
-- ✅ Package.json scripts
-- ✅ TypeScript configuration
-- ✅ Missing type definitions
+-  Configuration syntax errors
+-  Missing configuration files
+-  Outdated dependencies (with confirmation)
+-  ESLint/Prettier issues
+-  .gitignore patterns
+-  Package.json scripts
+-  TypeScript configuration
+-  Missing type definitions
 
 ### Running Auto-Fix
 
@@ -277,11 +277,11 @@ kubit-forge doctor --fix --interactive
 ```
 Running auto-fix...
 
-✓ Fixed: ESLint configuration (added missing rules)
-✓ Fixed: Added .gitignore patterns
-✓ Fixed: Updated TypeScript target to es2020
-⚠ Skipped: Dependency updates (requires confirmation)
-  → Run: kubit-forge deps:update
+ Fixed: ESLint configuration (added missing rules)
+ Fixed: Added .gitignore patterns
+ Fixed: Updated TypeScript target to es2020
+ Skipped: Dependency updates (requires confirmation)
+   Run: kubit-forge deps:update
 
 Auto-fix complete: 3 fixed, 1 skipped
 ```
@@ -305,24 +305,24 @@ kubit-forge doctor --predictive
 **Example Output:**
 
 ```
-🔮 Predictive Analysis
+ Predictive Analysis
 
-  ⚠ Deprecated Dependency Alert
-    → moment.js is in maintenance mode
-    → Recommendation: Migrate to date-fns or dayjs
-    → Effort: 2-3 hours
-    → Priority: Medium
+   Deprecated Dependency Alert
+     moment.js is in maintenance mode
+     Recommendation: Migrate to date-fns or dayjs
+     Effort: 2-3 hours
+     Priority: Medium
 
-  ⚠ Upcoming Breaking Change
-    → react-router@7 will be released soon
-    → Current version: react-router@6.4.0
-    → Breaking changes: Route API redesign
-    → Action: Review migration guide
+   Upcoming Breaking Change
+     react-router@7 will be released soon
+     Current version: react-router@6.4.0
+     Breaking changes: Route API redesign
+     Action: Review migration guide
 
-  ⚠ Bundle Size Trend
-    → Bundle size increased 15% in last month
-    → Current: 1.2 MB (from 1.0 MB)
-    → Recommendation: Implement code splitting
+   Bundle Size Trend
+     Bundle size increased 15% in last month
+     Current: 1.2 MB (from 1.0 MB)
+     Recommendation: Implement code splitting
 ```
 
 ## Advanced Features
@@ -464,13 +464,13 @@ kubit-forge doctor --export report.json
 
 # Check exit code
 if [ $? -ne 0 ]; then
-  echo "❌ Health check failed!"
+  echo " Health check failed!"
   # Send notification
   curl -X POST slack-webhook-url -d "@report.json"
   exit 1
 fi
 
-echo "✓ Health check passed!"
+echo " Health check passed!"
 ```
 
 ### Pre-Release Checklist
@@ -493,7 +493,7 @@ kubit-forge deps:analyze
 # Generate SBOM
 kubit-forge sbom:generate
 
-echo "✓ Pre-release checks complete!"
+echo " Pre-release checks complete!"
 ```
 
 ### Onboarding New Developers
@@ -513,7 +513,7 @@ kubit-forge doctor --fix
 # Install recommended tools
 kubit-forge doctor --install-recommendations
 
-echo "✓ Environment ready!"
+echo " Environment ready!"
 ```
 
 ## Troubleshooting
@@ -569,11 +569,105 @@ kubit-forge doctor --debug --rule custom-rule-name
 - Filter by category for faster analysis
 - Export reports for offline analysis
 
+## Doctor Advanced Plugin (Optional)
+
+**Optional plugin for extended diagnostics features.**
+
+### Installation
+
+Enable in your configuration:
+
+```toml
+# kubit.config.toml
+[plugins]
+enabled = ["@kubit/plugin-doctor-advanced"]
+```
+
+### Auto-Fix
+
+Automatically fix detected issues:
+
+```bash
+# Run diagnostics and auto-fix
+kubit-forge doctor:fix
+
+# Preview what would be fixed
+kubit-forge doctor:fix --dry-run
+```
+
+**What can be auto-fixed:**
+
+- Missing configuration files (.gitignore, .prettierrc)
+- Basic ESLint configuration issues
+- Package.json fields (license, repository)
+- Environment setup (.env files)
+
+**Safety features:**
+
+- Shows what will be changed
+- Dry-run mode to preview
+- Backup created before major changes
+- Rollback capability
+
+### Predictive Diagnostics
+
+Identify potential future issues:
+
+```bash
+kubit-forge doctor:predictive
+```
+
+**Analyzes:**
+
+- Dependency deprecation trends
+- Security vulnerability patterns
+- Performance degradation indicators
+- Code smell progression
+- Breaking changes in dependencies
+
+### IDE Integration
+
+Export diagnostics in IDE-compatible formats:
+
+```bash
+# Export as JSON
+kubit-forge doctor:export --format json
+
+# Export for VS Code
+kubit-forge doctor:export --format vscode --output .vscode/diagnostics.json
+
+# Export SARIF for GitHub Code Scanning
+kubit-forge doctor:export --format sarif --output results.sarif
+```
+
+**Supported formats:**
+
+- `json` - Standard JSON
+- `vscode` - VS Code problems
+- `sarif` - SARIF 2.1.0 (GitHub, GitLab)
+- `checkstyle` - Checkstyle XML
+
+### Personalized Recommendations
+
+Get context-aware recommendations:
+
+```bash
+kubit-forge doctor:recommendations
+```
+
+**Analyzes:**
+
+- Project size and complexity
+- Technology stack and versions
+- Code quality metrics
+- Team velocity patterns
+- Industry best practices
+
 ## Related Documentation
 
-- [Dependency Management](./DEPENDENCY-MANAGEMENT.md) - Manage dependencies
-- [Security & SBOM](./SECURITY-SBOM.md) - Security features
-- [Configuration](./CONFIGURATION.md) - Configure doctor behavior
+- [Configuration](../core/configuration.md) - Configure doctor behavior
+- [Security Plugin](./security.md) - Security features
+- [Framework Recipes](../framework/recipes.md) - Workflow automation
 
 ---
 

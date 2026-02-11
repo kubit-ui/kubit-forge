@@ -50,11 +50,11 @@ kubit-forge generate component Button --type class
 
 ```
 src/components/Button/
-├── Button.tsx
-├── Button.test.tsx        # if --with-tests
-├── Button.stories.tsx     # if --with-story
-├── Button.module.css      # if using CSS Modules
-└── index.ts
+ Button.tsx
+ Button.test.tsx        # if --with-tests
+ Button.stories.tsx     # if --with-story
+ Button.module.css      # if using CSS Modules
+ index.ts
 ```
 
 **Example Output (Button.tsx):**
@@ -110,9 +110,9 @@ kubit-forge generate page admin/Users --route /admin/users
 
 ```
 src/pages/Dashboard/
-├── Dashboard.tsx
-├── Dashboard.test.tsx
-└── index.ts
+ Dashboard.tsx
+ Dashboard.test.tsx
+ index.ts
 ```
 
 ### Hook Generator
@@ -361,10 +361,10 @@ kubit-forge generate:template component MyComponent
 
 ```
 .kubit/templates/component/
-├── component.tsx.hbs
-├── component.test.tsx.hbs
-├── component.stories.tsx.hbs
-└── template.config.json
+ component.tsx.hbs
+ component.test.tsx.hbs
+ component.stories.tsx.hbs
+ template.config.json
 ```
 
 **Example Template (component.tsx.hbs):**
@@ -609,8 +609,8 @@ kubit-forge generate component ButtonNew
 
 ```bash
 # Valid component names
-kubit-forge generate component MyComponent  # ✓ PascalCase
-kubit-forge generate component my-component # ✗ kebab-case not allowed
+kubit-forge generate component MyComponent  #  PascalCase
+kubit-forge generate component my-component #  kebab-case not allowed
 ```
 
 ## Related Documentation

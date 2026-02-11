@@ -42,33 +42,33 @@ kubit-forge upgrade:check --breaking
 
 ```
 Available Updates
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 Major (Breaking Changes):
-  react: 17.0.2 → 18.2.0
-    ⚠ Breaking: Automatic batching changes
-    ⚠ Breaking: Strict mode improvements
-    📖 Guide: https://react.dev/blog/2022/03/08/react-18-upgrade-guide
+  react: 17.0.2  18.2.0
+     Breaking: Automatic batching changes
+     Breaking: Strict mode improvements
+     Guide: https://react.dev/blog/2022/03/08/react-18-upgrade-guide
 
-  webpack: 4.46.0 → 5.89.0
-    ⚠ Breaking: Module federation changes
-    ⚠ Breaking: Node polyfills removed
-    📖 Guide: https://webpack.js.org/migrate/5/
+  webpack: 4.46.0  5.89.0
+     Breaking: Module federation changes
+     Breaking: Node polyfills removed
+     Guide: https://webpack.js.org/migrate/5/
 
 Minor (New Features):
-  typescript: 5.0.4 → 5.3.3
-    ✨ New: Decorator metadata
-    ✨ New: const type parameters
+  typescript: 5.0.4  5.3.3
+     New: Decorator metadata
+     New: const type parameters
 
-  eslint: 8.50.0 → 8.56.0
-    ✨ New: Flat config support
+  eslint: 8.50.0  8.56.0
+     New: Flat config support
 
 Patch (Bug Fixes):
-  axios: 1.5.0 → 1.6.7
-    🐛 Fix: Security vulnerability CVE-2023-45857
+  axios: 1.5.0  1.6.7
+     Fix: Security vulnerability CVE-2023-45857
 
-  lodash: 4.17.20 → 4.17.21
-    🐛 Fix: Prototype pollution
+  lodash: 4.17.20  4.17.21
+     Fix: Prototype pollution
 
 Total updates: 47 (12 major, 18 minor, 17 patch)
 ```
@@ -115,8 +115,8 @@ kubit-forge upgrade --safe --rollback
 1. Create backup/snapshot
 2. Upgrade dependencies
 3. Run tests
-4. If tests fail → rollback
-5. If tests pass → commit changes
+4. If tests fail  rollback
+5. If tests pass  commit changes
 
 ### Breaking Change Detection
 
@@ -134,8 +134,8 @@ kubit-forge upgrade:breaking --guide
 **Example Output:**
 
 ```
-Breaking Change Analysis: react 17→18
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Breaking Change Analysis: react 1718
+
 
 Impact: HIGH
 Affected files: 23
@@ -187,26 +187,26 @@ kubit-forge migrate:list --detailed
 
 ```
 Available Migrations
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 
 Framework Updates:
-  ✓ react-18-root-api       Migrate to React 18 root API
-  ✓ react-18-types          Update React 18 TypeScript types
-  ○ nextjs-13-app-router    Migrate to Next.js App Router
-  ○ vite-5-migration        Upgrade to Vite 5
+   react-18-root-api       Migrate to React 18 root API
+   react-18-types          Update React 18 TypeScript types
+   nextjs-13-app-router    Migrate to Next.js App Router
+   vite-5-migration        Upgrade to Vite 5
 
 Configuration:
-  ✓ eslint-flat-config      Migrate to ESLint flat config
-  ○ typescript-5-config     Update TypeScript 5 config
+   eslint-flat-config      Migrate to ESLint flat config
+   typescript-5-config     Update TypeScript 5 config
 
 Deprecations:
-  ○ remove-moment           Replace moment.js with date-fns
-  ○ remove-lodash           Replace lodash with native methods
+   remove-moment           Replace moment.js with date-fns
+   remove-lodash           Replace lodash with native methods
 
 Custom:
-  ○ company-auth-v2         Migrate to company auth v2
+   company-auth-v2         Migrate to company auth v2
 
-Legend: ✓ Completed | ○ Pending | ⚠ Failed
+Legend:  Completed |  Pending |  Failed
 ```
 
 ### Run Migration
@@ -232,24 +232,24 @@ kubit-forge migrate react-18-root-api --no-backup
 
 ```
 Running migration: react-18-root-api
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1. Creating backup...                              ✓
-2. Analyzing codebase...                           ✓
+
+1. Creating backup...                              
+2. Analyzing codebase...                           
    Found 3 files to migrate
 
 3. Applying transformations...
-   ✓ src/index.tsx - Updated ReactDOM.render
-   ✓ src/App.test.tsx - Updated test setup
-   ✓ src/utils/render.tsx - Updated test utility
+    src/index.tsx - Updated ReactDOM.render
+    src/App.test.tsx - Updated test setup
+    src/utils/render.tsx - Updated test utility
 
-4. Updating dependencies...                        ✓
+4. Updating dependencies...                        
    Updated: react@18.2.0, react-dom@18.2.0
 
-5. Running tests...                                ✓
+5. Running tests...                                
    All tests passed (23/23)
 
-6. Updating documentation...                       ✓
+6. Updating documentation...                       
 
 Migration completed successfully!
 

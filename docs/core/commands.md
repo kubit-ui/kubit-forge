@@ -39,11 +39,11 @@ kubit-forge dev
 
 **Features:**
 
-- ⚡ Lightning-fast HMR (Hot Module Replacement)
-- 🔄 Automatic browser refresh
-- 📦 On-demand compilation
-- 🔥 Error overlay
-- 🌐 Network access support
+-  Lightning-fast HMR (Hot Module Replacement)
+-  Automatic browser refresh
+-  On-demand compilation
+-  Error overlay
+-  Network access support
 
 **Options:**
 
@@ -69,9 +69,9 @@ kubit-forge dev --force
 ```
   VITE v5.0.0  ready in 342 ms
 
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: http://192.168.1.100:5173/
-  ➜  press h to show help
+    Local:   http://localhost:5173/
+    Network: http://192.168.1.100:5173/
+    press h to show help
 ```
 
 ### Environment Variables
@@ -94,21 +94,21 @@ kubit-forge build
 
 **Features:**
 
-- 🗜️ Code minification
-- 📦 Bundle optimization
-- 🌳 Tree-shaking
-- 💾 Asset optimization
-- 📊 Bundle analysis
+-  Code minification
+-  Bundle optimization
+-  Tree-shaking
+-  Asset optimization
+-  Bundle analysis
 
 **Output:**
 
 ```
 vite v5.0.0 building for production...
-✓ 1247 modules transformed.
-dist/index.html                   0.45 kB │ gzip:  0.29 kB
-dist/assets/index-b8d3c9f2.css   15.23 kB │ gzip:  4.12 kB
-dist/assets/index-d4f7e8a1.js   142.45 kB │ gzip: 45.78 kB
-✓ built in 3.24s
+ 1247 modules transformed.
+dist/index.html                   0.45 kB  gzip:  0.29 kB
+dist/assets/index-b8d3c9f2.css   15.23 kB  gzip:  4.12 kB
+dist/assets/index-d4f7e8a1.js   142.45 kB  gzip: 45.78 kB
+ built in 3.24s
 ```
 
 **Options:**
@@ -254,7 +254,7 @@ kubit-forge lint --max-warnings 0
 **Example Output:**
 
 ```
-✓ No linting errors found
+ No linting errors found
 
   Checked 145 files
   0 errors, 3 warnings
@@ -334,10 +334,10 @@ kubit-forge check --skip-tests
 ```
 Running checks...
 
-✓ Linting passed
-✓ Formatting check passed
-✓ Type checking passed
-⚠ Tests passed with warnings
+ Linting passed
+ Formatting check passed
+ Type checking passed
+ Tests passed with warnings
 
 All checks completed successfully!
 ```
@@ -360,12 +360,12 @@ kubit-forge info --json
 **Example Output:**
 
 ```
-📦 Project: my-awesome-app
-📝 Version: 1.0.0
-⚛️  Stack: React + TypeScript
-📦 Package Manager: pnpm
-🔧 Node Version: v20.10.0
-📁 Root: /Users/dev/my-app
+ Project: my-awesome-app
+ Version: 1.0.0
+ Stack: React + TypeScript
+ Package Manager: pnpm
+ Node Version: v20.10.0
+ Root: /Users/dev/my-app
 
 Dependencies: 42
 DevDependencies: 28

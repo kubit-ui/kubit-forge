@@ -23,12 +23,12 @@ kubit-forge init
 
 Every initialized project includes:
 
-- ✅ **TypeScript Configuration** - Full type safety with tsconfig.json
-- ✅ **Vite Build Setup** - Lightning-fast HMR and optimized builds
-- ✅ **ESLint & Prettier** - Code quality and formatting tools
-- ✅ **Testing Infrastructure** - Vitest configuration ready to use
-- ✅ **Git Initialization** - .gitignore and repository setup
-- ✅ **Package Manager Detection** - Automatically uses npm, yarn, or pnpm
+-  **TypeScript Configuration** - Full type safety with tsconfig.json
+-  **Vite Build Setup** - Lightning-fast HMR and optimized builds
+-  **ESLint & Prettier** - Code quality and formatting tools
+-  **Testing Infrastructure** - Vitest configuration ready to use
+-  **Git Initialization** - .gitignore and repository setup
+-  **Package Manager Detection** - Automatically uses npm, yarn, or pnpm
 
 ## Available Templates
 
@@ -55,15 +55,15 @@ kubit-forge init react my-app
 
 ```
 my-app/
-├── src/
-│   ├── App.tsx
-│   ├── App.css
-│   └── main.tsx
-├── public/
-├── index.html
-├── tsconfig.json
-├── vite.config.ts
-└── package.json
+ src/
+    App.tsx
+    App.css
+    main.tsx
+ public/
+ index.html
+ tsconfig.json
+ vite.config.ts
+ package.json
 ```
 
 #### 2. React + Bernova Design System (`react-bernova`)
@@ -176,20 +176,20 @@ All templates follow a consistent structure:
 
 ```
 project-root/
-├── src/                    # Source code
-│   ├── components/        # (React templates)
-│   ├── styles/           # Stylesheets
-│   ├── utils/            # Utility functions
-│   └── App.tsx           # Main application
-├── public/                # Static assets
-├── tests/                # Test files (if included)
-├── .vscode/              # VS Code settings (optional)
-├── .editorconfig         # Editor configuration
-├── .prettierrc           # Prettier configuration
-├── eslint.config.js      # ESLint configuration
-├── tsconfig.json         # TypeScript configuration
-├── vite.config.ts        # Vite configuration
-└── package.json          # Dependencies and scripts
+ src/                    # Source code
+    components/        # (React templates)
+    styles/           # Stylesheets
+    utils/            # Utility functions
+    App.tsx           # Main application
+ public/                # Static assets
+ tests/                # Test files (if included)
+ .vscode/              # VS Code settings (optional)
+ .editorconfig         # Editor configuration
+ .prettierrc           # Prettier configuration
+ eslint.config.js      # ESLint configuration
+ tsconfig.json         # TypeScript configuration
+ vite.config.ts        # Vite configuration
+ package.json          # Dependencies and scripts
 ```
 
 ## Custom Templates
@@ -271,13 +271,13 @@ Projects include Husky setup for:
 
 ### Project Naming
 
-✅ **Good:**
+ **Good:**
 
 - `my-app`
 - `awesome-dashboard`
 - `company-portal`
 
-❌ **Avoid:**
+ **Avoid:**
 
 - `MyApp` (use kebab-case)
 - `my app` (no spaces)

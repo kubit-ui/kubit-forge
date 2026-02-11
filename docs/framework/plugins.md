@@ -47,6 +47,100 @@ cd my-plugin
 npm publish
 ```
 
+## Internal (Local) Plugins
+
+You can use plugins without publishing to npm. Perfect for **company-specific tools**, **monorepos**, or **development**.
+
+### Configuration
+
+```toml
+# kubit.config.toml
+[plugins]
+# External plugins from npm
+enabled = ["@kubit/plugin-analytics"]
+
+# Internal plugins (local file paths)
+internal = [
+  "./src/plugins/my-plugin",
+  "./plugins/custom-commands"
+]
+```
+
+### Creating an Internal Plugin
+
+```typescript
+// src/plugins/my-plugin/index.ts
+import type { Plugin, PluginContext, CommandRegistration } from 'kubit-forge';
+
+const plugin: Plugin = {
+  name: '@myorg/my-plugin',
+  version: '1.0.0',
+
+  onLoad: async (ctx: PluginContext) => {
+    ctx.logger.info('My Plugin loaded');
+  },
+
+  registerCommands: (): CommandRegistration[] => {
+    return [
+      {
+        name: 'my-command',
+        description: 'My custom command',
+        action: async (args, ctx) => {
+          ctx.logger.success('Command executed!');
+          return { status: 'ok' };
+        },
+      },
+    ];
+  },
+};
+
+export default plugin;
+```
+
+### Benefits
+
+-  **No npm publish required** - Keep plugins private
+-  **Monorepo friendly** - Share plugins across packages
+-  **Fast development** - Develop alongside your app
+-  **Enterprise use cases** - Company-specific functionality
+
+### Example: Enterprise CLI
+
+```toml
+# kubit.config.toml
+[project]
+name = "enterprise-cli"
+
+[plugins]
+enabled = ["@kubit-ui/plugin-react"]
+
+# Company-specific plugins
+internal = [
+  "./src/plugins/company-standards",
+  "./src/plugins/deployment",
+  "./src/plugins/security-checks"
+]
+```
+
+```typescript
+// src/plugins/company-standards/index.ts
+export default {
+  name: '@company/standards',
+  version: '1.0.0',
+
+  registerCommands: () => [
+    {
+      name: 'validate:standards',
+      description: 'Validate code against company standards',
+      action: async (args, ctx) => {
+        // Custom validation logic
+        return { status: 'ok' };
+      },
+    },
+  ],
+};
+```
+
 ## Plugin Structure
 
 ### Basic Plugin
@@ -479,7 +573,7 @@ export default {
       console.log(`Deploying to ${target}...`);
       await deployToServer(target, ctx.config);
 
-      console.log('✓ Deployment successful!');
+      console.log(' Deployment successful!');
     },
   },
 } satisfies Plugin;
@@ -527,12 +621,12 @@ export async function {{method}}(req, res) {
 
 ### 1. Follow Naming Convention
 
-✅ **Good:**
+ **Good:**
 
 - `@org/kubit-plugin-feature`
 - `kubit-plugin-utility`
 
-❌ **Avoid:**
+ **Avoid:**
 
 - `my-cool-plugin`
 - `plugin-for-kubit`
@@ -642,10 +736,10 @@ kubit-forge plugin:verify @org/plugin-name --strict
 
 Only install plugins from:
 
-- ✅ Official @kubit scope
-- ✅ Verified organizations
-- ✅ Open source with reviews
-- ❌ Unknown sources
+-  Official @kubit scope
+-  Verified organizations
+-  Open source with reviews
+-  Unknown sources
 
 ## Related Documentation
 

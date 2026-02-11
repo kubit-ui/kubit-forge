@@ -10,11 +10,11 @@ Kubit Forge uses a TOML-based configuration file (`kubit.config.toml`) for proje
 
 ```
 project-root/
-├── kubit.config.toml    # Main configuration
-├── .kubit/              # Custom configurations
-│   ├── plugins/
-│   ├── recipes/
-│   └── templates/
+ kubit.config.toml    # Main configuration
+ .kubit/              # Custom configurations
+    plugins/
+    recipes/
+    templates/
 ```
 
 ### Basic Structure

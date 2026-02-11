@@ -4,7 +4,7 @@
 
 The Security Plugin provides enterprise-grade supply chain security features for projects that need SBOM (Software Bill of Materials) generation and advanced security auditing.
 
-## 📦 Installation
+##  Installation
 
 The security plugin is **built-in** but **optional**. Enable it in your configuration:
 
@@ -14,7 +14,7 @@ The security plugin is **built-in** but **optional**. Enable it in your configur
 enabled = ["@kubit/plugin-security"]
 ```
 
-## 🚀 Commands
+##  Commands
 
 ### SBOM Generation
 
@@ -95,7 +95,7 @@ kubit-forge security:check
 kubit-forge security:check --strict
 ```
 
-## 📋 Use Cases
+##  Use Cases
 
 ### 1. Enterprise Compliance
 
@@ -149,7 +149,7 @@ Automated security monitoring:
 #!/bin/bash
 # security-check.sh
 
-echo "🔒 Running security checks..."
+echo " Running security checks..."
 
 # Run security scan
 kubit-forge security:scan
@@ -160,7 +160,7 @@ kubit-forge security:audit --fix
 # Generate fresh SBOM
 kubit-forge sbom:generate --output sbom-$(date +%Y%m%d).json
 
-echo "✓ Security checks completed"
+echo " Security checks completed"
 ```
 
 ### 4. Supply Chain Verification
@@ -178,9 +178,9 @@ kubit-forge security:check
 kubit-forge security:audit --level moderate
 ```
 
-## 🎯 When to Use This Plugin
+##  When to Use This Plugin
 
-**✅ Use when you need:**
+** Use when you need:**
 
 - SBOM generation for compliance (SOC2, ISO 27001)
 - Supply chain security documentation
@@ -188,13 +188,13 @@ kubit-forge security:audit --level moderate
 - License compliance checking
 - Vulnerability tracking and reporting
 
-**❌ Not needed for:**
+** Not needed for:**
 
 - Simple personal projects
 - Basic development without compliance requirements
 - Projects using only `npm audit` or `pnpm audit`
 
-## 🔧 Configuration
+##  Configuration
 
 No additional configuration required. The plugin uses your project's `package.json` for analysis.
 
@@ -212,7 +212,7 @@ minSeverity = "moderate"
 allowedLicenses = ["MIT", "Apache-2.0", "BSD-3-Clause"]
 ```
 
-## 📊 Output Examples
+##  Output Examples
 
 ### SBOM Output (CycloneDX)
 
@@ -243,15 +243,15 @@ allowedLicenses = ["MIT", "Apache-2.0", "BSD-3-Clause"]
 ### Security Audit Output
 
 ```
-🔒 Running security audit...
+ Running security audit...
 
-✓ No vulnerabilities found
+ No vulnerabilities found
 
 Dependencies scanned: 245
 Time: 3.2s
 ```
 
-## 🤝 Integration with Package Managers
+##  Integration with Package Managers
 
 The plugin leverages native package manager audit commands:
 
@@ -261,7 +261,7 @@ The plugin leverages native package manager audit commands:
 
 This ensures compatibility and accuracy with your existing security tooling.
 
-## 📚 Related Tools
+##  Related Tools
 
 This plugin complements but doesn't replace:
 
@@ -270,7 +270,7 @@ This plugin complements but doesn't replace:
 - **Dependabot** - For automated updates
 - **OWASP Dependency-Check** - For comprehensive scanning
 
-## 🆘 Troubleshooting
+##  Troubleshooting
 
 ### SBOM Generation Fails
 
@@ -307,7 +307,7 @@ pnpm install -g pnpm@latest
 kubit-forge sbom:generate --format cyclonedx
 ```
 
-## 🔗 Standards Compliance
+##  Standards Compliance
 
 This plugin generates SBOMs compliant with:
 
@@ -315,14 +315,14 @@ This plugin generates SBOMs compliant with:
 - **SPDX 2.3** - Linux Foundation standard
 - **ISO/IEC 5230** - OpenChain specification
 
-## 🎓 Learn More
+##  Learn More
 
 - [CycloneDX Specification](https://cyclonedx.org/)
 - [SPDX Specification](https://spdx.dev/)
 - [NIST SBOM Guidelines](https://www.nist.gov/itl/executive-order-improving-nations-cybersecurity/software-security-supply-chains-software-1)
 - [OWASP Dependency Check](https://owasp.org/www-project-dependency-check/)
 
-## 📝 Example Workflow
+##  Example Workflow
 
 ```bash
 # 1. Enable plugin

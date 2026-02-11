@@ -706,11 +706,86 @@ args = ["@tanstack/react-query", "axios"]
 
 **A:** Yes, publish them to npm or a git repository.
 
+## Optional Pre-Built Recipes
+
+Ready-to-use recipes for advanced workflows.
+
+###  Security & SBOM Workflow
+
+**Recipe**: `security-sbom-workflow`  
+**Requires**: `@kubit/plugin-security`
+
+Complete security and SBOM generation for CI/CD.
+
+```bash
+# Apply recipe
+kubit-forge recipe apply security-sbom-workflow
+```
+
+**What it sets up:**
+
+- Automated security audits
+- SBOM generation (CycloneDX, SPDX)
+- GitHub Actions integration
+- Pre-release security checks
+
+###  Doctor Advanced Workflow
+
+**Recipe**: `doctor-advanced-workflow`  
+**Requires**: `@kubit/plugin-doctor-advanced`
+
+Advanced diagnostics and auto-fix setup.
+
+```bash
+kubit-forge recipe apply doctor-advanced-workflow
+```
+
+**Features:**
+
+- Predictive analysis setup
+- Auto-fix configuration
+- IDE integration
+- Custom health checks
+
+###  Testing Setup Workflow
+
+**Recipe**: `testing-setup-workflow`
+
+Complete testing infrastructure.
+
+```bash
+kubit-forge recipe apply testing-setup-workflow
+```
+
+**Includes:**
+
+- Unit testing (Vitest)
+- E2E testing (Playwright)
+- Testing Library
+- Coverage configuration
+
+###  Monorepo Setup Workflow
+
+**Recipe**: `monorepo-setup-workflow`
+
+Transform project into monorepo.
+
+```bash
+kubit-forge recipe apply monorepo-setup-workflow
+```
+
+**Sets up:**
+
+- pnpm workspaces
+- Turborepo configuration
+- Shared configurations
+- Root-level scripts
+
 ## Related Documentation
 
-- [Plugin System](./PLUGIN-SYSTEM.md) - Extend functionality
-- [Development Commands](./DEVELOPMENT-COMMANDS.md) - CLI commands
-- [Configuration](./CONFIGURATION.md) - Configure Kubit Forge
+- [Plugin System](./plugins.md) - Extend functionality
+- [Development Commands](../core/commands.md) - CLI commands
+- [Configuration](../core/configuration.md) - Configure Kubit Forge
 
 ---
 

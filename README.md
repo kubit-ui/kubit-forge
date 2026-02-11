@@ -14,20 +14,34 @@
 
 ## 📚 Documentation
 
-**[📖 Complete Documentation](./docs/README.md)** - Comprehensive guides for all features
+**[📖 Documentation Index](./docs/INDEX.md)** - Complete documentation hub
 
 ### Quick Access
 
-- **[Getting Started](./docs/PROJECT-INITIALIZATION.md)** - Create your first project
-- **[Add Features](./docs/ADD-COMMAND.md)** - Extend your project
-- **[CLI Commands](./docs/DEVELOPMENT-COMMANDS.md)** - Daily workflow
-- **[Plugin System](./docs/PLUGIN-SYSTEM.md)** - Extend functionality
-- **[Plugins vs Recipes](./docs/PLUGINS-VS-RECIPES.md)** - Understanding the difference
-- **[Optional Plugins](./docs/PLUGIN-SECURITY.md)** - Security, Doctor Advanced
-- **[Optional Recipes](./docs/RECIPES-OPTIONAL.md)** - Automated workflows
-- **[Configuration](./docs/CONFIGURATION.md)** - Configure your project
+**Getting Started:**
 
-[📑 Documentation Index](./docs/INDEX.md) - Complete documentation overview
+- **[Quick Start Guide](./docs/getting-started/quick-start.md)** - Create your first project
+- **[Adding Features](./docs/getting-started/adding-features.md)** - Extend your project
+
+**Core Features:**
+
+- **[Commands](./docs/core/commands.md)** - Daily workflow commands
+- **[Configuration](./docs/core/configuration.md)** - Configure your project
+- **[Code Generation](./docs/core/code-generation.md)** - Generate components
+
+**Framework & Extensibility:**
+
+- **[Framework Overview](./docs/framework/overview.md)** - Build custom CLIs ⭐
+- **[runCLI API](./docs/framework/run-cli-api.md)** - Complete API reference ⭐
+- **[Plugin System](./docs/framework/plugins.md)** - Extend functionality
+- **[Recipe System](./docs/framework/recipes.md)** - Automate workflows
+- **[Plugins vs Recipes](./docs/framework/plugins-vs-recipes.md)** - Understanding the difference
+
+**Advanced Features:**
+
+- **[Doctor](./docs/features/doctor.md)** - AI-powered diagnostics
+- **[Security](./docs/features/security.md)** - Security audits & SBOM
+- **[Monorepo](./docs/features/monorepo.md)** - Monorepo support
 
 ---
 
@@ -194,7 +208,7 @@ kubit-forge doctor --predictive
 
 ## Plugin System
 
-**[📖 Full Documentation](./docs/PLUGIN-SYSTEM.md)** | **[Plugins vs Recipes Guide](./docs/PLUGINS-VS-RECIPES.md)**
+**[📖 Full Documentation](./docs/framework/plugins.md)** | **[Plugins vs Recipes Guide](./docs/framework/plugins-vs-recipes.md)**
 
 ### Core CLI Philosophy
 
@@ -497,7 +511,7 @@ kubit-forge migrate:list
 
 ## Code Generation
 
-**[📖 Full Documentation](./docs/CODE-GENERATION.md)**
+**[📖 Full Documentation](./docs/core/code-generation.md)**
 
 Generate code scaffolds with best practices:
 

@@ -2,7 +2,7 @@
 
 **A complete guide to understanding when to use Plugins and when to use Recipes**
 
-## 🤔 The Confusion
+##  The Confusion
 
 You might be wondering:
 
@@ -12,7 +12,7 @@ You might be wondering:
 
 ---
 
-## 📚 The Simple Analogy
+## The Simple Analogy
 
 Think of building a house:
 
@@ -25,7 +25,7 @@ Think of building a house:
 
 ---
 
-## 🔌 What is a Plugin?
+##  What is a Plugin?
 
 A **Plugin** provides **new commands** (functionality).
 
@@ -36,11 +36,11 @@ A **Plugin** provides **new commands** (functionality).
 // It adds NEW COMMANDS to the CLI
 
 @kubit/plugin-security
-├── sbom:generate         ← NEW COMMAND
-├── sbom:validate         ← NEW COMMAND
-├── security:audit        ← NEW COMMAND
-├── security:scan         ← NEW COMMAND
-└── security:check        ← NEW COMMAND
+ sbom:generate          NEW COMMAND
+ sbom:validate          NEW COMMAND
+ security:audit         NEW COMMAND
+ security:scan          NEW COMMAND
+ security:check         NEW COMMAND
 ```
 
 ### Example: Using a Plugin
@@ -73,16 +73,16 @@ export const securityPlugin: Plugin = {
       {
         name: 'sbom:generate',
         action: async (args, ctx) => {
-          // ← ACTUAL CODE that reads package.json
-          // ← ACTUAL CODE that generates SBOM file
-          // ← ACTUAL CODE that writes the file
+          //  ACTUAL CODE that reads package.json
+          //  ACTUAL CODE that generates SBOM file
+          //  ACTUAL CODE that writes the file
         },
       },
       {
         name: 'security:audit',
         action: async (args, ctx) => {
-          // ← ACTUAL CODE that runs npm audit
-          // ← ACTUAL CODE that analyzes vulnerabilities
+          //  ACTUAL CODE that runs npm audit
+          //  ACTUAL CODE that analyzes vulnerabilities
         },
       },
     ];
@@ -92,7 +92,7 @@ export const securityPlugin: Plugin = {
 
 ---
 
-## 📋 What is a Recipe?
+##  What is a Recipe?
 
 A **Recipe** provides **automated setup** (configuration).
 
@@ -103,12 +103,12 @@ A **Recipe** provides **automated setup** (configuration).
 // It CONFIGURES everything for you automatically
 
 security-sbom-workflow
-├── Step 1: Install plugin          ← Runs: pnpm add -D @kubit/plugin-security
-├── Step 2: Enable plugin           ← Creates: kubit.config.toml config
-├── Step 3: Create CI workflow      ← Creates: .github/workflows/security.yml
-├── Step 4: Add npm scripts         ← Updates: package.json
-├── Step 5: Add prerelease hook     ← Updates: package.json
-└── Step 6: Update .gitignore       ← Updates: .gitignore
+ Step 1: Install plugin           Runs: pnpm add -D @kubit/plugin-security
+ Step 2: Enable plugin            Creates: kubit.config.toml config
+ Step 3: Create CI workflow       Creates: .github/workflows/security.yml
+ Step 4: Add npm scripts          Updates: package.json
+ Step 5: Add prerelease hook      Updates: package.json
+ Step 6: Update .gitignore        Updates: .gitignore
 ```
 
 ### Example: Using a Recipe
@@ -118,12 +118,12 @@ security-sbom-workflow
 kubit-forge recipe apply security-sbom-workflow
 
 # What it does automatically:
-# ✅ Installs @kubit/plugin-security
-# ✅ Creates kubit.config.toml with plugin enabled
-# ✅ Creates .github/workflows/security.yml
-# ✅ Adds npm scripts (security, sbom, etc.)
-# ✅ Adds prerelease hook
-# ✅ Updates .gitignore
+#  Installs @kubit/plugin-security
+#  Creates kubit.config.toml with plugin enabled
+#  Creates .github/workflows/security.yml
+#  Adds npm scripts (security, sbom, etc.)
+#  Adds prerelease hook
+#  Updates .gitignore
 ```
 
 ### What the Recipe Contains
@@ -154,35 +154,35 @@ The recipe **uses the commands** from the plugin in the workflow it creates.
 
 ---
 
-## 🔄 How They Work Together
+##  How They Work Together
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    YOUR PROJECT                          │
-├─────────────────────────────────────────────────────────┤
-│                                                          │
-│  1. Apply Recipe                                         │
-│     kubit-forge recipe apply security-sbom-workflow      │
-│                                                          │
-│  2. Recipe installs Plugin                               │
-│     pnpm add -D @kubit/plugin-security                   │
-│                                                          │
-│  3. Recipe creates CI workflow                           │
-│     .github/workflows/security.yml:                      │
-│       - run: kubit-forge sbom:generate  ← Uses Plugin   │
-│       - run: kubit-forge security:audit ← Uses Plugin   │
-│                                                          │
-│  4. Recipe adds npm scripts                              │
-│     package.json:                                        │
-│       "security": "kubit-forge security:audit" ← Plugin │
-│       "sbom": "kubit-forge sbom:generate"     ← Plugin  │
-│                                                          │
-└─────────────────────────────────────────────────────────┘
+
+                    YOUR PROJECT                          
+
+                                                          
+  1. Apply Recipe                                         
+     kubit-forge recipe apply security-sbom-workflow      
+                                                          
+  2. Recipe installs Plugin                               
+     pnpm add -D @kubit/plugin-security                   
+                                                          
+  3. Recipe creates CI workflow                           
+     .github/workflows/security.yml:                      
+       - run: kubit-forge sbom:generate   Uses Plugin   
+       - run: kubit-forge security:audit  Uses Plugin   
+                                                          
+  4. Recipe adds npm scripts                              
+     package.json:                                        
+       "security": "kubit-forge security:audit"  Plugin 
+       "sbom": "kubit-forge sbom:generate"      Plugin  
+                                                          
+
 ```
 
 ---
 
-## 🎯 When to Use Each One
+## When to Use Each One
 
 ### Use Plugin Only (Manual Setup)
 
@@ -198,7 +198,7 @@ pnpm add -D @kubit/plugin-security
 kubit-forge sbom:generate
 ```
 
-**✅ Use when:**
+** Use when:**
 
 - Small/personal projects
 - Custom configuration needed
@@ -219,13 +219,13 @@ kubit-forge sbom:generate
 kubit-forge recipe apply security-sbom-workflow
 
 # Done! Everything is configured:
-# ✅ Plugin installed
-# ✅ CI/CD workflows created
-# ✅ npm scripts added
-# ✅ Best practices applied
+#  Plugin installed
+#  CI/CD workflows created
+#  npm scripts added
+#  Best practices applied
 ```
 
-**✅ Use when:**
+** Use when:**
 
 - Enterprise/production projects
 - Need CI/CD integration
@@ -237,7 +237,7 @@ kubit-forge recipe apply security-sbom-workflow
 
 ---
 
-## 📊 Detailed Comparison
+## Detailed Comparison
 
 | Aspect            | Plugin                        | Recipe                                     |
 | ----------------- | ----------------------------- | ------------------------------------------ |
@@ -254,7 +254,7 @@ kubit-forge recipe apply security-sbom-workflow
 
 ---
 
-## 💡 Real-World Examples
+## Real-World Examples
 
 ### Example 1: Security Plugin
 
@@ -315,70 +315,70 @@ kubit-forge doctor:recommendations
 
 ---
 
-## 🏗️ Complete Architecture
+## Complete Architecture
 
 ```
-┌───────────────────────────────────────────────────────┐
-│               KUBIT FORGE CORE CLI                     │
-│                  (181 KB)                              │
-│                                                        │
-│  Essential commands only:                              │
-│  init, create, build, dev, test, generate, etc.       │
-└───────────────────────────────────────────────────────┘
-                        │
-        ┌───────────────┴───────────────┐
-        │                               │
-        ▼                               ▼
-┌───────────────┐             ┌──────────────────┐
-│    PLUGINS    │             │     RECIPES      │
-│ (Functionality)│             │  (Automation)    │
-└───────────────┘             └──────────────────┘
-        │                               │
-        ├─── @kubit/plugin-security     ├─── security-sbom-workflow
-        │    │                          │    │
-        │    ├─ sbom:generate ←─────────┼────┤ Uses this command
-        │    ├─ security:audit ←────────┼────┤ Uses this command
-        │    └─ security:check ←────────┼────┘ Uses this command
-        │                               │
-        ├─── @kubit/plugin-doctor-advanced   ├─── doctor-advanced-workflow
-        │    │                          │    │
-        │    ├─ doctor:fix ←───────────┼────┤ Uses this command
-        │    ├─ doctor:predictive ←────┼────┤ Uses this command
-        │    └─ doctor:export ←────────┼────┘ Uses this command
-        │                               │
-        └───────────────────────────────┴──── testing-complete-setup
-                                             │
-                                             └─── No plugin needed
+
+               KUBIT FORGE CORE CLI                     
+                  (181 KB)                              
+                                                        
+  Essential commands only:                              
+  init, create, build, dev, test, generate, etc.       
+
+                        
+        
+                                       
+                                       
+             
+    PLUGINS                      RECIPES      
+ (Functionality)               (Automation)    
+             
+                                       
+         @kubit/plugin-security      security-sbom-workflow
+                                          
+             sbom:generate  Uses this command
+             security:audit  Uses this command
+             security:check  Uses this command
+                                       
+         @kubit/plugin-doctor-advanced    doctor-advanced-workflow
+                                          
+             doctor:fix  Uses this command
+             doctor:predictive  Uses this command
+             doctor:export  Uses this command
+                                       
+         testing-complete-setup
+                                             
+                                              No plugin needed
                                                   Installs everything directly
 ```
 
 ---
 
-## 🎓 Decision Tree
+## Decision Tree
 
 ```
 Do you need new functionality (commands)?
-│
-├─ YES → Install PLUGIN
-│        │
-│        Do you want automated setup?
-│        │
-│        ├─ YES → Also apply RECIPE
-│        │        ↓
-│        │        Quick enterprise setup ✨
-│        │
-│        └─ NO → Configure manually
-│                 ↓
-│                 Full control 🎛️
-│
-└─ NO → Just use core CLI
-         ↓
-         Basic functionality ⚡
+
+ YES  Install PLUGIN
+        
+        Do you want automated setup?
+        
+         YES  Also apply RECIPE
+                
+                Quick enterprise setup
+        
+         NO  Configure manually
+                 
+                 Full control
+
+ NO  Just use core CLI
+         
+         Basic functionality 
 ```
 
 ---
 
-## 📝 Common Questions
+## Common Questions
 
 ### Q1: Can I use a Recipe without the Plugin?
 
@@ -387,7 +387,7 @@ Do you need new functionality (commands)?
 ```bash
 # Recipe installs the plugin for you
 kubit-forge recipe apply security-sbom-workflow
-# ↓ automatically runs
+#  automatically runs
 # pnpm add -D @kubit/plugin-security
 ```
 
@@ -427,7 +427,7 @@ kubit-forge sbom:generate  # Run when needed
 
 ---
 
-## 🚀 Recommended Workflows
+## Recommended Workflows
 
 ### For Learning / Small Projects
 
@@ -453,7 +453,7 @@ kubit-forge recipe apply security-sbom-workflow
 kubit-forge recipe apply testing-complete-setup
 kubit-forge recipe apply doctor-advanced-workflow
 
-# Done! Everything configured ✨
+# Done! Everything configured
 ```
 
 ### For Teams
@@ -472,39 +472,39 @@ kubit-forge recipe apply monorepo-turborepo-setup
 
 ---
 
-## ✨ Summary
+## Summary
 
-### Plugin = Tools 🔧
+### Plugin = Tools
 
 - **Adds new commands** to the CLI
 - **Implements functionality** in TypeScript
 - **Required** to run the commands
 - **Example**: `kubit-forge sbom:generate`
 
-### Recipe = Automation 🤖
+### Recipe = Automation 
 
 - **Configures everything** automatically
 - **Creates files** (workflows, scripts, configs)
 - **Optional** time-saver
 - **Example**: Creates CI/CD that uses plugin commands
 
-### Together = Best of Both Worlds 🎯
+### Together = Best of Both Worlds
 
 ```bash
 # One command for complete setup
 kubit-forge recipe apply security-sbom-workflow
 
 # Result:
-# ✅ Plugin installed (functionality)
-# ✅ Workflows created (automation)
-# ✅ Scripts configured (convenience)
-# ✅ Best practices applied (quality)
-# ✅ Ready for production (professional)
+#  Plugin installed (functionality)
+#  Workflows created (automation)
+#  Scripts configured (convenience)
+#  Best practices applied (quality)
+#  Ready for production (professional)
 ```
 
 ---
 
-## 🔗 Related Documentation
+## Related Documentation
 
 - [Plugin System](./PLUGIN-SYSTEM.md)
 - [Plugin Security](./PLUGIN-SECURITY.md)
@@ -519,4 +519,4 @@ kubit-forge recipe apply security-sbom-workflow
 - **Plugin** = App you install on your phone (gives you features)
 - **Recipe** = Setup wizard that configures the app for you
 
-You need the **app** to use it, but the **wizard** makes setup faster! 🚀
+You need the **app** to use it, but the **wizard** makes setup faster!
