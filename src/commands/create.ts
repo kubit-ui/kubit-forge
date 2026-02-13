@@ -3,12 +3,11 @@
  */
 
 import enquirer from 'enquirer';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync } from 'fs';
 import { join } from 'path';
 
 import type { CommandResult, PluginContext } from '../types/index.js';
 
-import { generateReactKubitUITemplate } from '../templates/generators/react-kubit-ui.js';
 import { colors } from '../utils/theme.js';
 import {
   displayWelcome,
@@ -160,33 +159,23 @@ export async function createCommand(
     // Create project
     ctx.logger.step('Creating project structure...');
 
-    // Handle Kubit UI template separately
-    if (answers.template === 'react-kubit-ui') {
-      mkdirSync(targetDir, { recursive: true });
-      generateReactKubitUITemplate({
-        packageManager: answers.packageManager,
-        projectName: answers.name,
-        targetDir,
-      });
-      ctx.logger.success('Project structure created');
-    } else {
-      // Map template to stack
-      const { language, stack } = parseTemplate(answers.template);
+    // Map template to actual template directory
+    const { language, stack, templateDir } = parseTemplate(answers.template);
 
-      // Initialize project
-      const result = await initCommand(
-        {
-          name: answers.name,
-          pm: answers.packageManager,
-          stack,
-          ts: language === 'ts',
-        },
-        ctx
-      );
+    // Initialize project with the correct template
+    const result = await initCommand(
+      {
+        name: answers.name,
+        pm: answers.packageManager,
+        stack,
+        templateDir,
+        ts: language === 'ts',
+      },
+      ctx
+    );
 
-      if (result.status === 'error') {
-        return result;
-      }
+    if (result.status === 'error') {
+      return result;
     }
 
     // Add features
@@ -356,16 +345,28 @@ function displayProjectSummary(answers: ProjectAnswers): void {
 }
 
 /**
- * Parse template to stack and language
+ * Parse template to stack, language and template directory
  */
-function parseTemplate(template: string): { stack: 'react' | 'vanilla'; language: 'ts' | 'js' } {
-  if (template.includes('react')) {
-    return { language: 'ts', stack: 'react' };
-  }
-  if (template.includes('vanilla-ts')) {
-    return { language: 'ts', stack: 'vanilla' };
-  }
-  return { language: 'js', stack: 'vanilla' };
+function parseTemplate(template: string): {
+  language: 'ts' | 'js';
+  stack: 'react' | 'vanilla';
+  templateDir: string;
+} {
+  // Map template values to their physical directories
+  const templateMap: Record<
+    string,
+    { language: 'ts' | 'js'; stack: 'react' | 'vanilla'; templateDir: string }
+  > = {
+    'kubit-full': { language: 'ts', stack: 'react', templateDir: 'kubit-full' },
+    'react-bernova': { language: 'ts', stack: 'react', templateDir: 'react-bernova' },
+    'react-kubit-ui': { language: 'ts', stack: 'react', templateDir: 'react-kubit-ui' },
+    'react-lib-bernova': { language: 'ts', stack: 'react', templateDir: 'react' },
+    'react-ts-vite-bernova': { language: 'ts', stack: 'react', templateDir: 'react-bernova' },
+    'vanilla-js': { language: 'js', stack: 'vanilla', templateDir: 'vanilla' },
+    'vanilla-ts': { language: 'ts', stack: 'vanilla', templateDir: 'vanilla' },
+  };
+
+  return templateMap[template] || { language: 'ts', stack: 'react', templateDir: 'react' };
 }
 
 /**

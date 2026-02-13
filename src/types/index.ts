@@ -240,6 +240,7 @@ export interface InitOptions {
   pm?: 'pnpm' | 'npm' | 'yarn';
   noTest?: boolean;
   router?: boolean;
+  templateDir?: string;
 }
 
 // ============================================================================
