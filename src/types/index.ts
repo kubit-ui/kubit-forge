@@ -42,6 +42,9 @@ export const KubitConfigSchema = z.object({
     .optional(),
 
   project: z.object({
+    bundler: z
+      .enum(['vite', 'webpack', 'rspack', 'turbopack', 'esbuild', 'rollup'])
+      .default('vite'),
     devPort: z.number().default(5173),
     language: z.enum(['ts', 'js']).default('ts'),
     name: z.string(),
@@ -235,6 +238,7 @@ export interface GlobalOptions {
 export interface InitOptions {
   stack: 'react' | 'vanilla';
   name: string;
+  bundler?: BundlerType;
   ts?: boolean;
   js?: boolean;
   pm?: 'pnpm' | 'npm' | 'yarn';
@@ -801,4 +805,205 @@ export interface FeatureRollbackInfo {
   filesModified: Array<{ path: string; backup: string }>;
   scriptsAdded: string[];
   dependenciesInstalled: string[];
+}
+
+// ============================================================================
+// Bundler System Types
+// ============================================================================
+
+/**
+ * Supported Bundlers
+ */
+export type BundlerType = 'vite' | 'webpack' | 'rspack' | 'turbopack' | 'esbuild' | 'rollup';
+
+/**
+ * Bundler Capability
+ */
+export interface BundlerCapability {
+  hmr: boolean; // Hot Module Replacement
+  codesplitting: boolean;
+  treeshaking: boolean;
+  minification: boolean;
+  sourcemaps: boolean;
+  typescript: boolean;
+  react: boolean;
+  css: boolean;
+  assets: boolean;
+  devServer: boolean;
+  preview: boolean;
+}
+
+/**
+ * Bundler Configuration
+ */
+export interface BundlerConfig {
+  type: BundlerType;
+  version?: string;
+  configFile: string;
+  capabilities: BundlerCapability;
+
+  // Dependencies required
+  dependencies: string[];
+  devDependencies: string[];
+
+  // Scripts to add to package.json
+  scripts: Record<string, string>;
+
+  // Default ports
+  defaultPorts: {
+    dev: number;
+    preview?: number;
+  };
+}
+
+/**
+ * Bundler Adapter Interface
+ */
+export interface BundlerAdapter {
+  readonly name: BundlerType;
+  readonly version: string;
+  readonly capabilities: BundlerCapability;
+
+  // Detection
+  detect(cwd: string): Promise<boolean>;
+
+  // Installation
+  install(ctx: PluginContext, options?: BundlerInstallOptions): Promise<BundlerInstallResult>;
+
+  // Configuration
+  generateConfig(options: BundlerConfigOptions): string;
+  updateConfig(cwd: string, updates: Partial<BundlerConfigOptions>): Promise<void>;
+
+  // Commands
+  dev(ctx: PluginContext, options: BundlerDevOptions): Promise<CommandResult>;
+  build(ctx: PluginContext, options: BundlerBuildOptions): Promise<CommandResult>;
+  preview?(ctx: PluginContext, options: BundlerPreviewOptions): Promise<CommandResult>;
+
+  // Utilities
+  getConfigPath(cwd: string): string;
+  validateConfig(cwd: string): Promise<BundlerValidationResult>;
+  migrate?(fromBundler: BundlerType, ctx: PluginContext): Promise<BundlerMigrationResult>;
+}
+
+/**
+ * Bundler Install Options
+ */
+export interface BundlerInstallOptions {
+  typescript?: boolean;
+  react?: boolean;
+  css?: 'vanilla' | 'scss' | 'less' | 'postcss';
+  plugins?: string[];
+  force?: boolean;
+}
+
+/**
+ * Bundler Install Result
+ */
+export interface BundlerInstallResult {
+  success: boolean;
+  bundler: BundlerType;
+  configFile: string;
+  filesCreated: string[];
+  dependenciesInstalled: string[];
+  scriptsAdded: string[];
+  message?: string;
+  errors?: string[];
+}
+
+/**
+ * Bundler Config Options
+ */
+export interface BundlerConfigOptions {
+  projectName: string;
+  typescript: boolean;
+  react: boolean;
+  port: number;
+  sourcemap: boolean;
+  minify: boolean;
+  outDir: string;
+  publicDir?: string;
+  envPrefix?: string;
+  plugins?: string[];
+}
+
+/**
+ * Bundler Dev Options
+ */
+export interface BundlerDevOptions {
+  port?: number;
+  host?: string;
+  open?: boolean;
+  https?: boolean;
+  cors?: boolean;
+  force?: boolean;
+}
+
+/**
+ * Bundler Build Options
+ */
+export interface BundlerBuildOptions {
+  mode?: 'production' | 'development';
+  sourcemap?: boolean;
+  minify?: boolean;
+  analyze?: boolean;
+  outDir?: string;
+  watch?: boolean;
+}
+
+/**
+ * Bundler Preview Options
+ */
+export interface BundlerPreviewOptions {
+  port?: number;
+  host?: string;
+  open?: boolean;
+  https?: boolean;
+}
+
+/**
+ * Bundler Validation Result
+ */
+export interface BundlerValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  suggestions?: string[];
+}
+
+/**
+ * Bundler Migration Result
+ */
+export interface BundlerMigrationResult {
+  success: boolean;
+  fromBundler: BundlerType;
+  toBundler: BundlerType;
+  changes: Array<{
+    type: 'file' | 'dependency' | 'script' | 'config';
+    action: 'created' | 'modified' | 'deleted';
+    path: string;
+    description: string;
+  }>;
+  manualSteps?: string[];
+  rollbackAvailable: boolean;
+}
+
+/**
+ * Bundler Switch Options
+ */
+export interface BundlerSwitchOptions {
+  to: BundlerType;
+  keepOldConfig?: boolean;
+  migrate?: boolean;
+  force?: boolean;
+}
+
+/**
+ * Bundler Detection Result
+ */
+export interface BundlerDetectionResult {
+  detected: boolean;
+  bundler?: BundlerType;
+  version?: string;
+  configFile?: string;
+  confidence: 'high' | 'medium' | 'low';
 }

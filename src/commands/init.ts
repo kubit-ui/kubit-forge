@@ -27,12 +27,19 @@ export async function initCommand(
   options: InitOptions,
   ctx: PluginContext
 ): Promise<CommandResult> {
-  const { name, pm = 'pnpm', stack, templateDir: customTemplateDir, ts = true } = options;
+  const {
+    bundler = 'vite',
+    name,
+    pm = 'pnpm',
+    stack,
+    templateDir: customTemplateDir,
+    ts = true,
+  } = options;
   const targetDir = join(ctx.cwd, name);
 
   displayWelcome(
     'Initialize Project',
-    `Creating a new ${stack} project with ${ts ? 'TypeScript' : 'JavaScript'}`
+    `Creating a new ${stack} project with ${ts ? 'TypeScript' : 'JavaScript'} and ${bundler}`
   );
 
   ctx.logger.step(`Setting up project: ${name}`);
@@ -79,7 +86,7 @@ export async function initCommand(
     cpSync(templateDir, targetDir, { recursive: true });
 
     // Create kubit.config.toml
-    const config = generateConfig(name, stack, ts ? 'ts' : 'js', pm);
+    const config = generateConfig(name, stack, ts ? 'ts' : 'js', pm, bundler);
     writeFileSync(join(targetDir, 'kubit.config.toml'), config);
 
     displaySuccess('Project Created Successfully', [
@@ -87,6 +94,7 @@ export async function initCommand(
       `Stack: ${stack}`,
       `Language: ${ts ? 'TypeScript' : 'JavaScript'}`,
       `Package Manager: ${pm}`,
+      `Bundler: ${bundler}`,
     ]);
 
     displayNextSteps([`cd ${name}`, `${pm} install`, `${pm} run dev`]);
@@ -115,7 +123,8 @@ function generateConfig(
   name: string,
   stack: 'react' | 'vanilla',
   language: 'ts' | 'js',
-  pm: 'pnpm' | 'npm' | 'yarn'
+  pm: 'pnpm' | 'npm' | 'yarn',
+  bundler: string = 'vite'
 ): string {
   // Use templates for default values
   const projectDefaults = PROJECT_DEFAULTS;
@@ -130,6 +139,7 @@ type = "web"
 stack = "${stack}"
 language = "${language}"
 packageManager = "${pm}"
+bundler = "${bundler}"
 nodeVersion = "${projectDefaults.nodeVersion}"
 devPort = ${projectDefaults.devPort}
 

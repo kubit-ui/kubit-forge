@@ -48,13 +48,14 @@ export class ConfigTemplateLoader {
    */
   static buildProjectConfig(options: ConfigTemplateOptions = {}): KubitConfig['project'] {
     return {
-      name: options.name || 'my-project',
-      type: options.type || 'web',
-      stack: options.stack || 'vanilla',
-      language: options.language || 'js',
-      packageManager: options.packageManager || PROJECT_DEFAULTS.packageManager,
-      nodeVersion: options.nodeVersion || PROJECT_DEFAULTS.nodeVersion,
+      bundler: 'vite',
       devPort: options.devPort || PROJECT_DEFAULTS.devPort,
+      language: options.language || 'js',
+      name: options.name || 'my-project',
+      nodeVersion: options.nodeVersion || PROJECT_DEFAULTS.nodeVersion,
+      packageManager: options.packageManager || PROJECT_DEFAULTS.packageManager,
+      stack: options.stack || 'vanilla',
+      type: options.type || 'web',
     };
   }
 

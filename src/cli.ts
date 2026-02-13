@@ -2,6 +2,7 @@ import { Command } from 'commander';
 
 import type { GlobalOptions, PluginContext } from './types/index.js';
 
+import { bundlerCommand } from './commands/bundler.js';
 import { createCommand } from './commands/create.js';
 import { doctorCommand } from './commands/doctor.js';
 import { generateCommand } from './commands/generate/index.js';
@@ -154,6 +155,7 @@ program
   .description('Create a new project (non-interactive)')
   .argument('<stack>', 'Project stack (react|vanilla)')
   .argument('<name>', 'Project name')
+  .option('--bundler <bundler>', 'Bundler to use (vite|webpack|rspack)', 'vite')
   .option('--ts', 'Use TypeScript (default)')
   .option('--js', 'Use JavaScript')
   .option('--pm <manager>', 'Package manager (pnpm|npm|yarn)', 'pnpm')
@@ -167,6 +169,7 @@ program
     try {
       const result = await initCommand(
         {
+          bundler: options.bundler,
           name,
           noTest: options.test === false,
           pm: options.pm,
@@ -1660,6 +1663,143 @@ program
       }
     } catch (error) {
       ctx.logger.error('Monorepo info failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// ============================================================================
+// BUNDLER COMMANDS
+// ============================================================================
+
+// bundler:list - List available bundlers
+program
+  .command('bundler:list')
+  .description('List available bundlers')
+  .action(async function () {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await bundlerCommand(
+        {
+          subcommand: 'list',
+        },
+        ctx
+      );
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Bundler list failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// bundler:detect - Detect current bundler
+program
+  .command('bundler:detect')
+  .description('Detect current bundler in the project')
+  .action(async function () {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await bundlerCommand(
+        {
+          subcommand: 'detect',
+        },
+        ctx
+      );
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Bundler detect failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// bundler:switch - Switch to a different bundler
+program
+  .command('bundler:switch')
+  .description('Switch to a different bundler')
+  .requiredOption('--to <bundler>', 'Target bundler (vite|webpack|rspack)')
+  .option('--keep-old-config', 'Keep old bundler configuration')
+  .option('--no-migrate', 'Skip migration')
+  .option('--force', 'Force switch without confirmation')
+  .action(async function (options) {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await bundlerCommand(
+        {
+          force: options.force,
+          keepOldConfig: options.keepOldConfig,
+          migrate: options.migrate,
+          subcommand: 'switch',
+          to: options.to,
+        },
+        ctx
+      );
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Bundler switch failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// bundler:validate - Validate bundler configuration
+program
+  .command('bundler:validate')
+  .description('Validate bundler configuration')
+  .action(async function () {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await bundlerCommand(
+        {
+          subcommand: 'validate',
+        },
+        ctx
+      );
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Bundler validate failed', error as Error);
+      process.exit(1);
+    }
+  });
+
+// bundler:info - Show bundler information
+program
+  .command('bundler:info')
+  .description('Show bundler information and capabilities')
+  .action(async function () {
+    const globalOpts = this.optsWithGlobals() as GlobalOptions;
+    const ctx = await createContext(globalOpts);
+
+    try {
+      const result = await bundlerCommand(
+        {
+          subcommand: 'info',
+        },
+        ctx
+      );
+
+      if (result.status === 'error') {
+        process.exit(1);
+      }
+    } catch (error) {
+      ctx.logger.error('Bundler info failed', error as Error);
       process.exit(1);
     }
   });
