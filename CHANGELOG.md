@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.17
+
+### Patch Changes
+
+- Merge branch 'fix/dir-templates' into next
+
 ## 0.0.2-canary.16
 
 ### Patch Changes
