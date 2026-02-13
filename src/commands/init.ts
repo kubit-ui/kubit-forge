@@ -27,7 +27,7 @@ export async function initCommand(
   options: InitOptions,
   ctx: PluginContext
 ): Promise<CommandResult> {
-  const { name, pm = 'pnpm', stack, ts = true } = options;
+  const { name, pm = 'pnpm', stack, templateDir: customTemplateDir, ts = true } = options;
   const targetDir = join(ctx.cwd, name);
 
   displayWelcome(
@@ -57,7 +57,10 @@ export async function initCommand(
     mkdirSync(targetDir, { recursive: true });
 
     // Copy template from CLI installation directory
-    const templateDir = join(CLI_ROOT, 'templates', stack);
+    // Use custom template directory if provided, otherwise use default stack template
+    const templateDir = customTemplateDir
+      ? join(CLI_ROOT, 'templates', customTemplateDir)
+      : join(CLI_ROOT, 'templates', stack);
 
     if (!existsSync(templateDir)) {
       return {
@@ -68,7 +71,7 @@ export async function initCommand(
             solution: 'Ensure kubit-forge is properly installed with templates',
           },
         ],
-        message: `Template for '${stack}' not found at ${templateDir}`,
+        message: `Template for '${customTemplateDir || stack}' not found at ${templateDir}`,
         status: 'error',
       };
     }
