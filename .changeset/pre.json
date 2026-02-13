@@ -1,8 +1,8 @@
 {
-  "mode": "exit",
+  "mode": "pre",
   "tag": "canary",
   "initialVersions": {
-    "kubit-forge": "0.0.2-canary.16"
+    "kubit-forge": "0.0.2-canary.17"
   },
   "changesets": [
     "canary-1770287850",
@@ -22,6 +22,7 @@
     "canary-1770731560",
     "canary-1770809723",
     "canary-1770822429",
-    "canary-1770972326"
+    "canary-1770972326",
+    "canary-1770976298"
   ]
 }

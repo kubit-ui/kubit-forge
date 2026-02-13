@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.18
+
+### Patch Changes
+
+- Merge branch 'feat/bundlers-init-commands' into next
+
 ## 0.0.2-canary.17
 
 ### Patch Changes
