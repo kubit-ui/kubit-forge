@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.19
+
+### Patch Changes
+
+- Update dependencies
+
 ## 0.0.2-canary.18
 
 ### Patch Changes

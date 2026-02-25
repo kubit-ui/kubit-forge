@@ -1,6 +1,6 @@
 {
   "name": "kubit-forge",
-  "version": "0.0.2-canary.18",
+  "version": "0.0.2-canary.19",
   "description": "World-class CLI for modern web development with enterprise-grade features: plugins, recipes, and DAG task engine",
   "main": "dist/index.js",
   "bin": {
