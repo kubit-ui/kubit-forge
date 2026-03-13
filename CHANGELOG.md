@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.20
+
+### Patch Changes
+
+- Bugfix(chore): include pnpm-lock
+
 ## 0.0.2-canary.19
 
 ### Patch Changes
