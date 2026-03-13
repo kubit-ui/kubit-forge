@@ -151,10 +151,11 @@ export const FEATURES: Record<string, FeatureDefinition> = {
       },
     ],
     dependencies: {},
-    description: 'Add ESLint for code linting',
+    description: 'Add ESLint with Kubit plugin for code linting',
     devDependencies: {
-      '@eslint/js': '^9.0.0',
-      eslint: '^9.0.0',
+      '@eslint/js': '^10.0.0',
+      '@kubit-ui-web/eslint-plugin-kubit': '^0.0.5',
+      eslint: '^10.0.0',
       'typescript-eslint': '^8.0.0',
     },
     files: [
@@ -226,6 +227,30 @@ export const FEATURES: Record<string, FeatureDefinition> = {
       },
     ],
     name: 'Jest',
+  },
+
+  oxlint: {
+    configChanges: [
+      {
+        changes: {
+          features: { oxlint: true },
+        },
+        file: 'kubit.config.toml',
+      },
+    ],
+    dependencies: {},
+    description: 'Add OxLint for fast Rust-based linting with Kubit rules via jsPlugins',
+    devDependencies: {
+      '@kubit-ui-web/eslint-plugin-kubit': '^0.0.5',
+      oxlint: '^1.54.0',
+    },
+    files: [
+      {
+        content: loadTemplate('oxlintrc.json.template'),
+        path: '.oxlintrc.json',
+      },
+    ],
+    name: 'OxLint',
   },
 
   'lint-staged': {

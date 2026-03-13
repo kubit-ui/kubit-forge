@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": [
+    "./node_modules/@kubit-ui-web/eslint-plugin-kubit/oxlint/recommended.json"
+  ],
+  "jsPlugins": [{ "name": "kubit", "specifier": "@kubit-ui-web/eslint-plugin-kubit" }],
+  "env": {
+    "browser": true,
+    "node": true,
+    "es2024": true
+  },
+  "globals": {
+    "describe": "readonly",
+    "expect": "readonly",
+    "it": "readonly",
+    "test": "readonly",
+    "vi": "readonly",
+    "vitest": "readonly"
+  },
+  "ignorePatterns": ["dist", "node_modules", "coverage", "*.config.*"]
+}

@@ -102,7 +102,7 @@ kubit-forge init vanilla my-app
 
 - TypeScript configuration
 - Vite build setup
-- ESLint & Prettier
+- OxLint & ESLint with Kubit plugin
 - Testing infrastructure
 - Git initialization
 - Package manager detection
@@ -134,7 +134,8 @@ Add features to existing projects with zero configuration:
 
 ```bash
 # Add linting
-kubit-forge add eslint
+kubit-forge add oxlint      # OxLint + Kubit rules via jsPlugins (recommended)
+kubit-forge add eslint       # ESLint + Kubit plugin
 kubit-forge add prettier
 
 # Add testing
@@ -157,6 +158,20 @@ kubit-forge add changesets
 kubit-forge add react-router
 ```
 
+### Linting
+
+Kubit Forge supports both **OxLint** (Rust-based, fast) and **ESLint**, with automatic detection:
+
+```bash
+# The lint command auto-detects which linter to use:
+# - .oxlintrc.json present → runs OxLint first, then ESLint if also configured
+# - Only eslint.config.js   → runs ESLint
+kubit-forge lint
+kubit-forge lint --fix
+```
+
+**OxLint integration** uses [`jsPlugins`](https://oxc.rs/docs/guide/usage/linter/js-plugins) to load all 10 Kubit rules natively — no ESLint required for those rules. When both are configured, OxLint handles the heavy lifting while ESLint covers rules OxLint doesn't support (Prettier, Perfectionist).
+
 ### Development Commands
 
 **[📖 Full Documentation](./docs/DEVELOPMENT-COMMANDS.md)**
@@ -173,7 +188,7 @@ kubit-forge build
 # Run tests
 kubit-forge test
 
-# Lint code
+# Lint code (auto-detects OxLint or ESLint)
 kubit-forge lint --fix
 
 # Format code
@@ -695,8 +710,8 @@ kubit-forge add vitest
 # Add Storybook
 kubit-forge add storybook
 
-# Add linting
-kubit-forge add eslint prettier
+# Add linting (OxLint recommended for speed)
+kubit-forge add oxlint
 ```
 
 ### 3. Run Quality Checks
@@ -800,6 +815,7 @@ Please read our [Code of Conduct](CODE_OF_CONDUCT.md) before contributing.
 - ✅ Monorepo support
 - ✅ Doctor command
 - ✅ Smart Dependency Management
+- ✅ OxLint integration with Kubit jsPlugins
 
 ### Upcoming (v1.x)
 

@@ -11,7 +11,8 @@ export interface LintOptions {
 
 /**
  * Run linter
- * Detects and runs ESLint with appropriate configuration
+ * Detects OxLint or ESLint and runs with appropriate configuration.
+ * OxLint is preferred when detected (.oxlintrc.json present).
  */
 export async function lintCommand(
   options: LintOptions,
@@ -24,40 +25,67 @@ export async function lintCommand(
 
   ctx.logger.step('Running linter...');
 
-  // Check if ESLint is configured
-  if (!hasESLintConfig(ctx.cwd)) {
+  const useOxlint = hasOxlintConfig(ctx.cwd);
+  const useEslint = hasESLintConfig(ctx.cwd);
+
+  if (!useOxlint && !useEslint) {
     return {
-      message: 'No ESLint configuration found. Run `kubit-forge add eslint` first.',
+      message:
+        'No linter configuration found. Run `kubit-forge add oxlint` or `kubit-forge add eslint` first.',
       status: 'error',
     };
   }
 
-  ctx.logger.info('Using ESLint');
+  let result: CommandResult;
 
-  // Build command args
-  const args = buildLintArgs(options);
+  if (useOxlint) {
+    ctx.logger.info('Using OxLint');
+    const args = buildOxlintArgs(options, ctx.cwd);
+    const runResult = await ctx.runner.run('oxlint', args);
 
-  // Execute ESLint
-  const result = await ctx.runner.run('eslint', args);
+    if (runResult.status === 'error') {
+      result = { message: 'OxLint found issues - please fix the errors above', status: 'error' };
+    } else {
+      ctx.logger.success('✓ OxLint: no issues found');
+      result = { message: 'OxLint passed', status: 'ok' };
+    }
 
-  if (result.status === 'error') {
-    return {
-      message: 'Linting failed - please fix the errors above',
-      status: 'error',
-    };
+    // If ESLint is also configured, run it for rules OxLint doesn't cover
+    if (useEslint && result.status === 'ok') {
+      ctx.logger.info('Running ESLint for additional rules...');
+      const eslintArgs = buildESLintArgs(options);
+      const eslintResult = await ctx.runner.run('eslint', eslintArgs);
+
+      if (eslintResult.status === 'error') {
+        result = { message: 'ESLint found issues - please fix the errors above', status: 'error' };
+      } else {
+        ctx.logger.success('✓ ESLint: no issues found');
+      }
+    }
+  } else {
+    ctx.logger.info('Using ESLint');
+    const args = buildESLintArgs(options);
+    const runResult = await ctx.runner.run('eslint', args);
+
+    if (runResult.status === 'error') {
+      result = { message: 'Linting failed - please fix the errors above', status: 'error' };
+    } else {
+      ctx.logger.success('✓ No linting errors found!');
+      result = { message: 'Linting completed', status: 'ok' };
+    }
   }
-
-  ctx.logger.success('✓ No linting errors found!');
 
   // Trigger lint:after hook
   if (ctx.hookManager) {
     await ctx.hookManager.trigger('lint:after', result);
   }
 
-  return {
-    message: 'Linting completed',
-    status: 'ok',
-  };
+  return result;
+}
+
+function hasOxlintConfig(cwd: string): boolean {
+  const configFiles = ['.oxlintrc.json', '.oxlintrc.jsonc'];
+  return configFiles.some((file) => existsSync(join(cwd, file)));
 }
 
 function hasESLintConfig(cwd: string): boolean {
@@ -76,7 +104,21 @@ function hasESLintConfig(cwd: string): boolean {
   return configFiles.some((file) => existsSync(join(cwd, file)));
 }
 
-function buildLintArgs(options: LintOptions): string[] {
+function buildOxlintArgs(options: LintOptions, cwd: string): string[] {
+  const args: string[] = ['src'];
+
+  const configPath = existsSync(join(cwd, '.oxlintrc.json')) ? '.oxlintrc.json' : '.oxlintrc.jsonc';
+
+  args.push('-c', configPath);
+
+  if (options.fix) {
+    args.push('--fix');
+  }
+
+  return args;
+}
+
+function buildESLintArgs(options: LintOptions): string[] {
   const args: string[] = ['.'];
 
   if (options.fix) {
@@ -91,7 +133,6 @@ function buildLintArgs(options: LintOptions): string[] {
     args.push('--quiet');
   }
 
-  // Add common patterns
   args.push('--ext', '.js,.jsx,.ts,.tsx');
 
   return args;
