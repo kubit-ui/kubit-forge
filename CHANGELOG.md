@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.22
+
+### Patch Changes
+
+- Add .yarnrc.yml with public registry defaults (use skip-worktree for local overrides)
+
 ## 0.0.2-canary.21
 
 ### Patch Changes
