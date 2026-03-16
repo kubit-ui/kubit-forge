@@ -28,7 +28,7 @@ version = "1.0.0"
 description = "My awesome application"
 stack = "react"          # react, vue, vanilla, svelte
 language = "typescript"  # typescript, javascript
-packageManager = "pnpm"  # pnpm, npm, yarn
+packageManager = "yarn"  # yarn, pnpm, npm
 
 [dev]
 port = 3000
@@ -82,7 +82,7 @@ license = "MIT"
 repository = "https://github.com/user/repo"
 stack = "react"
 language = "typescript"
-packageManager = "pnpm"
+packageManager = "yarn"
 ```
 
 **Fields:**
@@ -95,7 +95,7 @@ packageManager = "pnpm"
 - `repository` - Git repository URL
 - `stack` - Framework (react/vue/vanilla/svelte)
 - `language` - Language (typescript/javascript)
-- `packageManager` - Package manager (pnpm/npm/yarn)
+- `packageManager` - Package manager (yarn/pnpm/npm)
 
 ### Development Server
 
@@ -321,7 +321,7 @@ temp = "./.temp"
 ```toml
 [monorepo]
 enabled = true
-tool = "pnpm"  # pnpm, yarn, npm, turborepo, nx
+tool = "yarn"  # yarn, pnpm, npm, turborepo, nx
 workspaces = ["packages/*", "apps/*"]
 
 [monorepo.turborepo]
@@ -404,7 +404,7 @@ const config: KubitConfig = {
 ```toml
 # kubit.config.base.toml
 [project]
-packageManager = "pnpm"
+packageManager = "yarn"
 
 [quality]
 lint = true
@@ -576,7 +576,7 @@ name = "enterprise-app"
 version = "1.0.0"
 stack = "react"
 language = "typescript"
-packageManager = "pnpm"
+packageManager = "yarn"
 
 [dev]
 port = 3000
@@ -623,7 +623,7 @@ domain = "cdn.example.com"
 ```toml
 [project]
 name = "monorepo"
-packageManager = "pnpm"
+packageManager = "yarn"
 
 [monorepo]
 enabled = true

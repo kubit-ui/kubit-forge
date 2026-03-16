@@ -17,13 +17,13 @@ React application built with Kubit UI Components and Design System.
 ### Install dependencies
 
 ```bash
-pnpm install
+yarn install
 ```
 
 ### Development
 
 ```bash
-pnpm run dev
+yarn dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
@@ -31,20 +31,20 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Build
 
 ```bash
-pnpm run build
+yarn build
 ```
 
 ### Test
 
 ```bash
-pnpm run test
+yarn test
 ```
 
 ### Lint
 
 ```bash
-pnpm run lint
-pnpm run format
+yarn lint
+yarn format
 ```
 
 ## Project Structure

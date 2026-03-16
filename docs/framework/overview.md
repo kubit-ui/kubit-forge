@@ -36,7 +36,7 @@ When you build on top of Kubit Forge, you inherit:
 - **Recipe Engine** - Workflow automation
 - **Command Infrastructure** - CLI framework with Commander.js
 - **Configuration Management** - TOML-based config
-- **Package Manager Detection** - npm, yarn, pnpm support
+- **Package Manager Detection** - yarn, npm, pnpm support
 - **Logger & UI Helpers** - Beautiful terminal output
 - **File System Utilities** - Safe file operations
 - **Testing Infrastructure** - Ready to test your CLI
@@ -754,7 +754,7 @@ program
   .command('workspace:link')
   .description('Link all workspaces')
   .action(async () => {
-    await ctx.runner.run('pnpm', ['install']);
+    await ctx.runner.run('yarn', ['install']);
   });
 ```
 

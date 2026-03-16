@@ -126,13 +126,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: pnpm install
+        run: yarn install
 
       - name: Security Audit
-        run: pnpm kubit-forge security:audit --level high
+        run: yarn kubit-forge security:audit --level high
 
       - name: Generate SBOM
-        run: pnpm kubit-forge sbom:generate
+        run: yarn kubit-forge sbom:generate
 
       - name: Upload SBOM
         uses: actions/upload-artifact@v3
@@ -265,7 +265,7 @@ This ensures compatibility and accuracy with your existing security tooling.
 
 This plugin complements but doesn't replace:
 
-- `npm audit` / `pnpm audit` - For quick checks
+- `npm audit` / `yarn npm audit` - For quick checks
 - **Snyk** - For advanced vulnerability scanning
 - **Dependabot** - For automated updates
 - **OWASP Dependency-Check** - For comprehensive scanning
@@ -293,8 +293,8 @@ kubit-forge sbom:generate
 # For npm
 npm install -g npm@latest
 
-# For pnpm
-pnpm install -g pnpm@latest
+# For yarn
+corepack enable && corepack prepare yarn@stable --activate
 ```
 
 ### Validation Errors

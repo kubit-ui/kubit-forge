@@ -158,7 +158,7 @@ kubit-forge template:use react-ts-storybook my-app
 
 ```bash
 # Specify package manager
-kubit-forge init react my-app --package-manager pnpm
+kubit-forge init react my-app --package-manager yarn
 
 # Skip Git initialization
 kubit-forge init react my-app --no-git
@@ -330,8 +330,9 @@ kubit-forge init react my-app
 
 ```bash
 # Solution: Install the package manager or specify a different one
-npm install -g pnpm
-# or
+# Install yarn via corepack
+corepack enable
+# or specify a different package manager
 kubit-forge init react my-app --package-manager npm
 ```
 
@@ -344,7 +345,7 @@ sudo chown -R $USER:$USER my-app
 
 ## Performance Tips
 
-- Use **pnpm** for faster installation and better disk efficiency
+- Use **Yarn Berry** for faster installation and better disk efficiency
 - Enable **caching** in CI/CD pipelines
 - Use **shallow clones** when cloning template repositories
 - Skip git initialization if adding to existing repository
@@ -373,7 +374,7 @@ After initialization:
 ```bash
 # Create monorepo root
 mkdir my-monorepo && cd my-monorepo
-pnpm init
+yarn init
 
 # Initialize workspace packages
 kubit-forge init react packages/web-app

@@ -363,7 +363,7 @@ kubit-forge info --json
  Project: my-awesome-app
  Version: 1.0.0
  Stack: React + TypeScript
- Package Manager: pnpm
+ Package Manager: yarn
  Node Version: v20.10.0
  Root: /Users/dev/my-app
 

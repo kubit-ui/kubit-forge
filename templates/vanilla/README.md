@@ -10,8 +10,6 @@ Vanilla TypeScript application created with kubit-forge.
 npm install
 # or
 yarn install
-# or
-pnpm install
 ```
 
 ### Development

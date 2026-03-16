@@ -38,27 +38,28 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Get pnpm store directory
+      - name: Get Yarn cache directory
+        id: yarn-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "CACHE_DIR=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
-      - name: Setup pnpm cache
+      - name: Setup Yarn cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ steps.yarn-cache.outputs.CACHE_DIR }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
         run: |
-          echo "Installing dependencies with pnpm..."
-          pnpm --version
-          pnpm install --frozen-lockfile
+          echo "Installing dependencies with yarn..."
+          yarn --version
+          yarn install --immutable
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -108,7 +109,7 @@ jobs:
           # Check if already in pre mode
           if [ -f ".changeset/pre.json" ]; then
             echo "⚠️ Already in prerelease mode, exiting first..."
-            pnpm changeset pre exit
+            yarn changeset pre exit
 
             # Commit the exit
             git config --global user.name "github-actions[bot]"
@@ -120,12 +121,12 @@ jobs:
           fi
 
           echo "📦 Entering beta prerelease mode..."
-          pnpm changeset pre enter beta
+          yarn changeset pre enter beta
 
       - name: Version package
         run: |
           echo "📦 Versioning package for beta..."
-          pnpm changeset:version
+          yarn changeset:version
 
           # Configure git
           git config --global user.name "github-actions[bot]"
@@ -143,14 +144,14 @@ jobs:
       - name: Build package
         run: |
           echo "🏗️ Building package..."
-          pnpm build
+          yarn build
         env:
           NODE_ENV: production
 
       - name: Publish beta to NPM
         run: |
           echo "🚀 Publishing beta to NPM..."
-          pnpm changeset:publish
+          yarn changeset:publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -158,7 +159,7 @@ jobs:
       - name: Exit prerelease mode
         run: |
           echo "📦 Exiting beta prerelease mode..."
-          pnpm changeset pre exit
+          yarn changeset pre exit
 
           git add .
           if git diff --staged --quiet; then
@@ -190,7 +191,7 @@ jobs:
             comment += '\n✅ Beta package has been successfully published to NPM!\n\n';
             comment += '**Install beta version:**\n';
             comment += '```sh\n';
-            comment += `pnpm add -g kubit-forge@${version}\n`;
+            comment += `npm install -g kubit-forge@${version}\n`;
             comment += '```';
 
             // Try to find an open PR for this branch

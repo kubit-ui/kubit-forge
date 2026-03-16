@@ -6,7 +6,7 @@
   "description": "Full Kubit ecosystem template with React, Bernova, Components, and Charts",
   "scripts": {
     "dev": "vite",
-    "build": "pnpm bernova && tsc && vite build",
+    "build": "yarn bernova && tsc && vite build",
     "preview": "vite preview",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix",
@@ -19,7 +19,7 @@
     "bernova": "npx bernova",
     "bernova:foundation": "npx bernova --foundationOnly",
     "bernova:component": "npx bernova --componentOnly",
-    "validate": "pnpm format:check && pnpm lint && pnpm typecheck"
+    "validate": "yarn format:check && yarn lint && yarn typecheck"
   },
   "dependencies": {
     "react": "^18.3.1",

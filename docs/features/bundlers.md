@@ -107,8 +107,8 @@ Manual steps required:
   3. Check for Vite-specific features like glob imports
 
 Next steps:
-  1. Run: pnpm install
-  2. Run: pnpm run dev
+  1. Run: yarn install
+  2. Run: yarn dev
 ```
 
 ### Validate Bundler Configuration

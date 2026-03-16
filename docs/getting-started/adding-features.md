@@ -678,7 +678,7 @@ kubit-forge add typescript@5.3.0
 
 ### Q: Does it work with all package managers?
 
-**A:** Yes, it automatically detects npm, yarn, or pnpm.
+**A:** Yes, it automatically detects yarn, npm, or pnpm.
 
 ## Related Documentation
 

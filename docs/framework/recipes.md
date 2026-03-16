@@ -351,7 +351,7 @@ when = { file_exists = "src/pages" }
 id = "setup-monorepo"
 command = "monorepo:init"
 args = []
-when = { not_exists = "pnpm-workspace.yaml" }
+when = { not_exists = "package.json#workspaces" }
 ```
 
 ### Task Retries
@@ -629,21 +629,21 @@ cache_key = "build-${git_sha}"
 name = "monorepo-setup"
 
 [[tasks]]
-id = "init-pnpm-workspace"
+id = "init-yarn-workspace"
 command = "monorepo:init"
-args = ["--tool", "pnpm"]
+args = ["--tool", "yarn"]
 
 [[tasks]]
 id = "add-packages"
 command = "monorepo:add"
 args = ["packages/app", "packages/lib"]
-depends_on = ["init-pnpm-workspace"]
+depends_on = ["init-yarn-workspace"]
 
 [[tasks]]
 id = "setup-changesets"
 command = "add"
 args = ["@changesets/cli"]
-depends_on = ["init-pnpm-workspace"]
+depends_on = ["init-yarn-workspace"]
 ```
 
 ### E-commerce Stack
@@ -776,7 +776,7 @@ kubit-forge recipe apply monorepo-setup-workflow
 
 **Sets up:**
 
-- pnpm workspaces
+- Yarn workspaces
 - Turborepo configuration
 - Shared configurations
 - Root-level scripts

@@ -2,13 +2,13 @@
 
 ## Overview
 
-Kubit Forge provides first-class support for monorepo management, offering seamless integration with popular monorepo tools like pnpm workspaces, Yarn workspaces, Turborepo, and Nx.
+Kubit Forge provides first-class support for monorepo management, offering seamless integration with popular monorepo tools like Yarn workspaces, pnpm workspaces, Turborepo, and Nx.
 
 ## Quick Start
 
 ```bash
 # Initialize a monorepo
-kubit-forge monorepo:init --tool pnpm
+kubit-forge monorepo:init --tool yarn
 
 # Add a new package
 kubit-forge monorepo:add my-package
@@ -22,13 +22,13 @@ kubit-forge monorepo:info
 
 ## Supported Monorepo Tools
 
-### pnpm Workspaces
+### Yarn Workspaces
 
 The recommended choice for modern monorepos.
 
 ```bash
-# Initialize pnpm monorepo
-kubit-forge monorepo:init --tool pnpm
+# Initialize yarn monorepo
+kubit-forge monorepo:init --tool yarn
 
 # Create workspace structure
 kubit-forge monorepo:add packages/ui
@@ -40,8 +40,7 @@ kubit-forge monorepo:add apps/web
 
 ```
 monorepo/
- pnpm-workspace.yaml
- package.json
+ package.json  (with workspaces field)
  packages/
     ui/
        package.json
@@ -52,17 +51,17 @@ monorepo/
          package.json
 ```
 
-**pnpm-workspace.yaml:**
+**package.json workspaces:**
 
-```yaml
-packages:
-  - 'packages/*'
-  - 'apps/*'
+```json
+{
+  "workspaces": ["packages/*", "apps/*"]
+}
 ```
 
-### Yarn Workspaces
+### pnpm Workspaces
 
-Classic workspace support for Yarn users.
+Workspace support for pnpm users.
 
 ```bash
 # Initialize Yarn monorepo
@@ -174,7 +173,7 @@ kubit-forge monorepo:init --tool lerna
 kubit-forge monorepo:init
 
 # With specific tool
-kubit-forge monorepo:init --tool pnpm
+kubit-forge monorepo:init --tool yarn
 
 # With custom structure
 kubit-forge monorepo:init --structure custom
@@ -423,12 +422,11 @@ kubit-forge monorepo:changelog
 
 [monorepo]
 enabled = true
-tool = "pnpm"  # pnpm, yarn, npm, turborepo, nx, lerna
+tool = "yarn"  # yarn, pnpm, npm, turborepo, nx, lerna
 workspaces = ["packages/*", "apps/*"]
 
-[monorepo.pnpm]
-shamefullyHoist = false
-strictPeerDependencies = true
+[monorepo.yarn]
+nodeLinker = "node-modules"
 
 [monorepo.turborepo]
 pipeline = true
@@ -503,11 +501,11 @@ kubit-forge monorepo:version minor --all
 
 ## Examples
 
-### Basic pnpm Monorepo
+### Basic Yarn Monorepo
 
 ```bash
 # Initialize
-kubit-forge monorepo:init --tool pnpm
+kubit-forge monorepo:init --tool yarn
 
 # Add packages
 kubit-forge monorepo:add packages/ui
@@ -515,7 +513,7 @@ kubit-forge monorepo:add packages/core
 kubit-forge monorepo:add apps/web
 
 # Install dependencies
-pnpm install
+yarn install
 
 # Build all
 kubit-forge monorepo:run build
@@ -627,7 +625,7 @@ description = "Setup complete monorepo structure"
 [[tasks]]
 id = "init"
 command = "monorepo:init"
-args = ["--tool", "pnpm"]
+args = ["--tool", "yarn"]
 
 [[tasks]]
 id = "add-packages"

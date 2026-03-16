@@ -2,7 +2,7 @@ name: PR Validation & Quality Checks
 
 # This workflow validates PRs against project standards and coding guidelines
 # It runs on every PR to ensure code quality, documentation, and best practices
-# Adapted for single package (non-monorepo) with pnpm
+# Adapted for single package (non-monorepo) with Yarn Berry
 
 on:
   pull_request:
@@ -34,27 +34,28 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Get pnpm store directory
+      - name: Get Yarn cache directory
+        id: yarn-cache
         shell: bash
         run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+          echo "CACHE_DIR=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
 
-      - name: Setup pnpm cache
+      - name: Setup Yarn cache
         uses: actions/cache@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ steps.yarn-cache.outputs.CACHE_DIR }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-yarn-
 
       - name: Install dependencies
         run: |
           echo "Installing dependencies..."
-          pnpm --version
-          pnpm install --frozen-lockfile
+          yarn --version
+          yarn install --immutable
 
       - name: Validate Branch Naming
         id: branch-validation
@@ -95,7 +96,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Running lint..."
-          if pnpm lint; then
+          if yarn lint; then
             echo "✅ Lint passed"
             echo "lint_valid=true" >> $GITHUB_OUTPUT
           else
@@ -108,7 +109,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Running type check..."
-          if pnpm typecheck; then
+          if yarn typecheck; then
             echo "✅ Type check passed"
             echo "typecheck_valid=true" >> $GITHUB_OUTPUT
           else
@@ -121,7 +122,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Running tests..."
-          if pnpm test; then
+          if yarn test; then
             echo "✅ Tests passed"
             echo "tests_valid=true" >> $GITHUB_OUTPUT
           else
@@ -134,7 +135,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Building package..."
-          if pnpm build; then
+          if yarn build; then
             echo "✅ Build passed"
             echo "build_valid=true" >> $GITHUB_OUTPUT
           else

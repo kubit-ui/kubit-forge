@@ -27,7 +27,7 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 ### Prerequisites
 
 - Node.js >= 20.0.0
-- npm, yarn, or pnpm
+- Yarn >= 4.9.1 (or npm)
 - Git
 
 ### Fork and Clone

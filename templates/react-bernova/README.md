@@ -6,19 +6,19 @@ React application built with **Bernova** - CSS-in-JS with JavaScript syntax.
 
 ```bash
 # Install dependencies
-pnpm install
+yarn install
 
 # Generate CSS from Bernova styles
-pnpm bernova
+yarn bernova
 
 # Start development server
-pnpm dev
+yarn dev
 
 # Build for production
-pnpm build
+yarn build
 
 # Preview production build
-pnpm preview
+yarn preview
 ```
 
 ## 🎨 Bernova - CSS-in-JS
@@ -106,24 +106,24 @@ export const THEME_STYLES = {
 After editing styles, run:
 
 ```bash
-pnpm bernova
+yarn bernova
 ```
 
 This will generate CSS files in `src/styles/output/`.
 
 ## 📦 Scripts
 
-- `pnpm dev` - Start development server
-- `pnpm build` - Generate CSS and build for production
-- `pnpm preview` - Preview production build
-- `pnpm bernova` - Generate CSS from Bernova styles
-- `pnpm bernova:foundation` - Generate only foundations CSS
-- `pnpm bernova:component` - Generate only component CSS
-- `pnpm lint` - Lint code with ESLint
-- `pnpm format` - Format code with Prettier
-- `pnpm test` - Run tests with Vitest
-- `pnpm test:ui` - Run tests with UI
-- `pnpm test:coverage` - Generate coverage report
+- `yarn dev` - Start development server
+- `yarn build` - Generate CSS and build for production
+- `yarn preview` - Preview production build
+- `yarn bernova` - Generate CSS from Bernova styles
+- `yarn bernova:foundation` - Generate only foundations CSS
+- `yarn bernova:component` - Generate only component CSS
+- `yarn lint` - Lint code with ESLint
+- `yarn format` - Format code with Prettier
+- `yarn test` - Run tests with Vitest
+- `yarn test:ui` - Run tests with UI
+- `yarn test:coverage` - Generate coverage report
 
 ## 🛠️ Tech Stack
 

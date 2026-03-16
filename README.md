@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen.svg)](https://nodejs.org/)
-[![pnpm](https://img.shields.io/badge/pnpm-%3E%3D10.0.0-orange.svg)](https://pnpm.io/)
+[![Yarn](https://img.shields.io/badge/yarn-%3E%3D4.9.1-blue.svg)](https://yarnpkg.com/)
 
 **Kubit Forge** is an open-source, production-ready CLI that empowers developers to build modern web applications with confidence. From zero-config project initialization to AI-powered diagnostics, Kubit Forge provides everything you need to develop, test, and deploy world-class applications.
 
@@ -355,8 +355,8 @@ First-class support for monorepo tools:
 
 ### Supported Tools
 
+- **Yarn workspaces**
 - **pnpm workspaces**
-- **yarn workspaces**
 - **npm workspaces**
 - **Turborepo**
 - **Nx**
@@ -366,7 +366,7 @@ First-class support for monorepo tools:
 
 ```bash
 # Initialize monorepo
-kubit-forge monorepo:init --tool pnpm
+kubit-forge monorepo:init --tool yarn
 
 # Add package to monorepo
 kubit-forge monorepo:add my-package
@@ -651,32 +651,26 @@ export default {
 ### Prerequisites
 
 - **Node.js** >= 20.0.0
-- **pnpm** >= 10.0.0 (recommended) or npm/yarn
+- **Yarn** >= 4.9.1 (recommended) or npm
 
 ### Global Installation
 
 ```bash
-# Using pnpm (recommended)
-pnpm add -g kubit-forge
-
-# Using npm
+# Using npm (recommended for global installs)
 npm install -g kubit-forge
 
 # Using yarn
-yarn global add kubit-forge
+yarn add -D kubit-forge
 ```
 
 ### Local Installation
 
 ```bash
-# Using pnpm
-pnpm add -D kubit-forge
+# Using yarn
+yarn add -D kubit-forge
 
 # Using npm
 npm install --save-dev kubit-forge
-
-# Using yarn
-yarn add -D kubit-forge
 ```
 
 ### Verify Installation
@@ -755,19 +749,19 @@ git clone https://github.com/kubit-ui/kubit-forge.git
 cd kubit-forge
 
 # Install dependencies
-pnpm install
+yarn install
 
 # Build the project
-pnpm build
+yarn build
 
 # Link for local development
-pnpm dev:link
+yarn dev:link
 
 # Run tests
-pnpm test
+yarn test
 
 # Run linter
-pnpm lint
+yarn lint
 ```
 
 ### Pull Request Process
@@ -857,7 +851,7 @@ Special thanks to:
 - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
 - [Commander.js](https://github.com/tj/commander.js) - CLI framework
 - [Changesets](https://github.com/changesets/changesets) - Version management
-- [pnpm](https://pnpm.io/) - Fast, disk-efficient package manager
+- [Yarn Berry](https://yarnpkg.com/) - Modern, fast package manager
 
 ---
 

@@ -47,7 +47,7 @@ A **Plugin** provides **new commands** (functionality).
 
 ```bash
 # 1. Install the plugin
-pnpm add -D @kubit/plugin-security
+yarn add -D @kubit/plugin-security
 
 # 2. Enable it in config
 echo '[plugins]
@@ -103,7 +103,7 @@ A **Recipe** provides **automated setup** (configuration).
 // It CONFIGURES everything for you automatically
 
 security-sbom-workflow
- Step 1: Install plugin           Runs: pnpm add -D @kubit/plugin-security
+ Step 1: Install plugin           Runs: yarn add -D @kubit/plugin-security
  Step 2: Enable plugin            Creates: kubit.config.toml config
  Step 3: Create CI workflow       Creates: .github/workflows/security.yml
  Step 4: Add npm scripts          Updates: package.json
@@ -137,7 +137,7 @@ The recipe is **JSON configuration** that describes steps:
     {
       "id": "install-plugin",
       "type": "shell",
-      "script": "pnpm add -D @kubit/plugin-security"
+      "script": "yarn add -D @kubit/plugin-security"
     },
     {
       "id": "create-workflow",
@@ -165,7 +165,7 @@ The recipe **uses the commands** from the plugin in the workflow it creates.
      kubit-forge recipe apply security-sbom-workflow      
                                                           
   2. Recipe installs Plugin                               
-     pnpm add -D @kubit/plugin-security                   
+     yarn add -D @kubit/plugin-security                   
                                                           
   3. Recipe creates CI workflow                           
      .github/workflows/security.yml:                      
@@ -190,7 +190,7 @@ The recipe **uses the commands** from the plugin in the workflow it creates.
 
 ```bash
 # Manual approach
-pnpm add -D @kubit/plugin-security
+yarn add -D @kubit/plugin-security
 # Edit kubit.config.toml manually
 # Create workflows manually
 # Add scripts manually
@@ -243,7 +243,7 @@ kubit-forge recipe apply security-sbom-workflow
 | ----------------- | ----------------------------- | ------------------------------------------ |
 | **What it is**    | TypeScript code               | JSON configuration                         |
 | **Provides**      | New commands                  | Automated setup                            |
-| **Installation**  | `pnpm add -D @kubit/plugin-*` | `recipe apply name`                        |
+| **Installation**  | `yarn add -D @kubit/plugin-*` | `recipe apply name`                        |
 | **Location**      | `node_modules/`               | `src/recipes/optional/`                    |
 | **Purpose**       | Add functionality             | Configure everything                       |
 | **Required?**     | Yes (to run commands)         | No (optional automation)                   |
@@ -388,7 +388,7 @@ Do you need new functionality (commands)?
 # Recipe installs the plugin for you
 kubit-forge recipe apply security-sbom-workflow
 #  automatically runs
-# pnpm add -D @kubit/plugin-security
+# yarn add -D @kubit/plugin-security
 ```
 
 ### Q2: Can I use a Plugin without the Recipe?
@@ -397,7 +397,7 @@ kubit-forge recipe apply security-sbom-workflow
 
 ```bash
 # Install and use plugin manually
-pnpm add -D @kubit/plugin-security
+yarn add -D @kubit/plugin-security
 kubit-forge sbom:generate
 ```
 
@@ -421,7 +421,7 @@ kubit-forge recipe apply security-sbom-workflow \
 
 ```bash
 # No CI/CD needed
-pnpm add -D @kubit/plugin-security
+yarn add -D @kubit/plugin-security
 kubit-forge sbom:generate  # Run when needed
 ```
 
@@ -436,7 +436,7 @@ kubit-forge sbom:generate  # Run when needed
 kubit-forge init my-app
 
 # 2. Add plugin when needed
-pnpm add -D @kubit/plugin-security
+yarn add -D @kubit/plugin-security
 
 # 3. Use commands manually
 kubit-forge sbom:generate
@@ -467,7 +467,7 @@ kubit-forge recipe apply security-sbom-workflow
 kubit-forge recipe apply monorepo-turborepo-setup
 
 # 3. All team members get same setup
-# Just: git clone && pnpm install
+# Just: git clone && yarn install
 ```
 
 ---

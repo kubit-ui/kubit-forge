@@ -119,7 +119,7 @@ Specialized functionality for advanced use cases.
   - Breaking change detection
 
 - **[Monorepo Support](./features/monorepo.md)** - Working with monorepos
-  - pnpm, Turborepo, Nx support
+  - Yarn, Turborepo, Nx support
   - Workspace management
   - Monorepo commands
 

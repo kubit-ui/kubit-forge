@@ -41,46 +41,46 @@ Full Kubit Ecosystem Template - A complete showcase of the Kubit design system i
 ### Prerequisites
 
 - Node.js >= 20.0.0
-- pnpm (recommended) or npm/yarn
+- Yarn (recommended) or npm
 
 ### Installation
 
 ```bash
 # Install dependencies
-pnpm install
+yarn install
 
 # Generate Bernova styles
-pnpm bernova
+yarn bernova
 
 # Start development server
-pnpm dev
+yarn dev
 ```
 
 ### Available Scripts
 
 ```bash
 # Development
-pnpm dev                    # Start dev server
-pnpm bernova                # Generate all Bernova styles
-pnpm bernova:foundation     # Generate only foundations
-pnpm bernova:component      # Generate only components
+yarn dev                    # Start dev server
+yarn bernova                # Generate all Bernova styles
+yarn bernova:foundation     # Generate only foundations
+yarn bernova:component      # Generate only components
 
 # Build
-pnpm build                  # Build for production
-pnpm preview                # Preview production build
+yarn build                  # Build for production
+yarn preview                # Preview production build
 
 # Code Quality
-pnpm lint                   # Run ESLint
-pnpm lint:fix               # Fix ESLint errors
-pnpm format                 # Format code with Prettier
-pnpm format:check           # Check code formatting
-pnpm typecheck              # Run TypeScript checks
-pnpm validate               # Run all checks
+yarn lint                   # Run ESLint
+yarn lint:fix               # Fix ESLint errors
+yarn format                 # Format code with Prettier
+yarn format:check           # Check code formatting
+yarn typecheck              # Run TypeScript checks
+yarn validate               # Run all checks
 
 # Testing
-pnpm test                   # Run tests
-pnpm test:ui                # Run tests with UI
-pnpm test:coverage          # Run tests with coverage
+yarn test                   # Run tests
+yarn test:ui                # Run tests with UI
+yarn test:coverage          # Run tests with coverage
 ```
 
 ## 📁 Project Structure
@@ -136,7 +136,7 @@ export const BUTTON = {
 
 ### Using Generated Styles
 
-After running `pnpm bernova`, use the generated CSS classes:
+After running `yarn bernova`, use the generated CSS classes:
 
 ```tsx
 <button className="button button--primary">Click me</button>
