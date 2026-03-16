@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.21
+
+### Patch Changes
+
+- Configuration
+
 ## 0.0.2-canary.20
 
 ### Patch Changes
@@ -37,6 +43,7 @@
 - Simplify CLI by removing redundant features and moving advanced functionality to optional plugins
 
   BREAKING CHANGES:
+
   - Remove GUI/TUI commands (dashboard, gui, visual:config)
   - Remove assets optimization commands (assets:optimize, assets:compress, assets:cdn:sync)
   - Remove SBOM/security commands from core (moved to @kubit/plugin-security)
@@ -47,6 +54,7 @@
   - Remove dedicated bernova commands (bernova:init, bernova:generate, bernova:validate)
 
   IMPROVEMENTS:
+
   - Simplify doctor command to basic checks only (391 lines vs 479 lines)
   - Simplify deps:analyze command with native tool recommendations (125 lines vs 566 lines)
   - Integrate bernova into standard 'add' system for consistency
@@ -54,6 +62,7 @@
   - Remove ~4,400 lines of code from core
 
   NEW FEATURES:
+
   - Add @kubit/plugin-security (optional plugin for SBOM generation and security audits)
   - Add @kubit/plugin-doctor-advanced (optional plugin for auto-fix, predictive analysis, IDE integration)
   - Add optional recipes for automated workflows:
@@ -63,6 +72,7 @@
     - monorepo-turborepo-setup (complete Turborepo configuration)
 
   DOCUMENTATION:
+
   - Add PLUGINS-VS-RECIPES.md (comprehensive guide explaining the difference)
   - Add RECIPES-OPTIONAL.md (documentation for optional recipes)
   - Add PLUGIN-SECURITY.md (security plugin documentation)
@@ -72,6 +82,7 @@
   - Remove outdated documentation (GUI.md, ASSET-OPTIMIZATION.md, SECURITY-SBOM.md, etc.)
 
   PHILOSOPHY:
+
   - Core CLI remains lightweight with essential commands only
   - Advanced features available as optional plugins
   - Automated workflows provided through optional recipes
@@ -79,6 +90,7 @@
   - Maintain neutrality (no favoritism for specific packages)
 
   FILES DELETED:
+
   - src/commands/assets.ts
   - src/commands/dashboard.ts
   - src/commands/gui.ts
@@ -99,6 +111,7 @@
   - docs/DEPENDENCY_MANAGEMENT.md
 
   FILES CREATED:
+
   - src/plugins/security-plugin.ts
   - src/plugins/doctor-advanced-plugin.ts
   - src/recipes/optional/security-sbom-workflow.json
@@ -117,6 +130,7 @@
 ### Patch Changes
 
 - Remove deprecated loadConfigFromCLIDir option
+
   - Remove loadConfigFromCLIDir from RunCLIOptions interface
   - configDir is now the only way to specify config location
   - Update documentation with configDir examples
@@ -145,6 +159,7 @@
 ### Patch Changes
 
 - Migrate to kubit-forge internal plugins system
+
   - Replace manual plugin loading with PluginManager.loadInternalPlugins()
   - Configure plugins.internal in kubit.config.toml
   - Simplify CLI initialization by ~30 lines using kubit-forge features
@@ -155,6 +170,7 @@
   which allows loading local plugins without npm publish.
 
   Benefits:
+
   - Less boilerplate code
   - Consistent plugin loading mechanism
   - Better integration with kubit-forge ecosystem
@@ -167,6 +183,7 @@
 ### Patch Changes
 
 - Resolve ESLint errors and improve error handling
+
   - Remove useless assignment in HookManager.register method
   - Move exports after class definitions to fix no-use-before-define warnings
   - Add error cause preservation in catch blocks (preserve-caught-error rule)
@@ -174,6 +191,7 @@
   - Update eslint-config-kubit to v2.0.1 for ESLint 10 compatibility
 
   Files changed:
+
   - src/core/hook-manager.ts
   - src/core/recipe-engine.ts
   - src/core/recipe-remote-loader.ts
@@ -187,6 +205,7 @@
 ### Patch Changes
 
 - Use correct template IDs matching actual template directories
+
   - Change react-ts → react
   - Change react-ts-bernova → react-bernova
   - Add react-kubit-ui and kubit-full templates
@@ -211,6 +230,7 @@
 ### Patch Changes
 
 - Implement template creation with real-time console logging
+
   - Add /api/template/create endpoint for project initialization
   - Enable real-time log streaming during template creation
   - Add project name validation (lowercase, numbers, hyphens only)
@@ -233,6 +253,7 @@
 ### Patch Changes
 
 - Add floating draggable console with real-time logs
+
   - Add FloatingConsole component accessible from all screens
   - Implement drag and drop functionality for console positioning
   - Add minimize, maximize, and resize controls
@@ -272,6 +293,7 @@
   Add comprehensive logging system and improve error handling for command execution:
 
   Console Tab (New):
+
   - Real-time log viewer with auto-refresh every 2 seconds
   - Color-coded log types: error (red), success (green), stderr (orange), stdout (blue), info (gray)
   - Timestamps for each log entry
@@ -281,12 +303,14 @@
   - Keeps last 100 log entries in memory
 
   Command Improvements:
+
   - Load commands dynamically from package.json scripts
   - No longer hardcoded - adapts to each project
   - Displays actual script command in description
   - Better error messages with detailed output
 
   Error Handling:
+
   - Capture both stdout and stderr from command execution
   - Use execa with reject: false to handle failures gracefully
   - Log all command execution steps (start, output, result)
@@ -294,11 +318,13 @@
   - Show actual error output to user in console
 
   New API Endpoints:
+
   - GET /api/console/logs - Retrieve console logs
   - POST /api/console/clear - Clear console logs
   - GET /api/commands/available - Get available npm scripts dynamically
 
   Technical Changes:
+
   - Add consoleLogs array to AdvancedGuiServer class
   - Implement addLog() method for centralized logging
   - Update /api/command/execute with comprehensive error handling
@@ -306,6 +332,7 @@
   - Commands component now fetches from /api/commands/available
 
   Benefits:
+
   - See exactly what happens when commands execute
   - Debug failed commands with full output
   - No more 500 errors without context
@@ -313,6 +340,7 @@
   - Professional logging experience like real terminals
 
   Files modified:
+
   - src/gui/advanced-server.ts (963 lines, +120 lines)
 
   All features tested and working. Console provides full visibility into command execution.
@@ -326,6 +354,7 @@
   Add comprehensive web-based GUI with full project management capabilities:
 
   Frontend (8 Tabs):
+
   - Dashboard: Project stats, version, dependencies count, git status with refresh
   - Commands: Execute commands with one click (dev, build, test, lint, format, typecheck)
   - Git: Branch info, file changes count, last 10 commits with hash and message
@@ -336,6 +365,7 @@
   - Config: Visual editor for kubit.config.toml with live save
 
   Backend (REST API):
+
   - /api/dashboard - Project stats and git status
   - /api/config - GET/POST configuration management
   - /api/command/execute - Execute npm/pnpm commands
@@ -347,6 +377,7 @@
   - /api/files - Project file explorer
 
   Technical:
+
   - Single file architecture (advanced-server.ts)
   - Zero dependencies UI (React via CDN)
   - Node.js HTTP server with auto port resolution
@@ -358,6 +389,7 @@
   - Full TypeScript support
 
   Features:
+
   - Execute any package.json script from GUI
   - Visual git history browser
   - One-click feature installation
@@ -367,6 +399,7 @@
   - Port conflict auto-resolution
 
   Files:
+
   - src/gui/advanced-server.ts (791 lines, complete GUI)
   - src/commands/gui.ts (updated to use AdvancedGuiServer)
 
@@ -381,6 +414,7 @@
   Add modern web-based interface for visual project management:
 
   Commands:
+
   - gui: Launch full GUI dashboard with 3 tabs
     - Overview: project information cards
     - Commands: clickable command palette
@@ -395,6 +429,7 @@
     - Real-time changes with save confirmation
 
   GUI Features:
+
   - Beautiful gradient design with glassmorphism effects
   - Three main tabs: Overview, Commands, Configuration
   - Project overview with visual information cards
@@ -404,6 +439,7 @@
   - Responsive design for desktop and tablets
 
   Technical:
+
   - Zero dependencies UI (HTML/CSS/JS + React via CDN)
   - RESTful API (/api/config, /api/project/info, /api/commands)
   - Node.js HTTP server embedded
@@ -413,16 +449,19 @@
   - Semantic HTML with accessibility support
 
   Files added:
+
   - src/gui/server.ts (HTTP server + API + UI generation)
   - src/commands/gui.ts (GUI commands)
   - docs/GUI.md (comprehensive documentation)
 
   Files modified:
+
   - src/cli.ts (command registration)
   - README.md (new GUI section + roadmap)
   - CHANGELOG.md
 
   Documentation:
+
   - Complete GUI.md with architecture, API reference
   - Troubleshooting guide and FAQ
   - Examples and use cases
@@ -437,12 +476,14 @@
 A comprehensive suite of tools for intelligent dependency analysis, optimization, and management:
 
 - **`deps:analyze`** - Visualize dependency tree with interactive filtering
+
   - Tree-style visualization with unicode characters
   - Configurable depth and package filtering
   - Separate production and dev dependency views
   - Summary statistics (total, production, development)
 
 - **`deps:why <package>`** - Explain why a package is installed
+
   - Shows which packages require this dependency
   - Displays installation location and version
   - Identifies dependency type (production, development, peer, optional)
@@ -450,6 +491,7 @@ A comprehensive suite of tools for intelligent dependency analysis, optimization
   - Traces transitive dependency chains
 
 - **`deps:dedupe`** - Find and eliminate duplicate dependencies
+
   - Identifies duplicate packages with different versions
   - Shows potential space savings
   - Lists all locations of duplicates
@@ -457,6 +499,7 @@ A comprehensive suite of tools for intelligent dependency analysis, optimization
   - Safe operations with dry-run mode
 
 - **`deps:update`** - Smart dependency update suggestions
+
   - Scans for available updates (current, wanted, latest)
   - Identifies breaking changes with visual indicators
   - Highlights security vulnerabilities
@@ -465,6 +508,7 @@ A comprehensive suite of tools for intelligent dependency analysis, optimization
   - Filter by security-only updates
 
 - **`deps:alternatives <package>`** - Suggest better package alternatives
+
   - Curated database of known alternatives (axios, moment, lodash, etc.)
   - Comparison metrics (bundle size, downloads, stars)
   - Maintenance status indicators
@@ -499,6 +543,7 @@ A comprehensive suite of tools for intelligent dependency analysis, optimization
 Modern web-based interface for visual project management:
 
 - **`gui`** - Launch full GUI dashboard
+
   - Beautiful gradient design with glassmorphism effects
   - Three main tabs: Overview, Commands, Configuration
   - Automatic port conflict resolution
@@ -507,6 +552,7 @@ Modern web-based interface for visual project management:
   - No-open flag for headless mode
 
 - **`visual:config`** - Open configuration editor directly
+
   - Visual editing of `kubit.config.toml`
   - Form-based interface prevents syntax errors
   - Real-time validation
@@ -515,12 +561,14 @@ Modern web-based interface for visual project management:
   - Save button with success notification
 
 - **📊 Project Overview Tab**
+
   - Visual project information cards
   - Project name, stack, language
   - Package manager and working directory
   - Clean, organized display
 
 - **⚡ Commands Tab**
+
   - Clickable command cards
   - Common commands: dev, build, test, lint, format, typecheck
   - Icon-based visual identification
