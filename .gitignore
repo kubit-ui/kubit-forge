@@ -23,7 +23,6 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
 # OS
 .DS_Store
@@ -41,8 +40,16 @@ tmp/
 temp/
 *.tmp
 
-# Lock files (keep pnpm-lock.yaml)
+# Lock files (keep yarn.lock)
 package-lock.json
-yarn.lock
+pnpm-lock.yaml
 
-.npmrc
+# Yarn Berry
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+__reports__/

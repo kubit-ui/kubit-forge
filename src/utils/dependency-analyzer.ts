@@ -182,7 +182,9 @@ export class DependencyAnalyzer {
           });
           break;
         case 'npm':
-          result = await execa('npm', ['list', '--json', '--all'], { cwd: this.cwd });
+          result = await execa('npm', ['list', '--json', '--all'], {
+            cwd: this.cwd,
+          });
           break;
         case 'yarn':
           result = await execa('yarn', ['list', '--json'], { cwd: this.cwd });
@@ -356,7 +358,11 @@ export class DependencyAnalyzer {
   /**
    * Deduplicate dependencies
    */
-  async deduplicate(): Promise<{ before: number; after: number; saved: string }> {
+  async deduplicate(): Promise<{
+    before: number;
+    after: number;
+    saved: string;
+  }> {
     const beforeCount = await this.countTotalDependencies();
 
     try {
@@ -399,15 +405,41 @@ export class DependencyAnalyzer {
   }
 
   private async getNpmTree(): Promise<DependencyTree> {
-    const result = await execa('npm', ['list', '--json', '--all'], { cwd: this.cwd });
+    const result = await execa('npm', ['list', '--json', '--all'], {
+      cwd: this.cwd,
+    });
     const data = JSON.parse(result.stdout);
     return this.parseNpmTree(data);
   }
 
   private parsePackageJson(pkg: any): DependencyTree {
+    const dependencies = new Map<string, DependencyNode>();
+    const devDependencies = new Map<string, DependencyNode>();
+
+    if (pkg.dependencies) {
+      for (const [name, version] of Object.entries(pkg.dependencies)) {
+        dependencies.set(name, {
+          name,
+          version: String(version).replace(/^[\^~]/, ''),
+          required: String(version),
+        });
+      }
+    }
+
+    if (pkg.devDependencies) {
+      for (const [name, version] of Object.entries(pkg.devDependencies)) {
+        devDependencies.set(name, {
+          name,
+          version: String(version).replace(/^[\^~]/, ''),
+          required: String(version),
+          dev: true,
+        });
+      }
+    }
+
     return {
-      dependencies: new Map(),
-      devDependencies: new Map(),
+      dependencies,
+      devDependencies,
       name: pkg.name,
       version: pkg.version,
     };
@@ -556,7 +588,9 @@ export class DependencyAnalyzer {
       const cleanVersion = currentVersion.replace(/^[\^~]/, '');
 
       // Get package info from registry
-      const result = await execa('npm', ['view', name, 'version', '--json'], { cwd: this.cwd });
+      const result = await execa('npm', ['view', name, 'version', '--json'], {
+        cwd: this.cwd,
+      });
       const latest = result.stdout.replace(/"/g, '');
 
       // Determine wanted version (respects semver range)
