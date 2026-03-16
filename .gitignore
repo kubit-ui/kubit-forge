@@ -53,5 +53,3 @@ pnpm-lock.yaml
 !.yarn/versions
 
 __reports__/
-
-.yarnrc.yml
