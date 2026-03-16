@@ -53,7 +53,9 @@ describe('UpdateChecker', () => {
 
       const latestVersion = await updateChecker.checkForUpdates(false);
       expect(latestVersion).toBe('4.1.0');
-      expect(global.fetch).toHaveBeenCalledWith('https://registry.npmjs.org/kubit-forge/latest');
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://registry.npmjs.org/@kubit-ui-web/kubit-forge/latest'
+      );
     });
 
     it('should return null on fetch error', async () => {
@@ -140,17 +142,17 @@ describe('UpdateChecker', () => {
   describe('getUpdateCommand', () => {
     it('should return npm command by default', () => {
       const command = updateChecker.getUpdateCommand();
-      expect(command).toBe('npm install -g kubit-forge@latest');
+      expect(command).toBe('npm install -g @kubit-ui-web/kubit-forge@latest');
     });
 
     it('should return pnpm command', () => {
       const command = updateChecker.getUpdateCommand('pnpm');
-      expect(command).toBe('pnpm add -g kubit-forge@latest');
+      expect(command).toBe('pnpm add -g @kubit-ui-web/kubit-forge@latest');
     });
 
     it('should return yarn command', () => {
       const command = updateChecker.getUpdateCommand('yarn');
-      expect(command).toBe('yarn global add kubit-forge@latest');
+      expect(command).toBe('yarn global add @kubit-ui-web/kubit-forge@latest');
     });
   });
 
