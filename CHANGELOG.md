@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.2-canary.24
+
+### Patch Changes
+
+- Remove yarn engine restriction and packageManager field for universal install compatibility
+
 ## 0.0.2-canary.23
 
 ### Patch Changes
