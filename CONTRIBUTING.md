@@ -27,7 +27,7 @@ This project adheres to a [Code of Conduct](CODE_OF_CONDUCT.md). By participatin
 ### Prerequisites
 
 - Node.js >= 20.0.0
-- Yarn >= 4.9.1 (or npm)
+- Yarn >= 4.0.0 (via Corepack)
 - Git
 
 ### Fork and Clone
@@ -39,34 +39,64 @@ git clone https://github.com/YOUR_USERNAME/kubit-forge.git
 cd kubit-forge
 ```
 
+### Private Registry (optional)
+
+This repo uses the public npm registry by default. If your organization requires a **private registry** (JFrog Artifactory, Nexus, GitHub Packages, etc.), you can override it globally via environment variables — no need to modify any files.
+
+1. Add to your `~/.zshrc` (or `~/.bashrc`):
+
+```sh
+export YARN_NPM_REGISTRY_SERVER="https://your-org.example.com/your-npm-registry/"
+export YARN_NPM_ALWAYS_AUTH=true
+export YARN_ENABLE_STRICT_SSL=false
+```
+
+2. Reload your shell:
+
+```sh
+source ~/.zshrc
+```
+
+3. Verify:
+
+```sh
+yarn config get npmRegistryServer
+# Should show your private registry URL
+```
+
+This applies globally to all Yarn Berry projects. See `.env.example` for reference.
+
 ---
 
 ## 🛠️ Development Setup
 
 ```bash
+# Enable Corepack (ships with Node.js)
+corepack enable
+
 # Install dependencies
-npm install
+yarn install
 
 # Build the project
-npm run build
+yarn build
 
 # Link for local development
-npm link
+yarn dev:link
 
 # Run tests
-npm test
+yarn test
 
 # Run tests in watch mode
-npm run test:watch
+yarn test:watch
 
 # Type checking
-npm run typecheck
+yarn typecheck
 
 # Lint code
-npm run lint
+yarn lint
 
 # Format code
-npm run format
+yarn format
 ```
 
 ---
@@ -119,19 +149,19 @@ git checkout -b fix/your-bug-fix
 
 ```bash
 # Run all tests
-npm test
+yarn test
 
 # Run specific test
-npm test -- path/to/test.spec.ts
+yarn test path/to/test.spec.ts
 
 # Check types
-npm run typecheck
+yarn typecheck
 
 # Lint
-npm run lint
+yarn lint
 
 # Format
-npm run format
+yarn format
 ```
 
 ### 4. Commit Your Changes
@@ -182,16 +212,16 @@ describe('myFunction', () => {
 
 ```bash
 # Run all tests
-npm test
+yarn test
 
 # Watch mode
-npm run test:watch
+yarn test:watch
 
 # Coverage
-npm test -- --coverage
+yarn test --coverage
 
 # Specific file
-npm test -- path/to/file.test.ts
+yarn test path/to/file.test.ts
 ```
 
 ---
