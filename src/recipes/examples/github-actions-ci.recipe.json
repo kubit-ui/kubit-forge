@@ -1,0 +1,107 @@
+{
+  "name": "github-actions-ci",
+  "version": "1.0.0",
+  "description": "Setup comprehensive GitHub Actions CI/CD pipeline with quality checks, testing, and deployment",
+  "author": "Kubit Team",
+  "tags": ["ci-cd", "github-actions", "automation", "testing", "deployment"],
+  "variables": {
+    "projectName": "my-project",
+    "nodeVersion": "20",
+    "packageManager": "pnpm",
+    "runTests": true,
+    "runLint": true,
+    "runTypeCheck": true,
+    "runE2E": false,
+    "deployToVercel": false,
+    "deployToNetlify": false,
+    "enableDependabot": true,
+    "enableCodeQL": true
+  },
+  "prerequisites": {
+    "files": ["package.json"]
+  },
+  "steps": [
+    {
+      "type": "log",
+      "message": "🚀 Setting up GitHub Actions CI/CD...",
+      "level": "info"
+    },
+    {
+      "type": "create-file",
+      "name": "Create main CI workflow",
+      "path": ".github/workflows/ci.yml",
+      "content": "name: CI\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main, develop]\n\nenv:\n  NODE_VERSION: '${nodeVersion}'\n\njobs:\n  quality:\n    name: Code Quality\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n\n      - name: Setup Node.js\n        uses: actions/setup-node@v4\n        with:\n          node-version: ${{ env.NODE_VERSION }}\n\n      - name: Setup ${packageManager}\n        uses: pnpm/action-setup@v2\n        with:\n          version: 8\n\n      - name: Get ${packageManager} store directory\n        id: ${packageManager}-cache\n        shell: bash\n        run: |\n          echo \"STORE_PATH=$(${packageManager} store path)\" >> $GITHUB_OUTPUT\n\n      - name: Setup ${packageManager} cache\n        uses: actions/cache@v3\n        with:\n          path: ${{ steps.${packageManager}-cache.outputs.STORE_PATH }}\n          key: ${{ runner.os }}-${packageManager}-store-${{ hashFiles('**/pnpm-lock.yaml') }}\n          restore-keys: |\n            ${{ runner.os }}-${packageManager}-store-\n\n      - name: Install dependencies\n        run: ${packageManager} install --frozen-lockfile\n\n      ${runLint ? '- name: Run ESLint\n        run: ' + packageManager + ' run lint\n\n      ' : ''}${runTypeCheck ? '- name: Run TypeScript check\n        run: ' + packageManager + ' run typecheck\n\n      ' : ''}${runTests ? '- name: Run unit tests\n        run: ' + packageManager + ' run test\n\n      - name: Upload coverage\n        uses: codecov/codecov-action@v3\n        with:\n          files: ./coverage/coverage-final.json\n          flags: unittests\n\n      ' : ''}- name: Build project\n        run: ${packageManager} run build\n\n      - name: Upload build artifacts\n        uses: actions/upload-artifact@v3\n        with:\n          name: build\n          path: dist/\n          retention-days: 7\n"
+    },
+    {
+      "type": "conditional",
+      "name": "Add E2E testing job",
+      "condition": "$runE2E === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": ".github/workflows/e2e.yml",
+          "content": "name: E2E Tests\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main, develop]\n\nenv:\n  NODE_VERSION: '${nodeVersion}'\n\njobs:\n  e2e:\n    name: E2E Tests\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n\n      - name: Setup Node.js\n        uses: actions/setup-node@v4\n        with:\n          node-version: ${{ env.NODE_VERSION }}\n\n      - name: Setup ${packageManager}\n        uses: pnpm/action-setup@v2\n        with:\n          version: 8\n\n      - name: Install dependencies\n        run: ${packageManager} install --frozen-lockfile\n\n      - name: Install Playwright browsers\n        run: npx playwright install --with-deps\n\n      - name: Run E2E tests\n        run: ${packageManager} run test:e2e\n\n      - name: Upload test results\n        if: always()\n        uses: actions/upload-artifact@v3\n        with:\n          name: playwright-report\n          path: playwright-report/\n          retention-days: 30\n"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Add Vercel deployment",
+      "condition": "$deployToVercel === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": ".github/workflows/deploy-vercel.yml",
+          "content": "name: Deploy to Vercel\n\non:\n  push:\n    branches: [main]\n\nenv:\n  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}\n  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}\n\njobs:\n  deploy:\n    name: Deploy to Vercel\n    runs-on: ubuntu-latest\n    steps:\n      - name: Checkout code\n        uses: actions/checkout@v4\n\n      - name: Install Vercel CLI\n        run: npm install --global vercel@latest\n\n      - name: Pull Vercel Environment Information\n        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}\n\n      - name: Build Project Artifacts\n        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}\n\n      - name: Deploy Project Artifacts to Vercel\n        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}\n"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Add Dependabot configuration",
+      "condition": "$enableDependabot === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": ".github/dependabot.yml",
+          "content": "version: 2\nupdates:\n  - package-ecosystem: 'npm'\n    directory: '/'\n    schedule:\n      interval: 'weekly'\n      day: 'monday'\n    open-pull-requests-limit: 10\n    reviewers:\n      - '${projectName}-team'\n    labels:\n      - 'dependencies'\n      - 'automated'\n    commit-message:\n      prefix: 'chore'\n      include: 'scope'\n\n  - package-ecosystem: 'github-actions'\n    directory: '/'\n    schedule:\n      interval: 'weekly'\n      day: 'monday'\n    labels:\n      - 'dependencies'\n      - 'github-actions'\n"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Add CodeQL security scanning",
+      "condition": "$enableCodeQL === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": ".github/workflows/codeql.yml",
+          "content": "name: 'CodeQL'\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main]\n  schedule:\n    - cron: '0 0 * * 1'\n\njobs:\n  analyze:\n    name: Analyze\n    runs-on: ubuntu-latest\n    permissions:\n      actions: read\n      contents: read\n      security-events: write\n\n    strategy:\n      fail-fast: false\n      matrix:\n        language: ['javascript']\n\n    steps:\n      - name: Checkout repository\n        uses: actions/checkout@v4\n\n      - name: Initialize CodeQL\n        uses: github/codeql-action/init@v2\n        with:\n          languages: ${{ matrix.language }}\n\n      - name: Autobuild\n        uses: github/codeql-action/autobuild@v2\n\n      - name: Perform CodeQL Analysis\n        uses: github/codeql-action/analyze@v2\n        with:\n          category: '/language:${{matrix.language}}'\n"
+        }
+      ]
+    },
+    {
+      "type": "create-file",
+      "name": "Create PR template",
+      "path": ".github/pull_request_template.md",
+      "content": "## Description\n\n<!-- Describe your changes in detail -->\n\n## Type of change\n\n- [ ] Bug fix (non-breaking change which fixes an issue)\n- [ ] New feature (non-breaking change which adds functionality)\n- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)\n- [ ] Documentation update\n\n## Checklist\n\n- [ ] My code follows the style guidelines of this project\n- [ ] I have performed a self-review of my own code\n- [ ] I have commented my code, particularly in hard-to-understand areas\n- [ ] I have made corresponding changes to the documentation\n- [ ] My changes generate no new warnings\n- [ ] I have added tests that prove my fix is effective or that my feature works\n- [ ] New and existing unit tests pass locally with my changes\n- [ ] Any dependent changes have been merged and published\n\n## Screenshots (if applicable)\n\n<!-- Add screenshots here -->\n\n## Related Issues\n\n<!-- Link related issues here -->\nCloses #\n"
+    },
+    {
+      "type": "create-file",
+      "name": "Create issue templates directory",
+      "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+      "content": "---\nname: Bug report\nabout: Create a report to help us improve\ntitle: '[BUG] '\nlabels: bug\nassignees: ''\n---\n\n**Describe the bug**\nA clear and concise description of what the bug is.\n\n**To Reproduce**\nSteps to reproduce the behavior:\n1. Go to '...'\n2. Click on '....'\n3. Scroll down to '....'\n4. See error\n\n**Expected behavior**\nA clear and concise description of what you expected to happen.\n\n**Screenshots**\nIf applicable, add screenshots to help explain your problem.\n\n**Environment:**\n - OS: [e.g. macOS, Windows, Linux]\n - Browser [e.g. chrome, safari]\n - Version [e.g. 22]\n - Node version: [e.g. 18.0.0]\n\n**Additional context**\nAdd any other context about the problem here.\n"
+    },
+    {
+      "type": "create-file",
+      "path": ".github/ISSUE_TEMPLATE/feature_request.md",
+      "content": "---\nname: Feature request\nabout: Suggest an idea for this project\ntitle: '[FEATURE] '\nlabels: enhancement\nassignees: ''\n---\n\n**Is your feature request related to a problem? Please describe.**\nA clear and concise description of what the problem is. Ex. I'm always frustrated when [...]\n\n**Describe the solution you'd like**\nA clear and concise description of what you want to happen.\n\n**Describe alternatives you've considered**\nA clear and concise description of any alternative solutions or features you've considered.\n\n**Additional context**\nAdd any other context or screenshots about the feature request here.\n"
+    },
+    {
+      "type": "log",
+      "message": "✓ GitHub Actions CI/CD setup complete!",
+      "level": "success"
+    }
+  ],
+  "instructions": "GitHub Actions CI/CD setup complete!\n\nWorkflows created:\n- ✓ Main CI workflow (lint, test, build)\n${runE2E ? '- ✓ E2E testing workflow\n' : ''}${deployToVercel ? '- ✓ Vercel deployment workflow\n' : ''}${enableDependabot ? '- ✓ Dependabot configuration\n' : ''}${enableCodeQL ? '- ✓ CodeQL security scanning\n' : ''}\nTemplates created:\n- ✓ Pull request template\n- ✓ Bug report template\n- ✓ Feature request template\n\nNext steps:\n1. Commit and push the .github directory\n2. ${deployToVercel ? 'Add Vercel secrets to GitHub (VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID)\n3. ' : ''}Review and customize workflows as needed\n4. Enable branch protection rules in GitHub settings\n5. Configure required status checks\n\nYour CI/CD pipeline will now:\n${runLint ? '- ✓ Run linting on every push\n' : ''}${runTypeCheck ? '- ✓ Run type checking\n' : ''}${runTests ? '- ✓ Run unit tests with coverage\n' : ''}${runE2E ? '- ✓ Run E2E tests\n' : ''}- ✓ Build the project\n${deployToVercel ? '- ✓ Deploy to Vercel on main branch\n' : ''}${enableCodeQL ? '- ✓ Run security scans weekly\n' : ''}"
+}

@@ -1,0 +1,34 @@
+{
+  "mode": "exit",
+  "tag": "canary",
+  "initialVersions": {
+    "kubit-forge": "0.0.2-canary.23"
+  },
+  "changesets": [
+    "canary-1770287850",
+    "canary-1770451252",
+    "canary-1770451945",
+    "canary-1770453222",
+    "canary-1770453662",
+    "canary-1770461494",
+    "canary-1770488561",
+    "canary-1770489538",
+    "canary-1770490221",
+    "canary-1770490494",
+    "canary-1770716004",
+    "canary-1770725265",
+    "canary-1770726165",
+    "canary-1770731176",
+    "canary-1770731560",
+    "canary-1770809723",
+    "canary-1770822429",
+    "canary-1770972326",
+    "canary-1770976298",
+    "canary-1772030520",
+    "canary-1773392094",
+    "canary-1773678419",
+    "canary-1773679503",
+    "canary-1773732494",
+    "canary-1773743831"
+  ]
+}

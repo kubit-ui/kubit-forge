@@ -1,0 +1,80 @@
+{
+  "name": "parametrized-component-generator",
+  "version": "1.0.0",
+  "description": "Generate React components with customizable options using parameters",
+  "author": "Kubit Team",
+  "tags": ["generator", "react", "component", "parametrized"],
+  "variables": {
+    "componentName": "MyComponent",
+    "componentType": "functional",
+    "addProps": true,
+    "addStyles": true,
+    "addTests": true,
+    "addStory": false,
+    "exportType": "named"
+  },
+  "steps": [
+    {
+      "type": "log",
+      "message": "Generating component: ${componentName}",
+      "level": "info"
+    },
+    {
+      "type": "validate",
+      "condition": "$componentName !== ''",
+      "message": "Component name is required"
+    },
+    {
+      "type": "create-file",
+      "path": "src/components/${componentName}/${componentName}.tsx",
+      "content": "import React from 'react';\n${addStyles ? \"import './${componentName}.css';\" : ''}\n\n${addProps ? 'interface ' + componentName + 'Props {\n  // Add your props here\n}\n\n' : ''}${exportType === 'default' ? 'export default' : 'export'} function ${componentName}(${addProps ? 'props: ' + componentName + 'Props' : ''}) {\n  return (\n    <div className=\"${componentName.toLowerCase()}\">\n      <h1>${componentName}</h1>\n    </div>\n  );\n}\n${exportType === 'named' ? '\nexport default ' + componentName + ';' : ''}"
+    },
+    {
+      "type": "conditional",
+      "name": "Create CSS file",
+      "condition": "$addStyles === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": "src/components/${componentName}/${componentName}.css",
+          "content": ".${componentName.toLowerCase()} {\n  /* Add your styles here */\n}\n"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Create test file",
+      "condition": "$addTests === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": "src/components/${componentName}/${componentName}.test.tsx",
+          "content": "import { render, screen } from '@testing-library/react';\nimport ${componentName} from './${componentName}';\n\ndescribe('${componentName}', () => {\n  it('renders correctly', () => {\n    render(<${componentName} />);\n    expect(screen.getByText('${componentName}')).toBeInTheDocument();\n  });\n});\n"
+        }
+      ]
+    },
+    {
+      "type": "conditional",
+      "name": "Create Storybook story",
+      "condition": "$addStory === true",
+      "then": [
+        {
+          "type": "create-file",
+          "path": "src/components/${componentName}/${componentName}.stories.tsx",
+          "content": "import type { Meta, StoryObj } from '@storybook/react';\nimport ${componentName} from './${componentName}';\n\nconst meta: Meta<typeof ${componentName}> = {\n  title: 'Components/${componentName}',\n  component: ${componentName},\n  tags: ['autodocs'],\n};\n\nexport default meta;\ntype Story = StoryObj<typeof ${componentName}>;\n\nexport const Default: Story = {\n  args: {},\n};\n"
+        }
+      ]
+    },
+    {
+      "type": "create-file",
+      "path": "src/components/${componentName}/index.ts",
+      "content": "export { default } from './${componentName}';\n${addProps ? 'export type { ' + componentName + 'Props } from \\'./${componentName}\\';\n' : ''}"
+    },
+    {
+      "type": "log",
+      "message": "✓ Component ${componentName} generated successfully!",
+      "level": "success"
+    }
+  ],
+  "instructions": "Component generated at src/components/${componentName}/\n\nFiles created:\n- ${componentName}.tsx (component)\n${addStyles ? '- ' + componentName + '.css (styles)\n' : ''}${addTests ? '- ' + componentName + '.test.tsx (tests)\n' : ''}${addStory ? '- ' + componentName + '.stories.tsx (Storybook)\n' : ''}- index.ts (barrel export)\n\nNext steps:\n1. Customize the component implementation\n2. Add props and logic as needed\n${addTests ? '3. Run tests with npm test\n' : ''}${addStory ? '4. View in Storybook with npm run storybook\n' : ''}"
+}

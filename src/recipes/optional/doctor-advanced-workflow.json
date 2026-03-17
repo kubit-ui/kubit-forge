@@ -1,0 +1,62 @@
+{
+  "name": "doctor-advanced-workflow",
+  "version": "1.0.0",
+  "description": "Advanced diagnostics workflow with auto-fix and predictive analysis",
+  "author": "Kubit Team",
+  "tags": ["doctor", "diagnostics", "auto-fix", "predictive", "ci-cd"],
+  "category": "quality",
+  "requires": {
+    "kubitVersion": "^3.0.0",
+    "plugins": ["@kubit/plugin-doctor-advanced"]
+  },
+  "variables": {
+    "enableAutoFix": {
+      "type": "boolean",
+      "description": "Enable auto-fix in CI",
+      "default": false
+    },
+    "exportFormat": {
+      "type": "string",
+      "description": "Export format (json, vscode, sarif, checkstyle)",
+      "default": "sarif"
+    }
+  },
+  "steps": [
+    {
+      "id": "install-plugin",
+      "name": "Install doctor advanced plugin",
+      "type": "shell",
+      "script": "pnpm add -D @kubit/plugin-doctor-advanced"
+    },
+    {
+      "id": "enable-plugin",
+      "name": "Enable doctor advanced plugin",
+      "type": "file",
+      "operation": "append",
+      "target": "kubit.config.toml",
+      "content": "\n[plugins]\nenabled = [\"@kubit/plugin-doctor-advanced\"]\n\n[doctor]\nautofix.enabled = {{ enableAutoFix }}\npredictive.enabled = true\npredictive.riskThreshold = 60\n"
+    },
+    {
+      "id": "create-doctor-workflow",
+      "name": "Create GitHub Actions doctor workflow",
+      "type": "file",
+      "operation": "create",
+      "target": ".github/workflows/doctor.yml",
+      "content": "name: Doctor Advanced\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main]\n  schedule:\n    - cron: '0 0 * * 0' # Weekly on Sunday\n\njobs:\n  doctor:\n    runs-on: ubuntu-latest\n    \n    steps:\n      - uses: actions/checkout@v4\n      \n      - uses: pnpm/action-setup@v2\n        with:\n          version: 10\n      \n      - uses: actions/setup-node@v4\n        with:\n          node-version: '20'\n          cache: 'pnpm'\n      \n      - name: Install dependencies\n        run: pnpm install\n      \n      - name: Doctor Basic\n        run: pnpm kubit-forge doctor\n      \n      - name: Doctor Auto-Fix (Dry Run)\n        run: pnpm kubit-forge doctor:fix --dry-run\n      \n      - name: Predictive Diagnostics\n        run: pnpm kubit-forge doctor:predictive\n      \n      - name: Export Diagnostics\n        run: pnpm kubit-forge doctor:export --format {{ exportFormat }} --output diagnostics.{{ exportFormat }}\n      \n      - name: Upload Diagnostics\n        uses: actions/upload-artifact@v4\n        with:\n          name: diagnostics\n          path: diagnostics.*\n      \n      - name: Upload to GitHub Code Scanning (SARIF only)\n        if: ${{ '{{ exportFormat }}' == 'sarif' }}\n        uses: github/codeql-action/upload-sarif@v3\n        with:\n          sarif_file: diagnostics.sarif\n"
+    },
+    {
+      "id": "create-npm-scripts",
+      "name": "Add doctor scripts to package.json",
+      "type": "shell",
+      "script": "npm pkg set scripts.doctor:fix='kubit-forge doctor:fix' scripts.doctor:predictive='kubit-forge doctor:predictive' scripts.doctor:export='kubit-forge doctor:export --format sarif'"
+    },
+    {
+      "id": "create-vscode-task",
+      "name": "Create VS Code task for doctor",
+      "type": "file",
+      "operation": "create",
+      "target": ".vscode/tasks.json",
+      "content": "{\n  \"version\": \"2.0.0\",\n  \"tasks\": [\n    {\n      \"label\": \"Doctor: Run Diagnostics\",\n      \"type\": \"shell\",\n      \"command\": \"pnpm kubit-forge doctor\",\n      \"group\": \"test\",\n      \"presentation\": {\n        \"reveal\": \"always\",\n        \"panel\": \"new\"\n      }\n    },\n    {\n      \"label\": \"Doctor: Auto-Fix\",\n      \"type\": \"shell\",\n      \"command\": \"pnpm kubit-forge doctor:fix --dry-run\",\n      \"group\": \"test\"\n    },\n    {\n      \"label\": \"Doctor: Export for VS Code\",\n      \"type\": \"shell\",\n      \"command\": \"pnpm kubit-forge doctor:export --format vscode --output .vscode/diagnostics.json\",\n      \"group\": \"build\"\n    }\n  ]\n}\n"
+    }
+  ]
+}

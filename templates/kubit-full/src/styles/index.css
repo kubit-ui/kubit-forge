@@ -1,0 +1,6 @@
+/* Import Bernova generated styles */
+@import './default/foundations.css';
+@import './default/globalStyles.css';
+@import './default/components.css';
+
+/* Additional custom styles can be added here */

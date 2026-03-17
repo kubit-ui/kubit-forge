@@ -1,0 +1,49 @@
+{
+  "name": "storybook-setup",
+  "version": "1.2.0",
+  "description": "Add Storybook with automatic story generation and best practices",
+  "author": "Kubit Team",
+  "tags": ["storybook", "components", "documentation", "ui"],
+  "category": "tooling",
+  "requires": {
+    "kubitVersion": "^2.0.0",
+    "nodeVersion": ">=18"
+  },
+  "variables": {
+    "port": {
+      "type": "number",
+      "description": "Storybook dev server port",
+      "default": 6006
+    }
+  },
+  "steps": [
+    {
+      "id": "install-storybook",
+      "name": "Install Storybook",
+      "type": "shell",
+      "script": "npx storybook@latest init --yes"
+    },
+    {
+      "id": "install-addons",
+      "name": "Install Storybook addons",
+      "type": "shell",
+      "script": "pnpm add -D @storybook/addon-a11y @storybook/addon-interactions"
+    },
+    {
+      "id": "create-preview",
+      "name": "Configure Storybook preview",
+      "type": "file",
+      "operation": "create",
+      "target": ".storybook/preview.ts",
+      "content": "import type { Preview } from '@storybook/react';\n\nconst preview: Preview = {\n  parameters: {\n    actions: { argTypesRegex: '^on[A-Z].*' },\n    controls: {\n      matchers: {\n        color: /(background|color)$/i,\n        date: /Date$/,\n      },\n    },\n  },\n};\n\nexport default preview;\n"
+    },
+    {
+      "id": "create-example-story",
+      "name": "Create example story",
+      "type": "file",
+      "operation": "create",
+      "target": "src/components/Button/Button.stories.tsx",
+      "content": "import type { Meta, StoryObj } from '@storybook/react';\nimport { Button } from './Button';\n\nconst meta: Meta<typeof Button> = {\n  title: 'Components/Button',\n  component: Button,\n  tags: ['autodocs'],\n};\n\nexport default meta;\ntype Story = StoryObj<typeof Button>;\n\nexport const Primary: Story = {\n  args: {\n    children: 'Click me',\n    variant: 'primary',\n  },\n};\n"
+    }
+  ]
+}

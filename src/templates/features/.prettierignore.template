@@ -1,0 +1,28 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+dist
+build
+.next
+out
+.nuxt
+.cache
+
+# Coverage
+coverage
+.nyc_output
+
+# Misc
+.DS_Store
+*.log
+*.lock
+pnpm-lock.yaml
+yarn.lock
+package-lock.json
+
+# Generated files
+*.min.js
+*.min.css

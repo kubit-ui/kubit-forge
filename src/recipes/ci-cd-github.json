@@ -1,0 +1,51 @@
+{
+  "name": "ci-cd-github",
+  "version": "2.0.0",
+  "description": "GitHub Actions CI/CD pipeline with testing, linting, and deployment",
+  "author": "Kubit Team",
+  "tags": ["ci", "cd", "github-actions", "deployment", "automation"],
+  "category": "deployment",
+  "requires": {
+    "kubitVersion": "^2.0.0",
+    "tools": ["git"]
+  },
+  "variables": {
+    "deployTarget": {
+      "type": "string",
+      "description": "Deployment target (vercel, netlify, aws)",
+      "default": "vercel"
+    }
+  },
+  "steps": [
+    {
+      "id": "create-workflows-dir",
+      "name": "Create GitHub workflows directory",
+      "type": "shell",
+      "script": "mkdir -p .github/workflows"
+    },
+    {
+      "id": "create-ci-workflow",
+      "name": "Create CI workflow",
+      "type": "file",
+      "operation": "create",
+      "target": ".github/workflows/ci.yml",
+      "content": "name: CI\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main, develop]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: pnpm/action-setup@v2\n        with:\n          version: 8\n      - uses: actions/setup-node@v4\n        with:\n          node-version: '20'\n          cache: 'pnpm'\n      - run: pnpm install\n      - run: pnpm lint\n      - run: pnpm test\n      - run: pnpm build\n"
+    },
+    {
+      "id": "create-deploy-workflow",
+      "name": "Create deployment workflow",
+      "type": "file",
+      "operation": "create",
+      "target": ".github/workflows/deploy.yml",
+      "content": "name: Deploy\n\non:\n  push:\n    branches: [main]\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: pnpm/action-setup@v2\n        with:\n          version: 8\n      - uses: actions/setup-node@v4\n        with:\n          node-version: '20'\n          cache: 'pnpm'\n      - run: pnpm install\n      - run: pnpm build\n      - name: Deploy to Vercel\n        uses: amondnet/vercel-action@v25\n        with:\n          vercel-token: ${{ secrets.VERCEL_TOKEN }}\n          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}\n          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}\n          vercel-args: '--prod'\n"
+    },
+    {
+      "id": "create-dependabot",
+      "name": "Create Dependabot configuration",
+      "type": "file",
+      "operation": "create",
+      "target": ".github/dependabot.yml",
+      "content": "version: 2\nupdates:\n  - package-ecosystem: 'npm'\n    directory: '/'\n    schedule:\n      interval: 'weekly'\n    open-pull-requests-limit: 10\n"
+    }
+  ]
+}

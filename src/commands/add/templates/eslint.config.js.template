@@ -1,0 +1,12 @@
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import kubit from '@kubit-ui-web/eslint-plugin-kubit';
+
+export default [
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  kubit.configs.recommended,
+  {
+    ignores: ['**/dist/**', '**/node_modules/**', '**/coverage/**'],
+  },
+];

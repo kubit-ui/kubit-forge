@@ -1,0 +1,53 @@
+{
+  "name": "{{projectName}}",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Full Kubit ecosystem template with React, Bernova, Components, and Charts",
+  "scripts": {
+    "dev": "vite",
+    "build": "yarn bernova && tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,json,css,md}\"",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "typecheck": "tsc --noEmit",
+    "bernova": "npx bernova",
+    "bernova:foundation": "npx bernova --foundationOnly",
+    "bernova:component": "npx bernova --componentOnly",
+    "validate": "yarn format:check && yarn lint && yarn typecheck"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "bernova": "^1.4.0",
+    "@kubit-ui-web/react-components": "^2.0.0-beta.51",
+    "@kubit-ui-web/react-charts": "^1.11.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^5.1.3",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
+    "eslint": "^9.39.2",
+    "eslint-config-kubit": "^1.7.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0",
+    "vite": "^8.0.0-beta.10",
+    "vitest": "^4.0.18",
+    "jsdom": "^28.0.0",
+    "prettier": "^3.8.1",
+    "happy-dom": "^20.5.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

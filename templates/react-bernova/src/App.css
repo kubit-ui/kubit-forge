@@ -1,0 +1,89 @@
+/* App-specific styles
+ * Bernova will generate CSS from foundations, globalStyles, and theme
+ * This file contains app-specific overrides
+ */
+
+.app-header {
+  margin-bottom: var(--spacing-xxxl);
+  text-align: center;
+}
+
+.app-header h1 {
+  font-size: var(--fontSize-4xl);
+  font-weight: var(--fontWeight-bold);
+  color: var(--colors-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.app-header p {
+  color: var(--colors-text-secondary);
+  font-size: var(--fontSize-lg);
+}
+
+.app-content {
+  max-width: 800px;
+  margin: 0 auto var(--spacing-xxxl);
+  text-align: center;
+}
+
+.app-content h2 {
+  font-size: var(--fontSize-3xl);
+  margin-bottom: var(--spacing-lg);
+}
+
+.app-content code {
+  background-color: var(--colors-neutral-100);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--borderRadius-sm);
+  font-family: 'Courier New', monospace;
+  color: var(--colors-primary);
+}
+
+.button-group {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-xl);
+}
+
+.card {
+  background-color: var(--colors-surface);
+  border-radius: var(--borderRadius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadows-md);
+  text-align: left;
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-md);
+  color: var(--colors-primary);
+}
+
+.card ul {
+  list-style-position: inside;
+  padding-left: 0;
+}
+
+.card li {
+  margin-bottom: var(--spacing-sm);
+  color: var(--colors-text-secondary);
+}
+
+.app-footer {
+  text-align: center;
+  margin-top: var(--spacing-xxxl);
+  padding-top: var(--spacing-xl);
+  border-top: 1px solid var(--colors-neutral-300);
+}
+
+.app-footer a {
+  color: var(--colors-primary);
+  text-decoration: none;
+  font-weight: var(--fontWeight-medium);
+  transition: opacity 0.2s ease;
+}
+
+.app-footer a:hover {
+  opacity: 0.8;
+}
