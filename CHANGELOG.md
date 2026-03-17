@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.2-canary.23
+
+### Patch Changes
+
+- Yarn Berry docs, public registry, and pin Node range
+
+  - Switch .yarnrc.yml to public npm registry (open source repo)
+  - Add enableTelemetry: false
+  - Pin engines.node to '>=20.0.0 <25.0.0' and add engines.yarn
+  - Create .env.example with private registry setup guide (placeholder URLs)
+  - Add Private Registry section to CONTRIBUTING.md
+  - Replace all npm commands with yarn in CONTRIBUTING.md
+
 ## 0.0.2-canary.22
 
 ### Patch Changes
